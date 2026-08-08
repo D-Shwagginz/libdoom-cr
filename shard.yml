@@ -8,6 +8,10 @@ targets:
   libdoom-cr:
     main: src/libdoom-cr.cr
 
+dependencies:
+  raylib-cr:
+    github: d-shwagginz/raylib-cr
+
 crystal: '>= 1.21.0'
 
 license: MIT

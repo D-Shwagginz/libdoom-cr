@@ -1,2 +1,6 @@
 version: 2.0
-shards: {}
+shards:
+  raylib-cr:
+    git: https://github.com/d-shwagginz/raylib-cr.git
+    version: 6.0+git.commit.a51547f3736e7379c4deef368b7f82af34cf42a8
+

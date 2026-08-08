@@ -21,9 +21,9 @@ build/glue.c: src/*.cr
 	cc -c build/glue.c -o build/glue.o
 
 libpuredoom.dylib:
-	git clone https://github.com/Daivuk/PureDOOM
-	mv ./PureDOOM/PureDoom.h ./
-	rm -rf PureDoom
+	-git clone https://github.com/Daivuk/PureDOOM
+	cp ./PureDOOM/PureDoom.h ./
+	# rm -rf PureDoom
 	@mkdir -p build
 	@touch build/decls.h
 	@for sym in $(WRAP_SYMS); do \
