@@ -1,0 +1,13 @@
+name: libdoom-cr
+version: 0.1.0
+
+authors:
+  - D. Shwagginz <mynameisformat@gmail.com>
+
+targets:
+  libdoom-cr:
+    main: src/libdoom-cr.cr
+
+crystal: '>= 1.21.0'
+
+license: MIT
