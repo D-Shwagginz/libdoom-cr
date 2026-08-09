@@ -10,9 +10,4 @@ libpuredoom.dylib:
 	cc -shared -fPIC -x c \
 		-Wl,-undefined,dynamic_lookup \
 		-DDOOM_IMPLEMENTATION \
-		-DDOOM_IMPLEMENT_MALLOC \
-		-DDOOM_IMPLEMENT_FILE_IO \
-		-DDOOM_IMPLEMENT_GETTIME \
-		-DDOOM_IMPLEMENT_EXIT \
-		-DDOOM_IMPLEMENT_GETENV \
 			PureDoom.h -o libpuredoom.dylib

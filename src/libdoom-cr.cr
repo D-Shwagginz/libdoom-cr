@@ -30,8 +30,10 @@ def run
   Raylib.set_texture_filter(screen_texture, Raylib::TextureFilter::Point)
 
   RAudio.init_audio_device
+  RAudio.set_master_volume(10.0)
   RAudio.set_audio_stream_buffer_size_default(512)
   audio_stream = RAudio.load_audio_stream(CDoom::DOOM_SAMPLERATE, 16, 2)
+  RAudio.set_audio_stream_volume(audio_stream, 1.0)
   RAudio.play_audio_stream(audio_stream)
 
   ARGV.insert(0, "LibDoom")
