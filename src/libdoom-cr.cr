@@ -3,9 +3,15 @@ require "./libdoom-cr/implementation.cr"
 
 require "raylib-cr"
 require "raylib-cr/audio.cr"
+require "./adlmidi.cr"
 
 SRES_X = 320
 SRES_Y = 240
+
+MIDI_BUFFER_SIZE = 2048
+MIDI_SAMPLE_RATE = 44100
+MIDI_TICK_TIME = 1.0 / 140.0
+MIDI_BANK = 16
 
 macro poll_key(doomkey, raylibkey)
   CDoom.doom_key_up(CDoom::DoomKey::{{doomkey}}) if Raylib::KeyboardKey::{{raylibkey}}.released?
@@ -36,6 +42,18 @@ def run
   RAudio.set_audio_stream_volume(audio_stream, 1.0)
   RAudio.play_audio_stream(audio_stream)
 
+  adl_player = ADLMIDI.adl_init(44100)
+  ADLMIDI.adl_setNumChips(adl_player, 4)
+  ADLMIDI.adl_setBank(adl_player, MIDI_BANK)
+  RAudio.set_audio_stream_buffer_size_default(MIDI_BUFFER_SIZE // 2)
+  music_stream = RAudio.load_audio_stream(MIDI_SAMPLE_RATE, 16, 2)
+  RAudio.set_audio_stream_volume(music_stream, 1.0)
+  RAudio.play_audio_stream(music_stream)
+  music_buffer = Pointer(Int16).malloc(2048)
+  midi_tick_accumulator = 0.0
+  last_time = Raylib.get_time
+
+
   ARGV.insert(0, "LibDoom")
 
   CDoom.doom_set_default_int("key_up", CDoom::DoomKey::W.value)
@@ -45,6 +63,48 @@ def run
   CDoom.doom_init(ARGV.size, ARGV.map(&.to_unsafe), 0)
 
   until Raylib.close_window?
+     now = Raylib.get_time
+  midi_tick_accumulator += now - last_time
+  last_time = now
+
+  while midi_tick_accumulator >= MIDI_TICK_TIME
+    while (msg = CDoom.doom_tick_midi) != 0
+      status  = (msg & 0xFF).to_u8
+      data1   = ((msg >> 8) & 0xFF).to_u8
+      data2   = ((msg >> 16) & 0xFF).to_u8
+      command = status & 0xF0
+      channel = status & 0x0F
+
+      case command
+      when 0x80
+        ADLMIDI.adl_rt_noteOff(adl_player, channel, data1)
+      when 0x90
+        if data2 == 0
+          ADLMIDI.adl_rt_noteOff(adl_player, channel, data1) # vel 0 == note off
+        else
+          ADLMIDI.adl_rt_noteOn(adl_player, channel, data1, data2)
+        end
+      when 0xA0
+        ADLMIDI.adl_rt_noteAfterTouch(adl_player, channel, data1, data2)
+      when 0xB0
+        ADLMIDI.adl_rt_controllerChange(adl_player, channel, data1, data2)
+      when 0xC0
+        ADLMIDI.adl_rt_patchChange(adl_player, channel, data1)
+      when 0xD0
+        ADLMIDI.adl_rt_channelAfterTouch(adl_player, channel, data1)
+      when 0xE0
+        ADLMIDI.adl_rt_pitchBendML(adl_player, channel, data2, data1) # wire order: LSB, MSB
+      end
+    end
+    midi_tick_accumulator -= MIDI_TICK_TIME
+  end
+
+  if RAudio.audio_stream_processed?(music_stream)
+    generated = ADLMIDI.adl_generate(adl_player, MIDI_BUFFER_SIZE, music_buffer)
+    RAudio.update_audio_stream(music_stream, music_buffer, MIDI_BUFFER_SIZE // 2)
+  end
+
+
     if RAudio.audio_stream_processed?(audio_stream)
       RAudio.update_audio_stream(audio_stream, CDoom.doom_get_sound_buffer, 512)
     end
@@ -149,6 +209,10 @@ def run
     Raylib.end_drawing
   end
 
+  RAudio.unload_audio_stream(audio_stream)
+  RAudio.unload_audio_stream(music_stream)
+  RAudio.close_audio_device()
+  ADLMIDI.adl_close(adl_player)
   Raylib.unload_texture(screen_texture)
   Raylib.close_window
 end

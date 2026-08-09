@@ -392,6 +392,6 @@ fun doom_mouse_move(delta_x : Int32, delta_y : Int32)
       (CDoom.button_states[2] != 0 ? 4 : 0)
   event.data2 = delta_x
   event.data3 = -delta_y
-  
+
   CDoom.d_post_event(pointerof(event)) if event.data2 != 0 || event.data3 != 0
 end

@@ -2,8 +2,10 @@
 all: libpuredoom.dylib
 	shards install
 	crystal build src/libdoom-cr.cr --link-flags "-fuse-ld=/opt/homebrew/opt/lld/bin/ld64.lld" -o bin/libdoom
-	-cp rsrc/libADLMIDI.dylib ./bin
 	mv -f libpuredoom.dylib ./bin
+	-cp ./rsrc/libADLMIDI.dylib ./bin
+	install_name_tool -change "@rpath/libADLMIDI.1.dylib" "./libADLMIDI.dylib" ./bin/libdoom
+
 	cd ./bin && \
 	./libdoom
 
