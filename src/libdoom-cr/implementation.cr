@@ -248,11 +248,150 @@ fun doom_init(argc : Int32, argv : UInt8**, flags : Int32)
 
   CDoom.screen_buffer = CDoom.doom_malloc.call(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
   CDoom.final_screen_buffer = CDoom.doom_malloc.call(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT * 4).as(UInt8*)
-  CDoom.last_update_time = CDoom.i_get_time()
+  CDoom.last_update_time = CDoom.i_get_time
 
   CDoom.myargc = argc
   CDoom.myargv = argv
   CDoom.doom_flags = flags
 
-  CDoom.d_doom_main()
+  CDoom.d_doom_main
+end
+
+fun doom_update
+  now = CDoom.i_get_time
+  delta_time = now - CDoom.last_update_time
+
+  delta_time.times do |i|
+    if CDoom.is_wiping_screen
+      CDoom.d_update_wipe
+    else
+      CDoom.d_doom_loop
+    end
+  end
+
+  CDoom.last_update_time = now
+end
+
+fun doom_force_update
+  if CDoom.is_wiping_screen
+    CDoom.d_update_wipe
+  else
+    CDoom.d_doom_loop
+  end
+end
+
+fun doom_get_framebuffer(channels : Int32) : UInt8*
+  doom_memcpy(CDoom.screen_buffer.as(Void*), CDoom.screens[0].as(Void*), CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT)
+
+  # Draw crosshair
+  if (CDoom.crosshair != 0 &&
+     !CDoom.menuactive &&
+     CDoom.gamestate == CDoom::Gamestate::Level &&
+     !CDoom.automapactive)
+    y = CDoom::SCREENHEIGHT // 2
+    y += CDoom.setblocks == 11 ? 8 : -8
+    2.times do |i|
+      CDoom.screen_buffer[CDoom::SCREENWIDTH // 2 - 2 - i + y * CDoom::SCREENWIDTH] = 4
+      CDoom.screen_buffer[CDoom::SCREENWIDTH // 2 + 2 + i + y * CDoom::SCREENWIDTH] = 4
+    end
+    2.times do |i|
+      CDoom.screen_buffer[CDoom::SCREENWIDTH // 2 + (y - 2 - i) * CDoom::SCREENWIDTH] = 4
+      CDoom.screen_buffer[CDoom::SCREENWIDTH // 2 + (y + 2 + i) * CDoom::SCREENWIDTH] = 4
+    end
+  end
+
+  if channels == 1
+    return CDoom.screen_buffer
+  elsif channels == 3
+    (CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).times do |i|
+      k = i * 3
+      kpal = CDoom.screen_buffer[i] * 3
+      CDoom.final_screen_buffer[k + 0] = CDoom.screen_palette[kpal + 0]
+      CDoom.final_screen_buffer[k + 1] = CDoom.screen_palette[kpal + 1]
+      CDoom.final_screen_buffer[k + 2] = CDoom.screen_palette[kpal + 2]
+    end
+    return CDoom.final_screen_buffer
+  elsif channels == 4
+    (CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).times do |i|
+      k = i * 4
+      kpal = CDoom.screen_buffer[i].to_i32 * 3
+      CDoom.final_screen_buffer[k + 0] = CDoom.screen_palette[kpal + 0]
+      CDoom.final_screen_buffer[k + 1] = CDoom.screen_palette[kpal + 1]
+      CDoom.final_screen_buffer[k + 2] = CDoom.screen_palette[kpal + 2]
+      CDoom.final_screen_buffer[k + 3] = 255
+    end
+    return CDoom.final_screen_buffer
+  end
+  return Pointer(UInt8).null
+end
+
+fun doom_tick_midi : LibC::ULong
+  return CDoom.i_tick_song
+end
+
+fun doom_get_sound_buffer : Int16*
+  CDoom.i_update_sound
+  return CDoom.mixbuffer.to_unsafe
+end
+
+fun doom_key_down(key : CDoom::DoomKey)
+  event = CDoom::Event.new
+  event.type = CDoom::Evtype::Keydown
+  event.data1 = key.value
+  CDoom.d_post_event(pointerof(event))
+end
+
+fun doom_key_up(key : CDoom::DoomKey)
+  event = CDoom::Event.new
+  event.type = CDoom::Evtype::Keyup
+  event.data1 = key.value
+  CDoom.d_post_event(pointerof(event))
+end
+
+fun doom_button_down(button : CDoom::DoomButton)
+  CDoom.button_states[button.value] = 1
+
+  event = CDoom::Event.new
+  event.type = CDoom::Evtype::Mouse
+  event.data1 =
+    (CDoom.button_states[0]) |
+      (CDoom.button_states[1] != 0 ? 2 : 0) |
+      (CDoom.button_states[2] != 0 ? 4 : 0)
+  event.data2 = 0
+  event.data3 = 0
+  CDoom.d_post_event(pointerof(event))
+end
+
+fun doom_button_up(button : CDoom::DoomButton)
+  CDoom.button_states[button.value] = 0
+
+  event = CDoom::Event.new
+  event.type = CDoom::Evtype::Mouse
+  event.data1 =
+    (CDoom.button_states[0]) |
+      (CDoom.button_states[1] != 0 ? 2 : 0) |
+      (CDoom.button_states[2] != 0 ? 4 : 0)
+
+  event.data1 =
+    event.data1 ^
+      (CDoom.button_states[0]) ^
+      (CDoom.button_states[1] != 0 ? 2 : 0) ^
+      (CDoom.button_states[2] != 0 ? 4 : 0)
+
+  event.data2 = 0
+  event.data3 = 0
+  CDoom.d_post_event(pointerof(event))
+end
+
+fun doom_mouse_move(delta_x : Int32, delta_y : Int32)
+  event = CDoom::Event.new
+  event.type = CDoom::Evtype::Mouse
+  event.data1 =
+    (CDoom.button_states[0]) |
+      (CDoom.button_states[1] != 0 ? 2 : 0) |
+      (CDoom.button_states[2] != 0 ? 4 : 0)
+  event.data2 = delta_x
+  event.data3 = -delta_y
+  
+  CDoom.d_post_event(pointerof(event)) if event.data2 != 0 || event.data3 != 0
 end

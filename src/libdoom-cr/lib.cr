@@ -5974,6 +5974,15 @@ lib CDoom
   $doom_exit : DoomExitFn
   $doom_getenv : DoomGetenvFn
 
+  $setsizeneeded : Bool
+  $setblocks : LibC::Int
+  $setdetail : LibC::Int
+
+  $usemouse : LibC::Int
+  $usejoystick : LibC::Int
+  $crosshair : LibC::Int
+  $always_run : LibC::Int
+
   fun d_doom_loop = D_DoomLoop
   fun d_update_wipe = D_UpdateWipe
 end
