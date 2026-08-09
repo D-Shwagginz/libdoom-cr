@@ -3217,10 +3217,10 @@ lib CDoom
   end
 
   # the complete set of sound effects
-  $s_sfx = S_sfx : Sfxinfo*
+  $s_sfx = S_sfx : Sfxinfo[1]
 
   # the complete set of music
-  $s_music = S_music : Sfxinfo*
+  $s_music = S_music : Sfxinfo[1]
 
   #
   # Identifiers for all music in game.
@@ -5948,7 +5948,7 @@ lib CDoom
   SCREEN_PALETTE_SIZE = 256 * 3
   $screen_palette : LibC::UChar[SCREEN_PALETTE_SIZE]
   $is_wiping_screen : Bool
-  $defaults : Default*
+  $defaults : Default[1]
   $numdefaults : LibC::Int
   $mixbuffer : LibC::Short[2048]
 
