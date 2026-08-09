@@ -1,5 +1,3 @@
-WRAP_SYMS := $(shell grep -ohrE '^fun crystal_[A-Za-z0-9_]+' --include='*.cr' src | sed -E 's/^fun crystal_//')
-
 .PHONY: all
 all: libpuredoom.dylib
 	shards install
