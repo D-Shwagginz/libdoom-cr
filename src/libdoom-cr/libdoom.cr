@@ -852,7 +852,6 @@ module LibDoom
   end
 
   def self.am_do_follow_player
-    puts CDoom.gamemode
     if CDoom.f_oldloc.x != CDoom.plr.value.mo.value.x || CDoom.f_oldloc.y != CDoom.plr.value.mo.value.y
       CDoom.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - CDoom.m_w // 2
       CDoom.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - CDoom.m_h // 2
@@ -1151,6 +1150,59 @@ module LibDoom
     end
   end
   
-  
+  @@l : CDoom::Mline = CDoom::Mline.new
+  #
+# Determines visible lines, draws them.
+# This is LineDef based, not LineSeg based.
+#
+  def self.am_draw_walls
+    CDoom.numlines.times do |i|
+      @@l.a.x = CDoom.lines[i].v1.value.x
+      @@l.a.y = CDoom.lines[i].v1.value.y
+      @@l.b.x = CDoom.lines[i].v2.value.x
+      @@l.b.y = CDoom.lines[i].v2.value.y
+      if CDoom.cheating != 0 || (CDoom.lines[i].flags & CDoom::ML_MAPPED) != 0
+        next if (CDoom.lines[i].flags & CDoom::LINE_NEVERSEE) != 0 && CDoom.cheating == 0
+        if CDoom.lines[i].backsector.null?
+          CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom.lightlev)
+        else
+          if CDoom.lines[i].special == 39
+            # teleporters
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom::WALLRANGE // 2)
+          elsif CDoom.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
+            if CDoom.cheating != 0
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::SECRETWALLCOLORS + CDoom.lightlev)
+            else
+              CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom.lightlev)
+            end
+          elsif CDoom.lines[i].backsector.value.floorheight != CDoom.lines[i].frontsector.value.floorheight
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::FDWALLCOLORS + CDoom.lightlev) # floor level change
+          elsif CDoom.lines[i].backsector.value.ceilingheight != CDoom.lines[i].frontsector.value.ceilingheight
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::CDWALLCOLORS + CDoom.lightlev) # ceiling level change
+          elsif CDoom.cheating != 0
+            CDoom.am_draw_mline(pointerof(@@l), CDoom::TSWALLCOLORS + CDoom.lightlev)
+          end
+        end
+      elsif CDoom.plr.value.powers[CDoom::Powertype::Allmap.value] != 0
+        CDoom.am_draw_mline(pointerof(@@l), CDoom::GRAYS + 3) if CDoom.lines[i].flags & CDoom::LINE_NEVERSEE == 0
+      end
+    end
+  end
+
+  #
+# Rotation in 2D.
+# Used to rotate player arrow line character.
+#
+def self.am_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
+  tmpx = CDoom.fixed_mul(x.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
+  CDoom.fixed_mul(y.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT])
+
+  y.value = CDoom.fixed_mul(x.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT]) +
+  CDoom.fixed_mul(y.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT])
+
+  x.value = tmpx
+end
+
+
 end
 

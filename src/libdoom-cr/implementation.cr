@@ -321,3 +321,11 @@ end
 fun am_draw_grid = AM_drawGrid(color : Int32)
   LibDoom.am_draw_grid(color)
 end
+
+fun am_draw_walls = AM_drawWalls
+  LibDoom.am_draw_walls
+end
+
+fun am_rotate = AM_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
+  LibDoom.am_rotate(x, y, a)
+end

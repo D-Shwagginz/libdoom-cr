@@ -6253,4 +6253,8 @@ lib CDoom
 
   fun am_draw_grid = AM_drawGrid(color : LibC::Int)
 
+  fun am_draw_walls = AM_drawWalls()
+
+  fun am_rotate = AM_rotate(x : Fixed*, y : Fixed*, a : Angle)
+
 end
