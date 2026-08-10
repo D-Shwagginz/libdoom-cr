@@ -7,6 +7,7 @@ module LibDoom
   @@buffer : UInt8* = Pointer(UInt8).malloc(20)
   @@nexttic = 0
   @@litelevels : StaticArray(Int32, 8) = StaticArray[0, 4, 7, 10, 12, 14, 15, 15]
+  @@litelevelscnt = 0
 
   CDoom.screen_buffer = Pointer(UInt8).null
   CDoom.final_screen_buffer = Pointer(UInt8).null
@@ -109,10 +110,8 @@ module LibDoom
   CDoom.cheat_amap_seq[2] = 0x26
   CDoom.cheat_amap_seq[3] = 0x2e
   CDoom.cheat_amap_seq[4] = 0xff
-  #pointerof(CDoom.cheat_amap).value = CDoom::Cheatseq.new(sequence: CDoom.cheat_amap_seq.to_unsafe.as(UInt8*), p: Pointer(UInt8).null)
   CDoom.cheat_amap.sequence = CDoom.cheat_amap_seq.to_unsafe.as(UInt8*)
   CDoom.cheat_amap.p = Pointer(UInt8).null
-
 
   CDoom.stopped = 1
 
@@ -853,6 +852,7 @@ module LibDoom
   end
 
   def self.am_do_follow_player
+    puts CDoom.gamemode
     if CDoom.f_oldloc.x != CDoom.plr.value.mo.value.x || CDoom.f_oldloc.y != CDoom.plr.value.mo.value.y
       CDoom.m_x = ftom(mtof(CDoom.plr.value.mo.value.x)) - CDoom.m_w // 2
       CDoom.m_y = ftom(mtof(CDoom.plr.value.mo.value.y)) - CDoom.m_h // 2
@@ -864,6 +864,293 @@ module LibDoom
   end
 
   def self.am_update_light_lev
-
+    # Change light level
+    if CDoom.amclock > @@nexttic
+      CDoom.lightlev = @@litelevels[@@litelevelscnt]
+      @@litelevelscnt += 1
+      @@litelevelscnt = 0 if @@litelevelscnt == @@litelevels.size
+      @@nexttic = CDoom.amclock + 6 - (CDoom.amclock % 6)
+    end
   end
+
+  #
+  # Updates on Game Tick
+  #
+  def self.am_ticker
+    return if CDoom.automapactive == 0
+
+    CDoom.amclock += 1
+
+    CDoom.am_do_follow_player if CDoom.followplayer != 0
+
+    # Change the zoom if necessary
+    CDoom.am_change_window_scale if CDoom.ftom_zoommul != CDoom::FRACUNIT
+
+    # Change x,y location
+    CDoom.am_change_window_loc if CDoom.m_paninc.x != 0 || CDoom.m_paninc.y != 0
+
+    # Update light level
+    # CDoom.am_update_light_lev
+  end
+
+  #
+  # Clear automap frame buffer.
+  #
+  def self.am_clear_fb(color : Int32)
+    CDoom.doom_memset(CDoom.fb, color, CDoom.f_w * CDoom.f_h)
+  end
+
+  LEFT   = 1
+  RIGHT  = 2
+  BOTTOM = 4
+  TOP    = 8
+
+  macro dooutcode(oc, mx, my)
+    {{oc}} = 0
+    if ({{my}} < 0)
+      {{oc}} |= TOP
+    elsif ({{my}} >= CDoom.f_h)
+      {{oc}} |= BOTTOM
+    end
+    if ({{mx}} < 0)
+      {{oc}} |= LEFT
+    elsif ({{mx}} >= CDoom.f_w)
+      {{oc}} |= RIGHT
+    end
+  end
+
+  #
+  # Automap clipping of lines.
+  #
+  # Based on Cohen-Sutherland clipping algorithm but with a slightly
+  # faster reject and precalculated slopes.  If the speed is needed,
+  # use a hash algorithm to handle  the common cases.
+  #
+  def self.am_clip_mline(ml : CDoom::Mline*, fl : CDoom::Fline*) : CDoom::DoomBool
+    outcode1 = 0
+    outcode2 = 0
+    outside = 0
+
+    tmp = CDoom::Fpoint.new
+    dx = 0
+    dy = 0
+
+    # do trivial rejects and outcodes
+    if ml.value.a.y > CDoom.m_y2
+      outcode1 = TOP
+    elsif ml.value.a.y < CDoom.m_y
+      outcode1 = BOTTOM
+    end
+
+    if ml.value.b.y > CDoom.m_y2
+      outcode2 = TOP
+    elsif ml.value.b.y < CDoom.m_y
+      outcode2 = BOTTOM
+    end
+
+    return 0 if (outcode1 & outcode2) != 0 # trivially outside
+
+    if ml.value.a.x < CDoom.m_x
+      outcode1 |= LEFT
+    elsif ml.value.a.x > CDoom.m_x2
+      outcode1 |= RIGHT
+    end
+
+    if ml.value.b.x < CDoom.m_x
+      outcode2 |= LEFT
+    elsif ml.value.b.x > CDoom.m_x2
+      outcode2 |= RIGHT
+    end
+
+    return 0 if (outcode1 & outcode2) != 0 # trivially outside
+
+    # transform to frame-buffer coodinates.
+    fl.value.a.x = cxmtof(ml.value.a.x)
+    fl.value.a.y = cymtof(ml.value.a.y)
+    fl.value.b.x = cxmtof(ml.value.b.x)
+    fl.value.b.y = cymtof(ml.value.b.y)
+
+    dooutcode(outcode1, fl.value.a.x, fl.value.a.y)
+    dooutcode(outcode2, fl.value.b.x, fl.value.b.y)
+
+    return 0 if (outcode1 & outcode2) != 0
+
+    while (outcode1 | outcode2) != 0
+      # may be partially inside box
+      # find an outside point
+      if outcode1 != 0
+        outside = outcode1
+      else
+        outside = outcode2
+      end
+
+      # clip to each side
+      if outside & TOP != 0
+        dy = fl.value.a.y - fl.value.b.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.x = fl.value.a.x + (dx * fl.value.a.y) // dy
+        tmp.y = 0
+      elsif outside & BOTTOM != 0
+        dy = fl.value.a.y - fl.value.b.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.x = fl.value.a.x + (dx * (fl.value.a.y - CDoom.f_h)) // dy
+        tmp.y = CDoom.f_h - 1
+      elsif outside & RIGHT != 0
+        dy = fl.value.b.y - fl.value.a.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.y = fl.value.a.y + (dy * (CDoom.f_w - 1 - fl.value.a.x)) // dx
+        tmp.x = CDoom.f_w - 1
+      elsif outside & LEFT != 0
+        dy = fl.value.b.y - fl.value.a.y
+        dx = fl.value.b.x - fl.value.a.x
+        tmp.y = fl.value.a.y + (dy * (-fl.value.a.x)) // dx
+        tmp.x = 0
+      end
+
+      if outside == outcode1
+        fl.value.a = tmp
+        dooutcode(outcode1, fl.value.a.x, fl.value.a.y)
+      else
+        fl.value.b = tmp
+        dooutcode(outcode2, fl.value.b.x, fl.value.b.y)
+      end
+
+      return 0 if (outcode1 & outcode2) != 0 # trivially outside
+    end
+
+    return 1
+  end
+
+  macro putdot(xx, yy, cc)
+    CDoom.fb[{{yy}}*CDoom.f_w+{{xx}}]={{cc}}
+  end
+
+  @@fuck = 0
+
+  #
+  # Classic Bresenham w/ whatever optimizations needed for speed
+  #
+  def self.am_draw_fline(fl : CDoom::Fline*, color : Int32)
+    x = 0
+    y = 0
+    dx = 0
+    dy = 0
+    sx = 0
+    sy = 0
+    ax = 0
+    ay = 0
+    d = 0
+
+    # For debugging only
+    {% if false %}
+      # [pd] Don't waste CPU cycles testing this then
+      if (fl.value.a.x < 0 || fl.value.a.x >= CDoom.f_w ||
+         fl.value.a.y < 0 || fl.value.a.y >= CDoom.f_h ||
+         fl.value.b.x < 0 || fl.value.b.x >= CDoom.f_w ||
+         fl.value.b.y < 0 || fl.value.b.y >= CDoom.f_h)
+        CDoom.doom_print("fuck ")
+        CDoom.doom_print(CDoom.doom_itoa(@@fuck, 10))
+        @@fuck += 1
+        CDoom.doom_print("\r")
+        return
+      end
+    {% end %}
+
+    dx = fl.value.b.x - fl.value.a.x
+    ax = 2 * (dx < 0 ? -dx : dx)
+    sx = dx < 0 ? -1 : 1
+
+    dy = fl.value.b.y - fl.value.a.y
+    ay = 2 * (dy < 0 ? -dy : dy)
+    sy = dy < 0 ? -1 : 1
+
+    x = fl.value.a.x
+    y = fl.value.a.y
+
+    if ax > ay
+      d = ay - ax // 2
+      while true
+        putdot(x, y, color.to_u8!)
+        return if x == fl.value.b.x
+        if d >= 0
+          y += sy
+          d -= ax
+        end
+        x += sx
+        d += ay
+      end
+    else
+      d = ax - ay // 2
+      while true
+        putdot(x, y, color.to_u8!)
+        return if y == fl.value.b.y
+        if d >= 0
+          x += sx
+          d -= ay
+        end
+        y += sy
+        d += ax
+      end
+    end
+  end
+
+  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc(1)
+
+  #
+  # Clip lines, draw visible part sof lines.
+  #
+  def self.am_draw_mline(ml : CDoom::Mline*, color : Int32)
+    if CDoom.am_clip_mline(ml, @@fl) != 0
+      CDoom.am_draw_fline(@@fl, color)
+    end
+  end
+
+
+  #
+  # Draws flat (floor/ceiling tile) aligned grid lines.
+  #
+  def self.am_draw_grid(color : Int32)
+    # Figure out start of vertical gridlines
+    start = CDoom.m_x
+    ml = CDoom::Mline.new
+
+    if (start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
+      start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) -
+      ((start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
+    end
+    en = CDoom.m_x + CDoom.m_w
+
+    # draw vertical gridlines
+    ml.a.y = CDoom.m_y
+    ml.b.y = CDoom.m_y + CDoom.m_h
+    x = start
+    while x < en
+      ml.a.x = x
+      ml.b.x = x
+      CDoom.am_draw_mline(pointerof(ml), color)
+      x += CDoom::MAPBLOCKUNITS << CDoom::FRACBITS
+    end
+
+    # Figure out start of horizontal gridlines
+    start = CDoom.m_y
+    if (start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
+      start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) - 
+      ((start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
+    end
+    en = CDoom.m_y + CDoom.m_h
+
+    # draw horizontal gridlines
+    ml.a.x = CDoom.m_x
+    ml.b.x = CDoom.m_x + CDoom.m_w
+    y = start
+    while y < en
+      ml.a.y = y
+      ml.b.y = y
+      CDoom.am_draw_mline(pointerof(ml), color)
+      y += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
+    end
+  end
+  
+  
 end
+

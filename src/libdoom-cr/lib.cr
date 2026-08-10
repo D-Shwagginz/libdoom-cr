@@ -6235,11 +6235,22 @@ lib CDoom
 
   fun am_responder = AM_Responder(ev : Event*) : DoomBool
 
-fun am_change_window_scale = AM_changeWindowScale
+  fun am_change_window_scale = AM_changeWindowScale
 
-fun am_do_follow_player = AM_doFollowPlayer
+  fun am_do_follow_player = AM_doFollowPlayer
 
-fun am_update_light_lev = AM_updateLightLev
+  fun am_update_light_lev = AM_updateLightLev
 
+  fun am_ticker = AM_Ticker
+
+  fun am_clear_fb = AM_clearFB(color : LibC::Int)
+
+  fun am_clip_mline = AM_clipMline(ml : Mline*, fl : Fline*) : DoomBool
+
+  fun am_draw_fline = AM_drawFline(fl : Fline*, color : LibC::Int)
+
+  fun am_draw_mline = AM_drawMline(ml : Mline*, color : LibC::Int)
+
+  fun am_draw_grid = AM_drawGrid(color : LibC::Int)
 
 end

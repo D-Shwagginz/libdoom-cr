@@ -1,0 +1,3 @@
+idclev not working on doom 2 due to x < 1 return
+
+map follow command doesnt work to follow player if holding arrow keys

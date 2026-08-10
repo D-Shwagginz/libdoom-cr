@@ -297,3 +297,27 @@ end
 fun am_update_light_lev = AM_updateLightLev
   LibDoom.am_update_light_lev
 end
+
+fun am_ticker = AM_Ticker
+  LibDoom.am_ticker
+end
+
+fun am_clear_fb = AM_clearFB(color : LibC::Int)
+  LibDoom.am_clear_fb(color)
+end
+
+fun am_clip_mline = AM_clipMline(ml : CDoom::Mline*, fl : CDoom::Fline*) : CDoom::DoomBool
+  LibDoom.am_clip_mline(ml, fl)
+end
+
+fun am_draw_fline = AM_drawFline(fl : CDoom::Fline*, color : LibC::Int)
+  LibDoom.am_draw_fline(fl, color)
+end
+
+fun am_draw_mline = AM_drawMline(ml : CDoom::Mline*, color : LibC::Int)
+  LibDoom.am_draw_mline(ml, color)
+end
+
+fun am_draw_grid = AM_drawGrid(color : Int32)
+  LibDoom.am_draw_grid(color)
+end
