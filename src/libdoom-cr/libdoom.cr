@@ -5,6 +5,8 @@ module LibDoom
   @@cheatstate = 0
   @@bigstate = 0
   @@buffer : UInt8* = Pointer(UInt8).malloc(20)
+  @@nexttic = 0
+  @@litelevels : StaticArray(Int32, 8) = StaticArray[0, 4, 7, 10, 12, 14, 15, 15]
 
   CDoom.screen_buffer = Pointer(UInt8).null
   CDoom.final_screen_buffer = Pointer(UInt8).null
@@ -107,7 +109,10 @@ module LibDoom
   CDoom.cheat_amap_seq[2] = 0x26
   CDoom.cheat_amap_seq[3] = 0x2e
   CDoom.cheat_amap_seq[4] = 0xff
-  pointerof(CDoom.cheat_amap).value = CDoom::Cheatseq.new(sequence: CDoom.cheat_amap_seq.to_unsafe.as(UInt8*), p: Pointer(UInt8).null)
+  #pointerof(CDoom.cheat_amap).value = CDoom::Cheatseq.new(sequence: CDoom.cheat_amap_seq.to_unsafe.as(UInt8*), p: Pointer(UInt8).null)
+  CDoom.cheat_amap.sequence = CDoom.cheat_amap_seq.to_unsafe.as(UInt8*)
+  CDoom.cheat_amap.p = Pointer(UInt8).null
+
 
   CDoom.stopped = 1
 
@@ -856,5 +861,9 @@ module LibDoom
       CDoom.f_oldloc.x = CDoom.plr.value.mo.value.x
       CDoom.f_oldloc.y = CDoom.plr.value.mo.value.y
     end
+  end
+
+  def self.am_update_light_lev
+
   end
 end

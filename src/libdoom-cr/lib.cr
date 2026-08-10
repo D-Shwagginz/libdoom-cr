@@ -6239,4 +6239,7 @@ fun am_change_window_scale = AM_changeWindowScale
 
 fun am_do_follow_player = AM_doFollowPlayer
 
+fun am_update_light_lev = AM_updateLightLev
+
+
 end

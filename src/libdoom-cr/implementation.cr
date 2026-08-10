@@ -293,3 +293,7 @@ end
 fun am_do_follow_player = AM_doFollowPlayer
   LibDoom.am_do_follow_player
 end
+
+fun am_update_light_lev = AM_updateLightLev
+  LibDoom.am_update_light_lev
+end
