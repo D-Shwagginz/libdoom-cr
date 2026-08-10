@@ -12,13 +12,34 @@ end
 # prior to really call the function in question.
 #
 macro z_change_tag(p, t)
-  if (({{p}}.as(Byte*)) - sizeof(Memblock)).as(Memblock*).value.id != 0x1d4a11
-    buf = Array(LibC::Char).new(260, 0)
-    doom_strcpy(buf.to_unsafe, "Error: Z_CT at #{__FILE__} :")
-    doom_concat(buf.to_unsafe, doom_itoa(__LINE__, 10))
-    i_error(buf.to_unsafe)
+  if (({{p}}.as(CDoom::Byte*)) - sizeof(CDoom::Memblock)).as(CDoom::Memblock*).value.id != 0x1d4a11
+    buf = Pointer(UInt8).malloc(260)
+    CDoom.doom_strcpy(buf, "Error: Z_CT at #{__FILE__} :")
+    CDoom.doom_concat(buf, doom_itoa(__LINE__, 10))
+    CDoom.i_error(buf)
   end
-  z_change_tag2(p, t)
+  CDoom.z_change_tag2({{p}}, {{t}})
+end
+
+# translates between frame-buffer and map distances
+macro ftom(x)
+  (CDoom.fixed_mul(({{x}}<<16), CDoom.scale_ftom))
+end
+
+# define MTOF(x) (FixedMul((x),scale_mtof)>>16)
+macro mtof(x)
+  (CDoom.fixed_mul({{x}}, CDoom.scale_mtof)>>16)
+end
+
+# translates between frame-buffer and map coordinates
+# define CXMTOF(x)  (f_x + MTOF((x)-m_x))
+# define CYMTOF(y)  (f_y + (f_h - MTOF((y)-m_y)))
+macro cxmtof(x)
+  (CDoom.f_x + mtof({{x}}-CDoom.m_x))
+end
+
+macro cymtof(y)
+  (CDoom.f_y + (CDoom.f_h - mtof({{y}}-CDoom.m_y)))
 end
 
 @[Link(ldflags: "-L#{__DIR__}/../.. -lpuredoom")]
@@ -38,6 +59,8 @@ lib CDoom
   # Darken background when menu is open, making it more readable. This
   # uses a bit more CPU and redraws the HUD every frame
   DOOM_FLAG_MENU_DARKEN_BG = 8
+
+  alias DoomBool = LibC::Int
 
   enum DoomSeek
     DOOM_SEEK_CUR = 1
@@ -1210,12 +1233,12 @@ lib CDoom
   # __AMMAP_H__
 
   # Used by ST StatusBar stuff.
-  AM_MSGHEADER  = (('a' << 24) + ('m' << 16)).ord
-  AM_MSGENTERED = (AM_MSGHEADER | ('e' << 8)).ord
-  AM_MSGEXITED  = (AM_MSGHEADER | ('x' << 8)).ord
+  AM_MSGHEADER  = (('a'.ord << 24) + ('m'.ord << 16))
+  AM_MSGENTERED = (AM_MSGHEADER | ('e'.ord << 8))
+  AM_MSGEXITED  = (AM_MSGHEADER | ('x'.ord << 8))
 
   # Called by main loop.
-  fun am_responder = AM_Responder(ev : Event*) : Bool
+  fun am_responder = AM_Responder(ev : Event*) : DoomBool
 
   # Called by main loop.
   fun am_ticker = AM_Ticker
@@ -1474,7 +1497,7 @@ lib CDoom
   #
 
   # Called by main loop.
-  fun f_responder = F_Responder(ev : Event*) : Bool
+  fun f_responder = F_Responder(ev : Event*) : DoomBool
 
   # Called by main loop.
   fun f_ticker = F_Ticker
@@ -1531,7 +1554,7 @@ lib CDoom
   fun g_begin_recording = G_BeginRecording
 
   fun g_time_demo = G_TimeDemo(name : LibC::Char*)
-  fun g_check_demo_status = G_CheckDemoStatus : Bool
+  fun g_check_demo_status = G_CheckDemoStatus : DoomBool
 
   fun g_exit_level = G_ExitLevel
   fun g_secret_exit_level = G_SecretExitLevel
@@ -1539,7 +1562,7 @@ lib CDoom
   fun g_world_done = G_WorldDone
 
   fun g_ticker = G_Ticker
-  fun g_responder = G_Responder(ev : Event*) : Bool
+  fun g_responder = G_Responder(ev : Event*) : DoomBool
 
   fun g_screenshot = G_ScreenShot
 
@@ -1569,7 +1592,7 @@ lib CDoom
 
   fun hu_init = HU_Init
   fun hu_start = HU_Start
-  fun hu_responder = HU_Responder(ev : Event*) : Bool
+  fun hu_responder = HU_Responder(ev : Event*) : DoomBool
   fun hu_ticker = HU_Ticker
   fun hu_drawer = HU_Drawer
   fun hu_dequeue_chat_char = HU_dequeueChatChar : LibC::Char
@@ -3017,7 +3040,7 @@ lib CDoom
   # Even when the menu is not displayed,
   # this can resize the view and change game parameters.
   # Does all the real work of the menu interaction.
-  fun m_responder = M_Responder(ev : Event*) : Bool
+  fun m_responder = M_Responder(ev : Event*) : DoomBool
 
   # Called by main loop,
   # only used for menu (skull cursor) animation.
@@ -3050,12 +3073,12 @@ lib CDoom
     default_text_value : LibC::Char* # [pd] So we don't change defaultvalue behavior for int to intptr_t
   end
 
-  fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : Bool
+  fun m_write_file = M_WriteFile(name : LibC::Char*, source : Void*, length : LibC::Int) : DoomBool
   fun m_read_file = M_ReadFile(name : LibC::Char*, buffer : Byte**) : LibC::Int
   fun m_screenshot = M_ScreenShot
   fun m_load_defaults = M_LoadDefaults
   fun m_save_defaults = M_SaveDefaults
-  fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : Bool, string : LibC::Char*) : LibC::Int
+  fun m_draw_text(x : LibC::Int, y : LibC::Int, direct : DoomBool, string : LibC::Char*) : LibC::Int
 
   # __M_RANDOM__
 
@@ -3426,13 +3449,13 @@ lib CDoom
   #
 
   # Called by main loop.
-  fun st_responder = ST_Responder(ev : Event*) : Bool
+  fun st_responder = ST_Responder(ev : Event*) : DoomBool
 
   # Called by main loop.
   fun st_ticker = ST_Ticker
 
   # Called by main loop.
-  fun st_drawer = ST_Drawer(fullscreen : Bool, refresh : Bool)
+  fun st_drawer = ST_Drawer(fullscreen : DoomBool, refresh : DoomBool)
 
   # Called when the console player is spawned on each level.
   fun st_start = ST_Start
@@ -3812,8 +3835,8 @@ lib CDoom
 
     # Power ups. invinc and invis are tic counters.
     powers : LibC::Int[Powertype::NUMPOWERS]
-    cards : Bool[Card::NUMCARDS]
-    backpack : Bool
+    cards : DoomBool[Card::NUMCARDS]
+    backpack : DoomBool
 
     # Frags, kills of other players.
     frags : LibC::Int[MAXPLAYERS]
@@ -3822,7 +3845,7 @@ lib CDoom
     # Is wp_nochange if not changing.
     pendingweapons : Weapontype
 
-    weaponowned : Bool[Weapontype::NUMWEAPONS]
+    weaponowned : DoomBool[Weapontype::NUMWEAPONS]
     ammo : LibC::Int[Ammotype::NUMAMMO]
     maxammo : LibC::Int[Ammotype::NUMAMMO]
 
@@ -3867,7 +3890,7 @@ lib CDoom
     psprites : Pspdef[Psprnum::NUMPSPRITES]
 
     # True if secret level has been done.
-    didsecret : Bool
+    didsecret : DoomBool
   end
 
   #
@@ -3875,7 +3898,7 @@ lib CDoom
   # Structure passed e.g. to WI_Start(wb)
   #
   struct Wbplayerstruct
-    in : Bool # whether the player is in game
+    in : DoomBool # whether the player is in game
 
     # Player stats, kills, collected items etc.
     skills : LibC::Int
@@ -3890,7 +3913,7 @@ lib CDoom
     epsd : LibC::Int # episode # (0-2)
 
     # if true, splash the secret level
-    didsecret : Bool
+    didsecret : DoomBool
 
     # previous and next levels, origin 0
     last : LibC::Int
@@ -4011,10 +4034,10 @@ lib CDoom
   # ------------------------
   # Command line parameters.
   #
-  $nomonsters : Bool  # checkparm of -nomonsters
-  $respawnparm : Bool # checkparm of -respawn
-  $fastparm : Bool    # checkparm of -fast
-  $devparm : Bool     # DEBUG: launched with -devparm
+  $nomonsters : DoomBool  # checkparm of -nomonsters
+  $respawnparm : DoomBool # checkparm of -respawn
+  $fastparm : DoomBool    # checkparm of -fast
+  $devparm : DoomBool     # DEBUG: launched with -devparm
 
   # -----------------------------------------------------
   # Game Mode - identify IWAD as shareware, retail etc.
@@ -4023,7 +4046,7 @@ lib CDoom
   $gamemission : GameMission
 
   # Set if homebrew PWAD stuff has been added.
-  $modifiedgame : Bool
+  $modifiedgame : DoomBool
 
   # -------------------------------------------
   # Language.
@@ -4038,7 +4061,7 @@ lib CDoom
   $startepisode : LibC::Int
   $startmap : LibC::Int
 
-  $autostart : Bool
+  $autostart : DoomBool
 
   # Selected by user.
   $gameskill : Skill
@@ -4046,14 +4069,14 @@ lib CDoom
   $gamemap : LibC::Int
 
   # Nightmare mode flag, single player.
-  $respawnmonsters : Bool
+  $respawnmonsters : DoomBool
 
   # Netgame? Only true if >1 player.
-  $netgame : Bool
+  $netgame : DoomBool
 
   # Flag: true only if started as net deathmatch.
   # An enum might handle altdeath/cooperative better.
-  $deathmatch : Bool
+  $deathmatch : DoomBool
 
   # -------------------------
   # Internal parameters for sound rendering.
@@ -4076,16 +4099,16 @@ lib CDoom
   # Depending on view size - no status bar?
   # Note that there is no way to disable the
   #  status bar explicitely.
-  $statusbaractive : Bool
+  $statusbaractive : DoomBool
 
-  $automapactive : Bool # In AutoMap mode?
-  $menuactive : Bool    # Menu overlayed?
-  $paused : Bool        # Game Pause?
+  $automapactive : DoomBool # In AutoMap mode?
+  $menuactive : DoomBool    # Menu overlayed?
+  $paused : DoomBool        # Game Pause?
 
-  $viewactive : Bool
+  $viewactive : DoomBool
 
-  $nodrawers : Bool
-  $noblit : Bool
+  $nodrawers : DoomBool
+  $noblit : DoomBool
 
   $viewwindowx : LibC::Int
   $viewwindowy : LibC::Int
@@ -4117,14 +4140,14 @@ lib CDoom
   # DEMO playback/recording related stuff.
   # No demo, there is a human player in charge?
   # Disable save/end game?
-  $usergame : Bool
+  $usergame : DoomBool
 
   # ?
-  $demoplayback : Bool
-  $demorecording : Bool
+  $demoplayback : DoomBool
+  $demorecording : DoomBool
 
   # Quit after playing a demo from cmdline.
-  $singledemo : Bool
+  $singledemo : DoomBool
 
   # ?
   $gamestate : Gamestate
@@ -4141,7 +4164,7 @@ lib CDoom
   $players : Player[MAXPLAYERS]
 
   # Alive? Disconnected?
-  $playeringame : Bool[MAXPLAYERS]
+  $playeringame : DoomBool[MAXPLAYERS]
 
   # Player spawn spots for deathmatch.
   MAX_DM_STARTS = 10
@@ -4168,7 +4191,7 @@ lib CDoom
   $debugfile : Void*
 
   # if true, load all graphics at level load
-  $precache : Bool
+  $precache : DoomBool
 
   # wipegamestate can be set to -1
   # to force a wipe on the next draw
@@ -4177,7 +4200,7 @@ lib CDoom
   $mouse_sensitivity : LibC::Int
   # ?
   # debug flag to cancel adaptiveness
-  $singletics : Bool
+  $singletics : DoomBool
 
   $bodyqueslot : LibC::Int
 
@@ -4273,7 +4296,7 @@ lib CDoom
 
   # __P_INTER__
 
-  fun p_give_power = P_GivePower(player : Player*, power : LibC::Int) : Bool
+  fun p_give_power = P_GivePower(player : Player*, power : LibC::Int) : DoomBool
 
   # __R_DEFS__
 
@@ -4588,7 +4611,7 @@ lib CDoom
     # If false use 0 for any position.
     # Note: as eight entries are available,
     #  we might as well insert the same name eight times.
-    rotate : Bool
+    rotate : DoomBool
 
     # Lump to use for view angles 0-7.
     lump : LibC::Short[8]
@@ -4672,8 +4695,8 @@ lib CDoom
     cl : LibC::Int               # current line number
 
     # pointer to doom_boolean stating whether to update window
-    on : Bool*
-    laston : Bool # last value of *->on.
+    on : DoomBool*
+    laston : DoomBool # last value of *->on.
   end
 
   # Input Text Line widget
@@ -4685,8 +4708,8 @@ lib CDoom
     lm : LibC::Int
 
     # pointer to doom_boolean stating whether to update window
-    on : Bool*
-    laston : Bool # last value of *->on
+    on : DoomBool*
+    laston : DoomBool # last value of *->on
   end
 
   #
@@ -4706,13 +4729,13 @@ lib CDoom
   fun hulib_init_text_line = HUlib_initTextLine(t : HU_Textline*, x : LibC::Int, y : LibC::Int, f : Patch**, sc : LibC::Int)
 
   # returns success
-  fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : HU_Textline*, ch : LibC::Char) : Bool
+  fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : HU_Textline*, ch : LibC::Char) : DoomBool
 
   # returns success
-  fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : HU_Textline*) : Bool
+  fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : HU_Textline*) : DoomBool
 
   # draws tline
-  fun hulib_draw_text_line = HUlib_drawTextLine(l : HU_Textline*, drawcursor : Bool)
+  fun hulib_draw_text_line = HUlib_drawTextLine(l : HU_Textline*, drawcursor : DoomBool)
 
   # erases text line
   fun hulib_erase_text_line = HUlib_eraseTextLine(l : HU_Textline*)
@@ -4728,7 +4751,7 @@ lib CDoom
                                           h : LibC::Int,
                                           font : Patch**,
                                           startchar : LibC::Int,
-                                          on : Bool*)
+                                          on : DoomBool*)
 
   # add a new line
   fun hulib_add_line_to_s_text = HUlib_addLineToSText(s : HU_Stext*)
@@ -4748,7 +4771,7 @@ lib CDoom
                                           y : LibC::Int,
                                           font : Patch**,
                                           startchar : LibC::Int,
-                                          on : Bool*)
+                                          on : DoomBool*)
 
   # enforces left margin
   fun hulib_del_char_from_i_text = HUlib_delCharFromIText(it : HU_Itext*)
@@ -4763,7 +4786,7 @@ lib CDoom
   fun hulib_add_prefix_to_i_text = HUlib_addPrefixToIText(it : HU_Itext*, str : LibC::Char*)
 
   # whether eaten
-  fun hulib_key_in_i_text = HUlib_keyInIText(it : HU_Itext*, ch : LibC::UChar) : Bool
+  fun hulib_key_in_i_text = HUlib_keyInIText(it : HU_Itext*, ch : LibC::UChar) : DoomBool
 
   fun hulib_draw_i_text = HUlib_drawIText(it : HU_Itext*)
 
@@ -4775,7 +4798,7 @@ lib CDoom
   #
   # End-level timer (-TIMER option)
   #
-  $level_timer = levelTimer : Bool
+  $level_timer = levelTimer : DoomBool
   $level_time_count = levelTimeCount : LibC::Int
 
   # Define values for map objects
@@ -4791,7 +4814,7 @@ lib CDoom
   fun p_update_specials = P_UpdateSpecials
 
   # when needed
-  fun p_use_special_line = P_UseSpecialLine(thing : Mobj*, line : Line*, side : LibC::Int) : Bool
+  fun p_use_special_line = P_UseSpecialLine(thing : Mobj*, line : Line*, side : LibC::Int) : DoomBool
 
   fun p_shoot_special_line = P_ShootSpecialLine(thing : Mobj*, line : Line*)
   fun p_cross_special_line = P_CrossSpecialLine(linenum : LibC::Int, side : LibC::Int, thing : Mobj*)
@@ -4936,7 +4959,7 @@ lib CDoom
     count : LibC::Int
     status : Platenum
     oldstatus : Platenum
-    crush : Bool
+    crush : DoomBool
     tag : LibC::Int
     type : Plattype
   end
@@ -5015,7 +5038,7 @@ lib CDoom
     bottomheight : Fixed
     topheight : Fixed
     speed : Fixed
-    crush : Bool
+    crush : DoomBool
 
     # 1 = up, 0 = waiting, -1 = down
     direction : LibC::Int
@@ -5082,7 +5105,7 @@ lib CDoom
   struct Floormove
     thinker : Thinker
     type : Floorenum
-    crush : Bool
+    crush : DoomBool
     sector : Sector*
     direction : LibC::Int
     newspecial : LibC::Int
@@ -5099,7 +5122,7 @@ lib CDoom
     Pastdest
   end
 
-  fun t_move_plane = T_MovePlane(sector : Sector*, speed : Fixed, dest : Fixed, crush : Bool, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Result
+  fun t_move_plane = T_MovePlane(sector : Sector*, speed : Fixed, dest : Fixed, crush : DoomBool, floor_or_ceiling : LibC::Int, direction : LibC::Int) : Result
   fun ev_build_stairs = EV_BuildStairs(line : Line*, type : Stairenum) : LibC::Int
   fun ev_do_floor = EV_DoFloor(line : Line*, floortype : Floorenum) : LibC::Int
   fun t_move_floor = T_MoveFloor(floor : Floormove*)
@@ -5119,13 +5142,13 @@ lib CDoom
   $rw_w : LibC::Int
   $rw_stopx : LibC::Int
 
-  $segtextured : Bool
+  $segtextured : DoomBool
 
   # false if the back side is the same plane
-  $markfloor : Bool
-  $markceiling : Bool
+  $markfloor : DoomBool
+  $markceiling : DoomBool
 
-  $skymap : Bool
+  $skymap : DoomBool
 
   $drawsegs : Drawseg[MAXDRAWSEGS]
   $ds_p : Drawseg*
@@ -5527,7 +5550,7 @@ lib CDoom
   fun p_respawn_specials = P_RespawnSpecials
   fun p_spawn_mobj = P_SpawnMobj(x : Fixed, y : Fixed, z : Fixed, type : Mobjtype) : Mobj*
   fun p_remove_mobj = P_RemoveMobj(th : Mobj*)
-  fun p_set_mobj_state = P_SetMobjState(mobj : Mobj*, state : Statenum) : Bool
+  fun p_set_mobj_state = P_SetMobjState(mobj : Mobj*, state : Statenum) : DoomBool
   fun p_mobj_thinker = P_MobjThinker(mobj : Mobj*)
   fun p_spawn_puff = P_SpawnPuff(x : Fixed, y : Fixed, z : Fixed)
   fun p_spawn_blood = P_SpawnBlood(x : Fixed, y : Fixed, z : Fixed)
@@ -5556,7 +5579,7 @@ lib CDoom
 
   struct Intercept
     frac : Fixed # along trace line
-    isaline : Bool
+    isaline : DoomBool
     d : InterceptD
   end
 
@@ -5564,7 +5587,7 @@ lib CDoom
   $intercepts : Intercept[MAXINTERCEPTS]
   $intercept_p : Intercept*
 
-  alias Traverser = Proc(Intercept*, Bool)
+  alias Traverser = Proc(Intercept*, DoomBool)
 
   fun p_aprox_distance = P_AproxDistance(dx : Fixed, dy : Fixed) : Fixed
   fun p_point_on_line_side = P_PointOnLineSide(x : Fixed, y : Fixed, line : Line*) : LibC::Int
@@ -5580,8 +5603,8 @@ lib CDoom
 
   fun p_line_opening = P_LineOpening(linedef : Line*)
 
-  fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(Line*, Bool)) : Bool
-  fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(Mobj*, Bool)) : Bool
+  fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(Line*, DoomBool)) : DoomBool
+  fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(Mobj*, DoomBool)) : DoomBool
 
   PT_ADDLINES  = 1
   PT_ADDTHINGS = 2
@@ -5589,7 +5612,7 @@ lib CDoom
 
   $trace : Divline
 
-  fun p_path_traverse = P_PathTraverse(x1 : Fixed, y1 : Fixed, x2 : Fixed, y2 : Fixed, flags : LibC::Int, trav : Proc(Intercept*, Bool)) : Bool
+  fun p_path_traverse = P_PathTraverse(x1 : Fixed, y1 : Fixed, x2 : Fixed, y2 : Fixed, flags : LibC::Int, trav : Proc(Intercept*, DoomBool)) : DoomBool
   fun p_unset_thing_position = P_UnsetThingPosition(thing : Mobj*)
   fun p_set_thing_position = P_SetThingPosition(thing : Mobj*)
 
@@ -5599,19 +5622,19 @@ lib CDoom
 
   # If "floatok" true, move would be ok
   # if within "tmfloorz - tmceilingz".
-  $floatok : Bool
+  $floatok : DoomBool
   $tmfloorz : Fixed
   $tmceilingz : Fixed
 
   $ceilingline : Line*
 
-  fun p_check_position = P_CheckPosition(thing : Mobj*, x : Fixed, y : Fixed) : Bool
-  fun p_try_move = P_TryMove(thing : Mobj*, x : Fixed, y : Fixed) : Bool
-  fun p_teleport_move = P_TeleportMove(thing : Mobj*, x : Fixed, y : Fixed) : Bool
+  fun p_check_position = P_CheckPosition(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
+  fun p_try_move = P_TryMove(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
+  fun p_teleport_move = P_TeleportMove(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
   fun p_slide_move = P_SlideMove(mo : Mobj*)
-  fun p_check_sight = P_CheckSight(t1 : Mobj*, t2 : Mobj*) : Bool
+  fun p_check_sight = P_CheckSight(t1 : Mobj*, t2 : Mobj*) : DoomBool
   fun p_use_lines = P_UseLines(player : Player*)
-  fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : Bool) : Bool
+  fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : DoomBool) : DoomBool
 
   $linetarget : Mobj* # who got hit (or 0)
 
@@ -5670,7 +5693,7 @@ lib CDoom
 
     # pointer to doom_boolean stating
     #  whether to update number
-    on : Bool*
+    on : DoomBool*
 
     # list of patches for 0-9
     p : Patch**
@@ -5703,7 +5726,7 @@ lib CDoom
 
     # pointer to doom_boolean stating
     #  whether to update icon
-    on : Bool*
+    on : DoomBool*
 
     # list of icons
     p : Patch**
@@ -5722,11 +5745,11 @@ lib CDoom
     oldval : LibC::Int
 
     # pointer to current icon status
-    val : Bool*
+    val : DoomBool*
 
     # pointer to bool
     #  stating whether to update icon
-    on : Bool*
+    on : DoomBool*
 
     p : Patch*       # icon
     data : LibC::Int # user data
@@ -5748,10 +5771,10 @@ lib CDoom
                                      y : LibC::Int,
                                      pl : Patch**,
                                      num : LibC::Int*,
-                                     on : Bool*,
+                                     on : DoomBool*,
                                      width : LibC::Int)
 
-  fun stlib_update_num = STlib_updateNum(n : ST_Number*, refresh : Bool)
+  fun stlib_update_num = STlib_updateNum(n : ST_Number*, refresh : DoomBool)
 
   # Percent widget routines
   fun stlib_init_percent = STlib_initPercent(p : ST_Percent*,
@@ -5759,7 +5782,7 @@ lib CDoom
                                              y : LibC::Int,
                                              pl : Patch**,
                                              num : LibC::Int*,
-                                             on : Bool*,
+                                             on : DoomBool*,
                                              percent : Patch*)
 
   fun stlib_update_percent = STlib_updatePercent(per : ST_Percent*, refresh : LibC::Int)
@@ -5770,19 +5793,19 @@ lib CDoom
                                                 y : LibC::Int,
                                                 il : Patch**,
                                                 inum : LibC::Int*,
-                                                on : Bool*)
+                                                on : DoomBool*)
 
-  fun stlib_update_mult_icon = STlib_updateMultIcon(mi : ST_Multicon*, refresh : Bool)
+  fun stlib_update_mult_icon = STlib_updateMultIcon(mi : ST_Multicon*, refresh : DoomBool)
 
   # Binary Icon widget routines
   fun stlib_init_bin_con = STlib_initBinIcon(b : ST_Binicon*,
                                              x : LibC::Int,
                                              y : LibC::Int,
                                              i : Patch*,
-                                             val : Bool*,
-                                             on : Bool*)
+                                             val : DoomBool*,
+                                             on : DoomBool*)
 
-  fun stlib_update_bin_icon = STlib_updateBinIcon(bi : ST_Binicon*, refresh : Bool)
+  fun stlib_update_bin_icon = STlib_updateBinIcon(bi : ST_Binicon*, refresh : DoomBool)
 
   # __V_VIDEO__
 
@@ -5885,8 +5908,8 @@ lib CDoom
   fun w_lump_length = W_LumpLength(lump : LibC::Int) : LibC::Int
   fun w_read_lump = W_ReadLump(lump : LibC::Int, dest : Void*)
 
-  fun w_cache_lump_num(lump : LibC::Int, tag : LibC::Int) : Void*
-  fun w_cache_lump_name(name : LibC::Char*, tag : LibC::Int) : Void*
+  fun w_cache_lump_num = W_CacheLumpNum(lump : LibC::Int, tag : LibC::Int) : Void*
+  fun w_cache_lump_name = W_CacheLumpName(name : LibC::Char*, tag : LibC::Int) : Void*
 
   # __WI_STUFF__
 
@@ -5947,7 +5970,7 @@ lib CDoom
   $screens : Byte*[5]
   SCREEN_PALETTE_SIZE = 256 * 3
   $screen_palette : LibC::UChar[SCREEN_PALETTE_SIZE]
-  $is_wiping_screen : Bool
+  $is_wiping_screen : DoomBool
   $defaults : Default[1]
   $numdefaults : LibC::Int
   $mixbuffer : LibC::Short[2048]
@@ -5974,7 +5997,7 @@ lib CDoom
   $doom_exit : DoomExitFn
   $doom_getenv : DoomGetenvFn
 
-  $setsizeneeded : Bool
+  $setsizeneeded : DoomBool
   $setblocks : LibC::Int
   $setdetail : LibC::Int
 
@@ -5985,4 +6008,235 @@ lib CDoom
 
   fun d_doom_loop = D_DoomLoop
   fun d_update_wipe = D_UpdateWipe
+
+  REDS        = (256 - 5*16)
+  REDRANGE    = 16
+  BLUES       = (256 - 4*16 + 8)
+  BLUERANGE   = 8
+  GREENS      = (7*16)
+  GREENRANGE  = 16
+  GRAYS       = (6*16)
+  GRAYSRANGE  = 16
+  BROWNS      = (4*16)
+  BROWNRANGE  = 16
+  YELLOWS     = (256 - 32 + 7)
+  YELLOWRANGE = 1
+  BLACK       = 0
+  WHITE       = (256 - 47)
+
+  # Automap colors
+  BACKGROUND       = BLACK
+  YOURCOLORS       = WHITE
+  YOURRANGE        = 0
+  WALLCOLORS       = REDS
+  WALLRANGE        = REDRANGE
+  TSWALLCOLORS     = GRAYS
+  TSWALLRANGE      = GRAYSRANGE
+  FDWALLCOLORS     = BROWNS
+  FDWALLRANGE      = BROWNRANGE
+  CDWALLCOLORS     = YELLOWS
+  CDWALLRANGE      = YELLOWRANGE
+  THINGCOLORS      = GREENS
+  THINGRANGE       = GREENRANGE
+  SECRETWALLCOLORS = WALLCOLORS
+  SECRETWALLRANGE  = WALLRANGE
+  GRIDCOLORS       = (GRAYS + GRAYSRANGE/2)
+  GRIDRANGE        = 0
+  XHAIRCOLORS      = GRAYS
+
+  # drawing stuff
+  FB = 0
+
+  AM_PANDOWNKEY   = KEY_DOWNARROW
+  AM_PANUPKEY     = KEY_UPARROW
+  AM_PANRIGHTKEY  = KEY_RIGHTARROW
+  AM_PANLEFTKEY   = KEY_LEFTARROW
+  AM_ZOOMINKEY    = '='
+  AM_ZOOMOUTKEY   = '-'
+  AM_STARTKEY     = KEY_TAB
+  AM_ENDKEY       = KEY_TAB
+  AM_GOBIGKEY     = '0'
+  AM_FOLLOWKEY    = 'f'
+  AM_GRIDKEY      = 'g'
+  AM_MARKKEY      = 'm'
+  AM_CLEARMARKKEY = 'c'
+
+  AM_NUMMARKPOINTS = 10
+
+  # scale on entry
+  INITSCALEMTOF = (0.2*FRACUNIT)
+  # how much the automap moves window per tic in frame-buffer coordinates
+  # moves 140 pixels in 1 second
+  F_PANINC = 4
+  # how much zoom-in per tic
+  # goes to 2x in 1 second
+  M_ZOOMIN = (1.02*FRACUNIT).to_i32
+  # how much zoom-out per tic
+  # pulls out to 0.5x in 1 second
+  M_ZOOMOUT = (FRACUNIT/1.02).to_i32
+
+  # the following is crap
+  LINE_NEVERSEE = ML_DONTDRAW
+
+  struct Fpoint
+    x : LibC::Int
+    y : LibC::Int
+  end
+
+  struct Fline
+    a : Fpoint
+    b : Fpoint
+  end
+
+  struct Mpoint
+    x : Fixed
+    y : Fixed
+  end
+
+  struct Mline
+    a : Mpoint
+    b : Mpoint
+  end
+
+  struct Islope
+    slp : Fixed
+    islp : Fixed
+  end
+
+  #
+  # The vector graphics for the automap.
+  # A line drawing of the player pointing right,
+  # starting from the middle.
+  #
+  R                 = ((8*PLAYERRADIUS)//7)
+  NUMPLYRLINES      = 7
+  $player_arrow : Mline[NUMPLYRLINES]
+  NUMCHEATPLYRLINES = 16
+  $cheat_player_arrow : Mline[NUMCHEATPLYRLINES]
+
+  NUMTRIANGLEGUYLINES     = 3
+  $triangle_guy : Mline[NUMTRIANGLEGUYLINES]
+  NUMTHINTRIANGLEGUYLINES = 3
+  $thintriangle_guy : Mline[NUMTHINTRIANGLEGUYLINES]
+
+  $cheating : LibC::Int
+  $grid : LibC::Int
+
+  $leveljuststarted : LibC::Int # kluge until AM_LevelInit() is called
+
+  $finit_width : LibC::Int
+  $finit_height : LibC::Int
+
+  # location of window on screen
+  $f_x : LibC::Int
+  $f_y : LibC::Int
+
+  # size of window on screen
+  $f_w : LibC::Int
+  $f_h : LibC::Int
+
+  $lightlev : LibC::Int # used for funky strobing effect
+  $fb : Byte*           # psuedo-frame buffer
+  $amclock : LibC::Int
+
+  $m_paninc : Mpoint    # how far the window pans each tic (map coords)
+  $mtof_zoommul : Fixed # how far the window zooms in each tic (map coords)
+  $ftom_zoommul : Fixed #  how far the window zooms in each tic (fb coords)
+
+  # LL x,y where the window is on the map (map coords)
+  $m_x : Fixed
+  $m_y : Fixed
+  # UR x,y where the window is on the map (map coords)
+  $m_x2 : Fixed
+  $m_y2 : Fixed
+
+  #
+  # width/height of window on map (map coords)
+  #
+  $m_w : Fixed
+  $m_h : Fixed
+
+  # based on level size
+  $min_x : Fixed
+  $min_y : Fixed
+  $max_x : Fixed
+  $max_y : Fixed
+
+  $max_w : Fixed # max_x-min_x,
+  $max_h : Fixed # max_y-min_y
+
+  # based on player size
+  $min_w : Fixed
+  $min_h : Fixed
+
+  $min_scale_mtof : Fixed # used to tell when to stop zooming out
+  $max_scale_mtof : Fixed # used to tell when to stop zooming in
+
+  # old stuff for recovery later
+  $old_m_w : Fixed
+  $old_m_h : Fixed
+  $old_m_x : Fixed
+  $old_m_y : Fixed
+
+  # old location used by the Follower routine
+  $f_oldloc : Mpoint
+
+  # used by MTOF to scale from map-to-frame-buffer coords
+  $scale_mtof : Fixed
+  # used by FTOM to scale from frame-buffer-to-map coords (=1/scale_mtof)
+  $scale_ftom : Fixed
+
+  $plr : Player* # the player represented by an arrow
+
+  $marknums : Patch*[10]                 # numbers used for marking by the automap
+  $markpoints : Mpoint[AM_NUMMARKPOINTS] # where the points are
+  $markpointnum : LibC::Int              # next point to be assigned
+
+  $followplayer : LibC::Int # specifies whether to follow the player around
+
+  $cheat_amap_seq : LibC::Char[5]
+  $cheat_amap : Cheatseq
+
+  $stopped : DoomBool
+
+  $automapactive : DoomBool
+
+  $viewactive : DoomBool
+
+  fun am_activate_new_scale = AM_activateNewScale
+
+  fun am_save_scale_and_loc = AM_saveScaleAndLoc
+
+  fun am_restore_scale_and_loc = AM_restoreScaleAndLoc
+
+  fun am_add_mark = AM_addMark
+
+  fun am_find_min_max_boundaries = AM_findMinMaxBoundaries
+
+  fun am_change_window_loc = AM_changeWindowLoc
+
+  fun am_init_variables = AM_initVariables
+
+  fun am_load_pics = AM_loadPics
+
+  fun am_unload_pics = AM_unloadPics
+
+  fun am_clear_marks = AM_clearMarks
+
+  fun am_level_init = AM_LevelInit
+
+  fun am_stop = AM_Stop
+
+  fun am_start = AM_Start
+
+  fun am_min_out_window_scale = AM_minOutWindowScale
+
+  fun am_max_out_window_scale = AM_maxOutWindowScale
+
+  fun am_responder = AM_Responder(ev : Event*) : DoomBool
+
+fun am_change_window_scale = AM_changeWindowScale
+
+fun am_do_follow_player = AM_doFollowPlayer
+
 end
