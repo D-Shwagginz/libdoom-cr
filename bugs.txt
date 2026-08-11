@@ -3,3 +3,7 @@ idclev not working on doom 2 due to x < 1 return
 map follow command doesnt work to follow player if holding arrow keys
 
 automap doesnt update when in it
+
+chainsaw sound playing after attack
+
+add plutonia tnt pack detection for version printing and stuff

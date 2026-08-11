@@ -117,6 +117,104 @@ module LibDoom
 
   CDoom.automapactive = 0
 
+  CDoom.weaponinfo[0] = CDoom::Weaponinfo.new(
+    # fist
+    ammo: CDoom::Ammotype::Noammo,
+    upstate: CDoom::Statenum::S_PUNCHUP,
+    downstate: CDoom::Statenum::S_PUNCHDOWN,
+    readystate: CDoom::Statenum::S_PUNCH,
+    atkstate: CDoom::Statenum::S_PUNCH1,
+    flashstate: CDoom::Statenum::S_NULL
+  )
+  CDoom.weaponinfo[1] = CDoom::Weaponinfo.new(
+    # pistol
+    ammo: CDoom::Ammotype::Clip,
+    upstate: CDoom::Statenum::S_PISTOLUP,
+    downstate: CDoom::Statenum::S_PISTOLDOWN,
+    readystate: CDoom::Statenum::S_PISTOL,
+    atkstate: CDoom::Statenum::S_PISTOL1,
+    flashstate: CDoom::Statenum::S_PISTOLFLASH
+  )
+  CDoom.weaponinfo[2] = CDoom::Weaponinfo.new(
+    # shotgun
+    ammo: CDoom::Ammotype::Shell,
+    upstate: CDoom::Statenum::S_SGUNUP,
+    downstate: CDoom::Statenum::S_SGUNDOWN,
+    readystate: CDoom::Statenum::S_SGUN,
+    atkstate: CDoom::Statenum::S_SGUN1,
+    flashstate: CDoom::Statenum::S_SGUNFLASH1
+  )
+  CDoom.weaponinfo[3] = CDoom::Weaponinfo.new(
+    # chaingun
+    ammo: CDoom::Ammotype::Clip,
+    upstate: CDoom::Statenum::S_CHAINUP,
+    downstate: CDoom::Statenum::S_CHAINDOWN,
+    readystate: CDoom::Statenum::S_CHAIN,
+    atkstate: CDoom::Statenum::S_CHAIN1,
+    flashstate: CDoom::Statenum::S_CHAINFLASH1
+  )
+  CDoom.weaponinfo[4] = CDoom::Weaponinfo.new(
+    # missile launcher
+    ammo: CDoom::Ammotype::Misl,
+    upstate: CDoom::Statenum::S_MISSILEUP,
+    downstate: CDoom::Statenum::S_MISSILEDOWN,
+    readystate: CDoom::Statenum::S_MISSILE,
+    atkstate: CDoom::Statenum::S_MISSILE1,
+    flashstate: CDoom::Statenum::S_MISSILEFLASH1
+  )
+  CDoom.weaponinfo[5] = CDoom::Weaponinfo.new(
+    # plasma rifle
+    ammo: CDoom::Ammotype::Cell,
+    upstate: CDoom::Statenum::S_PLASMAUP,
+    downstate: CDoom::Statenum::S_PLASMADOWN,
+    readystate: CDoom::Statenum::S_PLASMA,
+    atkstate: CDoom::Statenum::S_PLASMA1,
+    flashstate: CDoom::Statenum::S_PLASMAFLASH1
+  )
+  CDoom.weaponinfo[6] = CDoom::Weaponinfo.new(
+    # bfg 9000
+    ammo: CDoom::Ammotype::Cell,
+    upstate: CDoom::Statenum::S_BFGUP,
+    downstate: CDoom::Statenum::S_BFGDOWN,
+    readystate: CDoom::Statenum::S_BFG,
+    atkstate: CDoom::Statenum::S_BFG1,
+    flashstate: CDoom::Statenum::S_BFGFLASH1
+  )
+  CDoom.weaponinfo[7] = CDoom::Weaponinfo.new(
+    # chainsaw
+    ammo: CDoom::Ammotype::Noammo,
+    upstate: CDoom::Statenum::S_SAWUP,
+    downstate: CDoom::Statenum::S_SAWDOWN,
+    readystate: CDoom::Statenum::S_SAW,
+    atkstate: CDoom::Statenum::S_SAW1,
+    flashstate: CDoom::Statenum::S_NULL
+  )
+  CDoom.weaponinfo[8] = CDoom::Weaponinfo.new(
+    # fist
+    ammo: CDoom::Ammotype::Shell,
+    upstate: CDoom::Statenum::S_DSGUNUP,
+    downstate: CDoom::Statenum::S_DSGUNDOWN,
+    readystate: CDoom::Statenum::S_DSGUN,
+    atkstate: CDoom::Statenum::S_DSGUN1,
+    flashstate: CDoom::Statenum::S_DSGUNFLASH1
+  )
+
+  CDoom.singletics = 1
+
+  CDoom.is_wiping_screen = 0
+
+  CDoom.debugfile = Pointer(Void).null
+
+  CDoom.wipegamestate = CDoom::Gamestate::Demoscreen
+
+  CDoom.forwardmove[0] = 0x19
+  CDoom.forwardmove[1] = 0x32
+  CDoom.sidemove[0] = 0x18
+  CDoom.sidemove[1] = 0x28
+  CDoom.angleturn[0] = 640
+  CDoom.angleturn[1] = 1280
+  CDoom.angleturn[3] = 320
+
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -1093,7 +1191,7 @@ module LibDoom
     end
   end
 
-  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc(1)
+  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc
 
   #
   # Clip lines, draw visible part sof lines.
@@ -1339,5 +1437,873 @@ module LibDoom
     CDoom.am_draw_marks
 
     CDoom.v_mark_rect(CDoom.f_x, CDoom.f_y, CDoom.f_w, CDoom.f_h)
+  end
+
+  #
+  # d_post_event
+  # Called by the I/O functions when input is detected
+  #
+  def self.d_post_event(ev : CDoom::Event*)
+    CDoom.events[CDoom.eventhead] = ev.value
+    CDoom.eventhead += 1
+    CDoom.eventhead = (CDoom.eventhead) & (CDoom::MAXEVENTS - 1)
+  end
+
+  #
+  # d_process_events
+  # Send all the events of the given timestamp down the responder chain
+  #
+  def self.d_process_events
+    # IF STORE DEMO, DO NOT ACCEPT INPUT
+    return if CDoom.gamemode == CDoom::GameMode::Commercial &&
+              CDoom.w_check_num_for_name("map01") < 0
+
+    while CDoom.eventtail != CDoom.eventhead
+      ev = CDoom.events.to_unsafe + CDoom.eventtail
+      CDoom.g_responder(ev) if CDoom.m_responder(ev) == 0
+      # else menu ate the event
+      CDoom.eventtail += 1
+      CDoom.eventtail = (CDoom.eventtail) & (CDoom::MAXEVENTS - 1)
+    end
+  end
+
+  @@viewactivestate = false
+  @@menuactivestate = false
+  @@inhelpscreenstate = false
+  @@fullscreen = false
+  @@oldgamestate = -1
+  @@borderdrawcount = 0
+
+  #
+  # d_display
+  #  draw current display, possibly wiping it from the previous
+  #
+  def self.d_display
+    return if CDoom.nodrawers != 0 # for comparative timing / profiling
+
+    redrawsbar = false
+
+    # change the view size if needed
+    if CDoom.setsizeneeded != 0
+      CDoom.r_execute_set_view_size
+      @@oldgamestate = -1 # force background redraw
+      @@borderdrawcount = 3
+    end
+
+    wipe = false
+    # save the current screen if about to wipe
+    if CDoom.gamestate != CDoom.wipegamestate
+      wipe = true
+      CDoom.wipe_start_screen(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
+    end
+
+    CDoom.hu_erase if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.gametic != 0
+
+    # do buffered drawing
+    case CDoom.gamestate
+    when CDoom::Gamestate::Level
+      if CDoom.gametic != 0
+        CDoom.am_drawer if CDoom.automapactive != 0
+        redrawsbar = true if wipe || (CDoom.viewheight != 200 && @@fullscreen)
+        redrawsbar = true if @@inhelpscreenstate && CDoom.inhelpscreens == 0 # just put away the help screen
+        CDoom.st_drawer((CDoom.viewheight == 200).to_unsafe, redrawsbar.to_unsafe)
+        @@fullscreen = CDoom.viewheight == 200
+      end
+    when CDoom::Gamestate::Intermission
+      CDoom.wi_drawer
+    when CDoom::Gamestate::Finale
+      CDoom.f_drawer
+    when CDoom::Gamestate::Demoscreen
+      CDoom.d_page_drawer
+    end
+
+    # draw buffered stuff to screen
+    CDoom.i_update_no_blit
+
+    # draw the view directly
+    if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.automapactive == 0 && CDoom.gametic != 0
+      CDoom.r_render_player_view(CDoom.players.to_unsafe + CDoom.displayplayer)
+    end
+
+    CDoom.hu_drawer if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.gametic != 0
+
+    # clean up border stuff
+    if CDoom.gamestate.value != @@oldgamestate && CDoom.gamestate != CDoom::Gamestate::Level
+      CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
+    end
+
+    # see if the border needs to be initially drawn
+    if CDoom.gamestate == CDoom::Gamestate::Level && @@oldgamestate != CDoom::Gamestate::Level.value
+      @@viewactivestate = false # view was not active
+      CDoom.r_fill_back_screen  # draw the pattern into the back screen
+    end
+
+    # see if the border needs to be updated to the screen
+    if CDoom.gamestate == CDoom::Gamestate::Level && CDoom.automapactive == 0 && CDoom.scaledviewwidth != 320
+      @@borderdrawcount = 3 if CDoom.menuactive != 0 || @@menuactivestate || !@@viewactivestate
+      if @@borderdrawcount != 0
+        CDoom.r_draw_view_border # erase old menu stuff
+        @@borderdrawcount -= 1
+      end
+    end
+
+    @@menuactivestate = CDoom.menuactive != 0
+    @@viewactivestate = CDoom.viewactive != 0
+    @@inhelpscreenstate = CDoom.inhelpscreens != 0
+    @@oldgamestate = CDoom.gamestate.value
+    CDoom.wipegamestate = CDoom.gamestate
+
+    # draw pause pic
+    if CDoom.paused != 0
+      y = 0
+      if CDoom.automapactive != 0
+        y = 4
+      else
+        y = CDoom.viewwindowy + 4
+      end
+      CDoom.v_draw_patch_direct(CDoom.viewwindowx + (CDoom.scaledviewwidth - 68) // 2,
+        y, 0, CDoom.w_cache_lump_name("M_PAUSE", CDoom::PU_CACHE).as(CDoom::Patch*))
+    end
+
+    # menus go directly to the screen
+    CDoom.m_drawer   # menu is drawn even on top of everything
+    CDoom.net_update # send out any new accumulation
+
+    # normal update
+    CDoom.is_wiping_screen = wipe.to_unsafe
+    if !wipe
+      CDoom.i_finish_update # page flip or blit buffer
+      return
+    end
+
+    # wipe update
+    CDoom.wipe_end_screen(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
+  end
+
+  def self.d_update_wipe
+    if CDoom.wipe_screen_wipe(CDoom::WIPE_MELT, 0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT, 1) != 0
+      CDoom.is_wiping_screen = 0
+    end
+  end
+
+  def self.d_doom_loop
+    # while true
+    # frame syncronous IO operations
+    CDoom.i_start_frame
+
+    # process one or more tics
+    if CDoom.singletics != 0
+      CDoom.i_start_tic
+      CDoom.d_process_events
+      CDoom.g_build_ticcmd((CDoom.netcmds.to_unsafe + CDoom.consoleplayer).value.to_unsafe + CDoom.maketic % CDoom::BACKUPTICS)
+      CDoom.d_do_advance_demo if CDoom.advancedemo != 0
+      CDoom.m_ticker
+      CDoom.g_ticker
+      CDoom.gametic += 1
+      CDoom.maketic += 1
+    else
+      CDoom.try_run_tics # will run at least one tic
+    end
+
+    CDoom.s_update_sounds(CDoom.players[CDoom.consoleplayer].mo) # move positional sounds
+
+    # Update display, next frame, with current state.
+    CDoom.d_display
+
+    # end
+  end
+
+  #
+  # d_page_ticker
+  # Handles timing for warped projection
+  #
+  def self.d_page_ticker
+    CDoom.pagetic -= 1
+    CDoom.d_advance_demo if CDoom.pagetic < 0
+  end
+
+  def self.d_page_drawer
+    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name(CDoom.pagename, CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  #
+  # d_advance_demo
+  # Called after each demo or intro demosequence finishes
+  #
+  def self.d_advance_demo
+    CDoom.advancedemo = 1
+  end
+
+  #
+  # This cycles through the demo sequences.
+  # Todo: FIXME - version dependend demo numbers?
+  #
+  def self.d_do_advance_demo
+    CDoom.players[CDoom.consoleplayer].playerstate = CDoom::Playerstate::PST_LIVE # not reborn
+    CDoom.advancedemo = 0
+    CDoom.usergame = 0 # no save / end game here
+    CDoom.paused = 0
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+
+    if CDoom.gamemode == CDoom::GameMode::Retail
+      CDoom.demosequence = (CDoom.demosequence + 1) % 7
+    else
+      CDoom.demosequence = (CDoom.demosequence + 1) % 6
+    end
+
+    case CDoom.demosequence
+    when 0
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.pagetic = 35 * 11
+      else
+        CDoom.pagetic = 170
+      end
+      CDoom.gamestate = CDoom::Gamestate::Demoscreen
+      CDoom.pagename = "TITLEPIC"
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
+      else
+        CDoom.s_start_music(CDoom::Musicenum::MUS_intro)
+      end
+    when 1
+      CDoom.g_defered_play_demo("demo1")
+    when 2
+      CDoom.pagetic = 200
+      CDoom.gamestate = CDoom::Gamestate::Demoscreen
+      CDoom.pagename = "CREDIT"
+    when 3
+      CDoom.g_defered_play_demo("demo2")
+    when 4
+      CDoom.gamestate = CDoom::Gamestate::Demoscreen
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.pagetic = 35 * 11
+        CDoom.pagename = "TITLEPIC"
+        CDoom.s_start_music(CDoom::Musicenum::MUS_dm2ttl)
+      else
+        CDoom.pagetic = 200
+
+        if CDoom.gamemode == CDoom::GameMode::Retail
+          CDoom.pagename = "CREDIT"
+        else
+          CDoom.pagename = "HELP2"
+        end
+      end
+    when 5
+      CDoom.g_defered_play_demo("demo3")
+      # THE DEFINITIVE DOOM Special Edition demo
+    when 6
+      CDoom.g_defered_play_demo("demo4")
+    end
+  end
+
+  def self.d_start_title
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.demosequence = -1
+    CDoom.d_advance_demo
+  end
+
+  def self.d_add_file(file : UInt8*)
+    numwadfiles = 0
+    until CDoom.wadfiles[numwadfiles].null?
+      numwadfiles += 1
+    end
+
+    newfile = CDoom.doom_malloc.call(doom_strlen(file) + 1)
+    CDoom.doom_strcpy(newfile.as(UInt8*), file)
+
+    CDoom.wadfiles[numwadfiles] = newfile.as(UInt8*)
+  end
+
+  #
+  # identify_version
+  # Checks availability of IWAD files by name,
+  # to determine whether registered/commercial features
+  # should be executed (notably loading PWAD's).
+  #
+  def self.identify_version
+    doomwaddir = CDoom.doom_getenv.call("DOOMWADDIR".to_unsafe)
+    doomwaddir = ".".to_unsafe if doomwaddir.null?
+
+    # Commercial.
+    doom2wad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 9 + 1).as(UInt8*)
+    CDoom.doom_strcpy(doom2wad, doomwaddir)
+    CDoom.doom_concat(doom2wad, "/doom2.wad")
+
+    # Retail.
+    doomuwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 8 + 1).as(UInt8*)
+    CDoom.doom_strcpy(doomuwad, doomwaddir)
+    CDoom.doom_concat(doomuwad, "/doomu.wad")
+
+    # Registered.
+    doomwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 8 + 1).as(UInt8*)
+    CDoom.doom_strcpy(doomwad, doomwaddir)
+    CDoom.doom_concat(doomwad, "/doom.wad")
+
+    # Shareware.
+    doom1wad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 9 + 1).as(UInt8*)
+    CDoom.doom_strcpy(doom1wad, doomwaddir)
+    CDoom.doom_concat(doom1wad, "/doom1.wad")
+
+    # Bug, dear Shawn.
+    # Insufficient malloc, caused spurious realloc errors.
+    plutoniawad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 12 + 1).as(UInt8*)
+    CDoom.doom_strcpy(plutoniawad, doomwaddir)
+    CDoom.doom_concat(plutoniawad, "/plutonia.wad")
+
+    tntwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 9 + 1).as(UInt8*)
+    CDoom.doom_strcpy(tntwad, doomwaddir)
+    CDoom.doom_concat(tntwad, "/tnt.wad")
+
+    # French stuff
+    doom2fwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 10 + 1).as(UInt8*)
+    CDoom.doom_strcpy(doom2fwad, doomwaddir)
+    CDoom.doom_concat(doom2fwad, "/doom2f.wad")
+
+    {% if !CDoom.has_constant?("DOOM_WIN32") %}
+      home = CDoom.doom_getenv.call("HOME".to_unsafe)
+      if home.null?
+        CDoom.i_error("Error: Please set $HOME to your home directory")
+      end
+    {% else %}
+      home = ".".to_unsafe
+    {% end %}
+    home = ".".to_unsafe # Don't be cute. Just use binary dir
+
+    CDoom.doom_strcpy(CDoom.basedefault, home)
+    CDoom.doom_concat(CDoom.basedefault, "/config.cfg")
+
+    if CDoom.m_check_parm("-shdev") != 0
+      CDoom.gamemode = CDoom::GameMode::Shareware
+      CDoom.devparm = 1
+      CDoom.d_add_file(CDoom::DEVDATA + "doom1.wad")
+      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      return
+    end
+
+    if CDoom.m_check_parm("-regdev") != 0
+      CDoom.gamemode = CDoom::GameMode::Registered
+      CDoom.devparm = 1
+      CDoom.d_add_file(CDoom::DEVDATA + "doom.wad")
+      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
+      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture2.lmp")
+      CDoom.d_add_file(CDoom::DEVMAPS + "data_se/pnames.lmp")
+      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      return
+    end
+
+    if CDoom.m_check_parm("-comdev") != 0
+      CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.devparm = 1
+      CDoom.d_add_file(CDoom::DEVDATA + "doom2.wad")
+
+      CDoom.d_add_file(CDoom::DEVMAPS + "cdata/texture1.lmp")
+      CDoom.d_add_file(CDoom::DEVMAPS + "cdata/pnames.lmp")
+      CDoom.doom_strcpy(CDoom.basedefault, CDoom::DEVDATA + "default.cfg")
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(doom2fwad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Commercial
+      # C'est ridicule!
+      # Let's handle languages in config files, okay?
+      CDoom.language = CDoom::Language::French
+      CDoom.doom_print.call("French version\n".to_unsafe)
+      CDoom.d_add_file(doom2fwad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(doom2wad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.d_add_file(doom2wad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(plutoniawad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.d_add_file(plutoniawad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(tntwad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.d_add_file(tntwad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(doomuwad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Retail
+      CDoom.d_add_file(doomuwad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(doomwad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Registered
+      CDoom.d_add_file(doomwad)
+      return
+    end
+
+    if !(f = CDoom.doom_open.call(doom1wad, "rb".to_unsafe)).null?
+      CDoom.doom_close.call(f)
+      CDoom.gamemode = CDoom::GameMode::Shareware
+      CDoom.d_add_file(doom1wad)
+      return
+    end
+
+    CDoom.doom_print.call("Game mode indeterminate.\n".to_unsafe)
+    CDoom.gamemode = CDoom::GameMode::Indetermined
+  end
+
+  #
+  # Find a Response File
+  #
+  def self.find_response_file
+    (CDoom.myargc - 1).times do |i|
+      i += 1
+
+      if CDoom.myargv[i][0].chr == '@'
+        moreargs = Pointer(UInt8*).malloc(20)
+
+        # READ THE RESPONSE FILE INTO MEMORY
+        handle = CDoom.doom_open.call(CDoom.myargv[i] + 1, "rb".to_unsafe)
+        if handle.null?
+          CDoom.doom_print.call("\nNo such response file!".to_unsafe)
+          CDoom.doom_exit.call(1)
+        end
+        CDoom.doom_print.call("Found response file #{String.new(CDoom.myargv[i] + 1)}!\n".to_unsafe)
+        CDoom.doom_seek.call(handle, 0, CDoom::DoomSeek::DOOM_SEEK_END)
+        size = CDoom.doom_tell.call(handle)
+        CDoom.doom_seek.call(handle, 0, CDoom::DoomSeek::DOOM_SEEK_SET)
+        file = CDoom.doom_malloc.call(size)
+        CDoom.doom_read.call(handle, file, size * 1)
+        CDoom.doom_close.call(handle)
+
+        # KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
+        index = 0
+        k = i + 1
+        while k < CDoom.myargc
+          moreargs[index] = CDoom.myargv[k]
+          index += 1
+          k += 1
+        end
+
+        firstargv = CDoom.myargv[i]
+        CDoom.myargv = CDoom.doom_malloc.call(sizeof(UInt8*) * CDoom::MAXARGVS).as(UInt8**)
+        CDoom.doom_memset(CDoom.myargv, 0, sizeof(UInt8*) * CDoom::MAXARGVS)
+        CDoom.myargv[0] = firstargv
+
+        infile = file.as(UInt8*)
+        indexinfile = 0
+        k = 0
+        indexinfile += 1 # SKIP PAST ARGV[0] (KEEP IT)
+        loop do
+          CDoom.myargv[indexinfile] = infile + k
+          indexinfile += 1
+          while k < size &&
+                (((infile + k).value >= ' '.ord + 1) && ((infile + k).value <= 'z'.ord))
+            k += 1
+          end
+          (infile + k).value = 0
+          while k < size &&
+                (((infile + k).value <= ' '.ord) || ((infile + k).value > 'z'.ord))
+            k += 1
+          end
+
+          break if !(k < size)
+        end
+
+        k = 0
+        while k < index
+          CDoom.myargv[indexinfile] = moreargs[k]
+          indexinfile += 1
+          k += 1
+        end
+        CDoom.myargc = indexinfile
+
+        # DISPLAY ARGS
+        CDoom.doom_print.call(CDoom.doom_itoa(CDoom.myargc, 10))
+        CDoom.doom_print.call(" command-line args: \n".to_unsafe)
+        k = 1
+        while k < CDoom.myargc
+          CDoom.doom_print.call(CDoom.myargv[k])
+          CDoom.doom_print.call("\n".to_unsafe)
+          k += 1
+        end
+
+        break
+      end
+    end
+  end
+
+  #
+  # d_doom_main
+  #
+  def self.d_doom_main
+    file = Pointer(UInt8).malloc(256)
+
+    CDoom.find_response_file
+
+    CDoom.identify_version
+
+    CDoom.modifiedgame = 0
+
+    CDoom.nomonsters = CDoom.m_check_parm("-nomonsters")
+    CDoom.respawnparm = CDoom.m_check_parm("-respawn")
+    CDoom.fastparm = CDoom.m_check_parm("-fast")
+    CDoom.devparm = CDoom.m_check_parm("-devparm")
+    if CDoom.m_check_parm("-altdeath") != 0
+      CDoom.deathmatch = 2
+    elsif CDoom.m_check_parm("-deathmatch") != 0
+      CDoom.deathmatch = 1
+    end
+
+    case CDoom.gamemode
+    when CDoom::GameMode::Retail
+      CDoom.doom_strcpy(CDoom.title, "                         " + "The Ultimate DOOM Startup v")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+      CDoom.doom_concat(CDoom.title, ".")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+      CDoom.doom_concat(CDoom.title, "                           ")
+    when CDoom::GameMode::Shareware
+      CDoom.doom_strcpy(CDoom.title, "                         " + "DOOM Shareware Startup v")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+      CDoom.doom_concat(CDoom.title, ".")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+      CDoom.doom_concat(CDoom.title, "                           ")
+    when CDoom::GameMode::Registered
+      CDoom.doom_strcpy(CDoom.title, "                         " + "DOOM Registered Startup v")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+      CDoom.doom_concat(CDoom.title, ".")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+      CDoom.doom_concat(CDoom.title, "                           ")
+    when CDoom::GameMode::Commercial
+      CDoom.doom_strcpy(CDoom.title, "                         " + "DOOM 2: Hell on Earth v")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+      CDoom.doom_concat(CDoom.title, ".")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+      CDoom.doom_concat(CDoom.title, "                           ")
+    else
+      CDoom.doom_strcpy(CDoom.title, "                         " + "Public DOOM - v")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+      CDoom.doom_concat(CDoom.title, ".")
+      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+      CDoom.doom_concat(CDoom.title, "                           ")
+    end
+
+    CDoom.doom_print.call(CDoom.title.to_unsafe)
+    CDoom.doom_print.call("\n".to_unsafe)
+
+    CDoom.doom_print.call(CDoom::D_DEVSTR.to_unsafe) if CDoom.devparm != 0
+
+    {% if false %}
+      # [pd] Ignore cdrom
+      if CDoom.m_check_parm("-cdrom") != 0
+        CDoom.doom_print.call(CDoom::D_CDROM.to_unsafe)
+        Dir.mkdir("c:\\doomdata")
+        CDoom.doom_strcpy(CDoom.basedefault, "c:/doomdata/default.cfg")
+      end
+    {% end %}
+
+    # turbo option
+    if (p = CDoom.m_check_parm("-turbo")) != 0
+      scale = 200
+
+      if p < CDoom.myargc - 1
+        scale = CDoom.doom_atoi(CDoom.myargv[p + 1])
+      end
+      scale = 10 if scale < 10
+      scale = 400 if scale > 400
+      CDoom.doom_print.call("turbo scale: ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(scale, 10))
+      CDoom.doom_print.call("%\n".to_unsafe)
+      CDoom.forwardmove[0] = CDoom.forwardmove[0] * scale // 100
+      CDoom.forwardmove[1] = CDoom.forwardmove[1] * scale // 100
+      CDoom.sidemove[0] = CDoom.sidemove[0] * scale // 100
+      CDoom.sidemove[1] = CDoom.sidemove[1] * scale // 100
+    end
+
+    # add any files specified on the command line with -file wadfile
+    # to the wad list
+    #
+    # convenience hack to allow -wart e m to add a wad file
+    # prepend a tilde to the filename so wadfile will be reloadable
+    p = CDoom.m_check_parm("-wart")
+    if p != 0
+      CDoom.myargv[p][4] = 'p'.ord.to_u8 # big hack, change to -warp
+
+      # Map name handling
+      case CDoom.gamemode
+      when CDoom::GameMode::Shareware, CDoom::GameMode::Retail, CDoom::GameMode::Registered
+        CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}E")
+        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
+        CDoom.doom_concat(file, "M")
+        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 2][0]))
+        CDoom.doom_concat(file, ".wad")
+
+        CDoom.doom_print.call("Warping to Episode ".to_unsafe)
+        CDoom.doom_print.call(CDoom.myargv[p + 1])
+        CDoom.doom_print.call(", Map ".to_unsafe)
+        CDoom.doom_print.call(CDoom.myargv[p + 2])
+        CDoom.doom_print.call(".\n".to_unsafe)
+        # when CDoom::GameMode::Commercial
+      else
+        p = CDoom.doom_atoi(CDoom.myargv[p + 1])
+        if p < 10
+          CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}cdata/map0")
+          CDoom.doom_concat(file, CDoom.doom_itoa(p, 10))
+          CDoom.doom_concat(file, ".wad")
+        else
+          CDoom.doom_strcpy(file, "~#{CDoom::DEVMAPS}cdata/map")
+          CDoom.doom_concat(file, CDoom.doom_itoa(p, 10))
+          CDoom.doom_concat(file, ".wad")
+        end
+      end
+      CDoom.d_add_file(file)
+    end
+
+    p = CDoom.m_check_parm("-file")
+    if p != 0
+      # the parms after p are wadfile/lump names,
+      # until end of parms or another - preceded parm
+      CDoom.modifiedgame = 1 # homebrew levels
+      while (p += 1) != CDoom.myargc && CDoom.myargv[p][0].chr != '-'
+        CDoom.d_add_file(CDoom.myargv[p])
+      end
+    end
+
+    p = CDoom.m_check_parm("-playdemo")
+
+    p = CDoom.m_check_parm("-timedemo") if p == 0
+
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.doom_strcpy(file, CDoom.myargv[p + 1])
+      CDoom.doom_concat(file, ".lmp")
+      CDoom.d_add_file(file)
+      CDoom.doom_print.call("Playing demo ".to_unsafe)
+      CDoom.doom_print.call(CDoom.myargv[p + 1])
+      CDoom.doom_print.call(".lmp.\n".to_unsafe)
+    end
+
+    # get skill / episode / map from parms
+    CDoom.startskill = CDoom::Skill::Medium
+    CDoom.startepisode = 1
+    CDoom.startmap = 1
+    CDoom.autostart = 0
+
+    p = CDoom.m_check_parm("-skill")
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.startskill = CDoom::Skill.new(CDoom.myargv[p + 1][0] - '1'.ord)
+      CDoom.autostart = 1
+    end
+
+    p = CDoom.m_check_parm("-episode")
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.startepisode = CDoom.myargv[p + 1][0] - '0'.ord
+      CDoom.startmap = 1
+      CDoom.autostart = 1
+    end
+
+    CDoom.m_check_parm("-timer")
+    if p != 0 && p < CDoom.myargc - 1 && CDoom.deathmatch != 0
+      time = CDoom.doom_atoi(CDoom.myargv[p + 1])
+      CDoom.doom_print.call("Levels will end after ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(time, 10))
+      CDoom.doom_print.call(" minute".to_unsafe)
+      CDoom.doom_print.call("s".to_unsafe) if time > 1
+      CDoom.doom_print.call(".\n".to_unsafe)
+    end
+
+    p = CDoom.m_check_parm("-avg")
+    if p != 0 && p < CDoom.myargc - 1 && CDoom.deathmatch != 0
+      CDoom.doom_print.call("Austin Virtual Gaming: Levels will end after 20 minutes\n".to_unsafe)
+    end
+
+    p = CDoom.m_check_parm("-warp")
+    if p != 0 && p < CDoom.myargc - 1
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.startmap = CDoom.doom_atoi(CDoom.myargv[p + 1])
+      else
+        CDoom.startepisode = CDoom.myargv[p + 1][0] - '0'.ord
+        CDoom.startmap = CDoom.myargv[p + 2][0] - '0'.ord
+      end
+      CDoom.autostart = 1
+    end
+
+    # init subsystems
+    CDoom.doom_print.call("v_init: allocate screens.\n".to_unsafe)
+    CDoom.v_init
+
+    CDoom.doom_print.call("m_load_defaults: Load system defaults.\n".to_unsafe)
+    CDoom.m_load_defaults # load before initing other systems
+
+    CDoom.doom_print.call("z_init: Init zone memory allocation daemon. \n".to_unsafe)
+    CDoom.z_init
+
+    CDoom.doom_print.call("w_init: Init Wadfiles.\n".to_unsafe)
+    CDoom.w_init_multiple_files(CDoom.wadfiles)
+
+    # Check for -file in shareware
+    if CDoom.modifiedgame != 0
+      # These are the lumps that will be checked in IWAD,
+      # if any one is not present, execution will be aborted.
+      name = [
+        "e2m1", "e2m2", "e2m3", "e2m4", "e2m5", "e2m6", "e2m7", "e2m8", "e2m9",
+        "e3m1", "e3m3", "e3m3", "e3m4", "e3m5", "e3m6", "e3m7", "e3m8", "e3m9",
+        "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1",
+      ]
+
+      if CDoom.gamemode == CDoom::GameMode::Shareware
+        CDoom.i_error("Error: \nYou cannot -file with the shareware version. Register!")
+      end
+
+      # Check for fake IWAD with right name,
+      # but w/o all the lumps of the registered version.
+      if CDoom.gamemode == CDoom::GameMode::Registered
+        23.times do |i|
+          if CDoom.w_check_num_for_name(name[i]) < 0
+            CDoom.i_error("Error: \nThis is not the registered version.")
+          end
+        end
+      end
+    end
+
+    # Iff additonal PWAD files are used, print modified banner
+    if CDoom.modifiedgame != 0
+      CDoom.doom_print.call(
+        ("===========================================================================\n" +
+         "ATTENTION:  This version of DOOM has been modified.  If you would like to\n" +
+         "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n" +
+         "        You will not receive technical support for modified games.\n" +
+         # "                      press enter to continue\n" +
+         "===========================================================================\n").to_unsafe
+      )
+    end
+
+    # Check and print which version is executed.
+    case CDoom.gamemode
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Indetermined
+      CDoom.doom_print.call(
+        ("===========================================================================\n" +
+         "                                Shareware!\n" +
+         "===========================================================================\n").to_unsafe
+      )
+    when CDoom::GameMode::Registered, CDoom::GameMode::Retail, CDoom::GameMode::Commercial
+      CDoom.doom_print.call(
+        ("===========================================================================\n" +
+         "                 Commercial product - do not distribute!\n" +
+         "         Please report software piracy to the SPA: 1-800-388-PIR8\n" +
+         "===========================================================================\n").to_unsafe
+      )
+    else
+      # Ouch
+    end
+
+    CDoom.doom_print.call("m_init: Init miscellaneous info.\n".to_unsafe)
+    CDoom.m_init
+
+    CDoom.doom_print.call("r_init: Init DOOM refresh daemon - ".to_unsafe)
+    CDoom.r_init
+
+    CDoom.doom_print.call("\np_init: Init Playloop state.\n".to_unsafe)
+    CDoom.p_init
+
+    CDoom.doom_print.call("i_init: Setting up machine state.\n".to_unsafe)
+    CDoom.i_init
+
+    CDoom.doom_print.call("d_check_net_game: Checking network game status.\n".to_unsafe)
+    CDoom.d_check_net_game
+
+    CDoom.doom_print.call("s_init: Setting up sound.\n".to_unsafe)
+    CDoom.s_init(CDoom.snd_sfx_volume, CDoom.snd_music_volume)
+
+    CDoom.doom_print.call("hu_init: Setting up heads up display.\n".to_unsafe)
+    CDoom.hu_init
+
+    CDoom.doom_print.call("st_init: Init status bar.\n".to_unsafe)
+    CDoom.st_init
+
+    # check for a driver that wants intermission stats
+    {% if false %} # [pd] Unsure how to test this
+    p = CDoom.m_check_parm("-statcopy")
+    if p != 0 && p < CDoom.myargc - 1
+      # for statistics driver
+      CDoom.statcopy = String.new(CDoom.myargv[p + 1]).to_i64.as(Void*)
+      CDoom.doom_print.call("External statistics registered.\n".to_unsafe)
+    end
+    {% end %}
+
+    # start the apropriate game based on parms
+    p = CDoom.m_check_parm("-record")
+
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.g_record_demo(CDoom.myargv[p + 1])
+      CDoom.autostart = 1
+    end
+
+    p = CDoom.m_check_parm("-playdemo")
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.singledemo = 0 # quit after one demo
+      CDoom.g_defered_play_demo(CDoom.myargv[p + 1])
+      CDoom.d_doom_loop # never returns
+    end
+
+    p = CDoom.m_check_parm("-timedemo")
+    if p != 0 && p < CDoom.myargc - 1
+      CDoom.g_time_demo(CDoom.myargv[p + 1])
+      CDoom.d_doom_loop # never returns
+    end
+
+    p = CDoom.m_check_parm("-loadgame")
+    if p != 0 && p < CDoom.myargc - 1
+      {% if false %} # [pd] We don't support the cdrom flag
+      if CDoom.m_check_parm("-cdrom")
+        CDoom.doom_strcpy(file, "c:\\doomdata\\")
+        CDoom.doom_concat(file, CDoom::SAVEGAMENAME)
+        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
+        CDoom.doom_concat(file, ".dsg")
+      else
+        {% end %}
+        CDoom.doom_strcpy(file, CDoom::SAVEGAMENAME)
+        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
+        CDoom.doom_concat(file, ".dsg")
+        {% if false %} # Love you Crystal
+      end
+      {% end %}
+      CDoom.g_load_game(file)
+    end
+
+
+    if CDoom.gameaction != CDoom::Gameaction::Loadgame
+      if CDoom.autostart != 0 || CDoom.netgame != 0
+        CDoom.g_init_new(CDoom.startskill, CDoom.startepisode, CDoom.startmap)
+      else
+        CDoom.d_start_title # start up intro loop
+      end
+    end
+
+    # CDoom.d_doom_loop # never returns [ddos] Called by app
+
+    CDoom.g_begin_recording if CDoom.demorecording != 0
+
+    if CDoom.m_check_parm("-debugfile") != 0
+      filename = Pointer(UInt8).malloc(20)
+      CDoom.doom_strcpy(filename, "debug")
+      CDoom.doom_concat(filename, CDoom.doom_itoa(CDoom.consoleplayer, 10))
+      CDoom.doom_concat(filename, ".txt")
+
+      CDoom.doom_print.call("debug output to: ".to_unsafe)
+      CDoom.doom_print.call(filename)
+      CDoom.doom_print.call("\n".to_unsafe)
+      CDoom.debugfile = CDoom.doom_open.call(filename, "w".to_unsafe)
+    end
+
+    CDoom.i_init_graphics
   end
 end

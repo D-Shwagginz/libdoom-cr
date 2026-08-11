@@ -354,14 +354,70 @@ fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
   LibDoom.am_draw_things(colors, colorrange)
 end
 
-  fun am_draw_marks = AM_drawMarks()
-LibDoom.am_draw_marks
+fun am_draw_marks = AM_drawMarks
+  LibDoom.am_draw_marks
+end
+
+fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
+  LibDoom.am_draw_crosshair(color)
+end
+
+fun am_drawer = AM_Drawer
+  LibDoom.am_drawer
+end
+
+fun d_post_event = D_PostEvent(ev : CDoom::Event*)
+  LibDoom.d_post_event(ev)
+end
+
+  fun d_process_events = D_ProcessEvents
+LibDoom.d_process_events
   end
 
-  fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
-LibDoom.am_draw_crosshair(color)
+  fun d_display = D_Display
+LibDoom.d_display
   end
 
-  fun am_drawer = AM_Drawer
-LibDoom.am_drawer
+  fun d_update_wipe = D_UpdateWipe
+LibDoom.d_update_wipe
   end
+
+  fun d_doom_loop = D_DoomLoop
+    LibDoom.d_doom_loop
+  end
+
+    fun d_page_ticker = D_PageTicker
+LibDoom.d_page_ticker
+    end
+
+    fun d_page_drawer = D_PageDrawer
+LibDoom.d_page_drawer
+    end
+
+      fun d_advance_demo = D_AdvanceDemo
+LibDoom.d_advance_demo
+      end
+
+        fun d_do_advance_demo = D_DoAdvanceDemo
+LibDoom.d_do_advance_demo
+        end
+
+    fun d_start_title = D_StartTitle
+LibDoom.d_start_title
+    end
+
+      fun d_add_file = D_AddFile(file : LibC::Char*)
+LibDoom.d_add_file(file)
+      end
+
+        fun identify_version = IdentifyVersion
+LibDoom.identify_version
+        end
+
+          fun find_response_file = FindResponseFile
+LibDoom.find_response_file
+          end
+
+            fun d_doom_main = D_DoomMain
+LibDoom.d_doom_main
+            end
