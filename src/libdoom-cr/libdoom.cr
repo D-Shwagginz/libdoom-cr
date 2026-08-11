@@ -1104,7 +1104,6 @@ module LibDoom
     end
   end
 
-
   #
   # Draws flat (floor/ceiling tile) aligned grid lines.
   #
@@ -1115,7 +1114,7 @@ module LibDoom
 
     if (start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
       start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) -
-      ((start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
+               ((start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
     end
     en = CDoom.m_x + CDoom.m_w
 
@@ -1133,8 +1132,8 @@ module LibDoom
     # Figure out start of horizontal gridlines
     start = CDoom.m_y
     if (start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
-      start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) - 
-      ((start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
+      start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) -
+               ((start - CDoom.bmaporgy) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
     end
     en = CDoom.m_y + CDoom.m_h
 
@@ -1149,12 +1148,13 @@ module LibDoom
       y += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
     end
   end
-  
+
   @@l : CDoom::Mline = CDoom::Mline.new
+
   #
-# Determines visible lines, draws them.
-# This is LineDef based, not LineSeg based.
-#
+  # Determines visible lines, draws them.
+  # This is LineDef based, not LineSeg based.
+  #
   def self.am_draw_walls
     CDoom.numlines.times do |i|
       @@l.a.x = CDoom.lines[i].v1.value.x
@@ -1171,7 +1171,7 @@ module LibDoom
             CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom::WALLRANGE // 2)
           elsif CDoom.lines[i].flags & CDoom::ML_SECRET != 0 # secret door
             if CDoom.cheating != 0
-            CDoom.am_draw_mline(pointerof(@@l), CDoom::SECRETWALLCOLORS + CDoom.lightlev)
+              CDoom.am_draw_mline(pointerof(@@l), CDoom::SECRETWALLCOLORS + CDoom.lightlev)
             else
               CDoom.am_draw_mline(pointerof(@@l), CDoom::WALLCOLORS + CDoom.lightlev)
             end
@@ -1190,19 +1190,154 @@ module LibDoom
   end
 
   #
-# Rotation in 2D.
-# Used to rotate player arrow line character.
-#
-def self.am_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
-  tmpx = CDoom.fixed_mul(x.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
-  CDoom.fixed_mul(y.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT])
+  # Rotation in 2D.
+  # Used to rotate player arrow line character.
+  #
+  def self.am_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
+    tmpx = CDoom.fixed_mul(x.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT]) -
+           CDoom.fixed_mul(y.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT])
 
-  y.value = CDoom.fixed_mul(x.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT]) +
-  CDoom.fixed_mul(y.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT])
+    y.value = CDoom.fixed_mul(x.value, CDoom.finesine[a >> CDoom::ANGLETOFINESHIFT]) +
+              CDoom.fixed_mul(y.value, CDoom.finecosine[a >> CDoom::ANGLETOFINESHIFT])
 
-  x.value = tmpx
+    x.value = tmpx
+  end
+
+  def self.am_draw_line_character(lineguy : CDoom::Mline*,
+                                  lineguylines : LibC::Int,
+                                  scale : CDoom::Fixed,
+                                  angle : CDoom::Angle,
+                                  color : LibC::Int,
+                                  x : CDoom::Fixed,
+                                  y : CDoom::Fixed)
+    l = CDoom::Mline.new
+    lineguylines.times do |i|
+      ax = lineguy[i].a.x
+      ay = lineguy[i].a.y
+
+      if scale != 0
+        ax = CDoom.fixed_mul(scale, ax)
+        ay = CDoom.fixed_mul(scale, ay)
+      end
+
+      l.a = CDoom::Mpoint.new(x: ax, y: ay)
+
+      CDoom.am_rotate(
+        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
+        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @a) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        angle) if angle != 0
+
+      l.a = CDoom::Mpoint.new(x: l.a.x + x, y: l.a.y + y)
+
+      bx = lineguy[i].b.x
+      by = lineguy[i].b.y
+
+      if scale != 0
+        bx = CDoom.fixed_mul(scale, bx)
+        by = CDoom.fixed_mul(scale, by)
+      end
+
+      l.b = CDoom::Mpoint.new(x: bx, y: by)
+
+      CDoom.am_rotate(
+        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @x)).as(CDoom::Fixed*),
+        (pointerof(l).as(UInt8*) + offsetof(CDoom::Mline, @b) + offsetof(CDoom::Mpoint, @y)).as(CDoom::Fixed*),
+        angle) if angle != 0
+
+      l.b = CDoom::Mpoint.new(x: l.b.x + x, y: l.b.y + y)
+
+      CDoom.am_draw_mline(pointerof(l), color)
+    end
+  end
+
+  def self.am_draw_players
+    p : CDoom::Player* = Pointer(CDoom::Player).null
+    their_colors = [CDoom::GREENS, CDoom::GRAYS, CDoom::BROWNS, CDoom::REDS]
+    their_color = -1
+    color = 0
+
+    if CDoom.netgame == 0
+      if CDoom.cheating != 0
+        CDoom.am_draw_line_character(
+          CDoom.cheat_player_arrow, CDoom::NUMCHEATPLYRLINES, 0,
+          CDoom.plr.value.mo.value.angle, CDoom::WHITE,
+          CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
+        )
+      else
+        CDoom.am_draw_line_character(
+          CDoom.player_arrow, CDoom::NUMPLYRLINES, 0, CDoom.plr.value.mo.value.angle,
+          CDoom::WHITE, CDoom.plr.value.mo.value.x, CDoom.plr.value.mo.value.y
+        )
+      end
+      return
+    end
+
+    CDoom::MAXPLAYERS.times do |i|
+      their_color += 1
+      p = CDoom.players.to_unsafe + i
+
+      next if (CDoom.deathmatch != 0 && CDoom.singledemo == 0) && p != CDoom.plr
+      next if CDoom.playeringame[i] == 0
+
+      if p.value.powers[CDoom::Powertype::Invisibility.value] != 0
+        color = 246 # *close* to black
+      else
+        color = their_colors[their_color]
+      end
+
+      CDoom.am_draw_line_character(
+        CDoom.player_arrow, CDoom::NUMPLYRLINES, 0, p.value.mo.value.angle,
+        color, p.value.mo.value.x, p.value.mo.value.y
+      )
+    end
+  end
+
+  def self.am_draw_things(colors : LibC::Int, colorrange : LibC::Int)
+    CDoom.numsectors.times do |i|
+      t = CDoom.sectors[i].thinglist
+      until t.null?
+        CDoom.am_draw_line_character(
+          CDoom.thintriangle_guy, CDoom::NUMTHINTRIANGLEGUYLINES,
+          16 << CDoom::FRACBITS, t.value.angle, colors + CDoom.lightlev,
+          t.value.x, t.value.y
+        )
+        t = t.value.snext
+      end
+    end
+  end
+
+  def self.am_draw_marks
+    CDoom::AM_NUMMARKPOINTS.times do |i|
+      if CDoom.markpoints[i].x != -1
+        # w = CDoom.marknums[i].value.width.to_i16!
+        # h = CDoom.marknums[i].value.height.to_i16!
+        w = 5 # because somethings wrong with the wad, i guess
+        h = 6 # because somethings wrong with the wad, i guess
+        fx = cxmtof(CDoom.markpoints[i].x)
+        fy = cymtof(CDoom.markpoints[i].y)
+        if fx >= CDoom.f_x && fx <= CDoom.f_w - w && fy >= CDoom.f_y && fy <= CDoom.f_h - h
+          CDoom.v_draw_patch(fx, fy, CDoom::FB, CDoom.marknums[i])
+        end
+      end
+    end
+  end
+
+  def self.am_draw_crosshair(color : Int32)
+    CDoom.fb[(CDoom.f_w * (CDoom.f_h + 1)) // 2] = color.to_u8! # single point for now
+  end
+
+  def self.am_drawer
+    return if CDoom.automapactive == 0
+
+    CDoom.am_clear_fb(CDoom::BACKGROUND)
+    CDoom.am_draw_grid(CDoom::GRIDCOLORS) if CDoom.grid != 0
+    CDoom.am_draw_walls
+    CDoom.am_draw_players
+    CDoom.am_draw_things(CDoom::THINGCOLORS, CDoom::THINGRANGE) if CDoom.cheating == 2
+    CDoom.am_draw_crosshair(CDoom::XHAIRCOLORS)
+
+    CDoom.am_draw_marks
+
+    CDoom.v_mark_rect(CDoom.f_x, CDoom.f_y, CDoom.f_w, CDoom.f_h)
+  end
 end
-
-
-end
-

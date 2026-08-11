@@ -6253,8 +6253,26 @@ lib CDoom
 
   fun am_draw_grid = AM_drawGrid(color : LibC::Int)
 
-  fun am_draw_walls = AM_drawWalls()
+  fun am_draw_walls = AM_drawWalls
 
   fun am_rotate = AM_rotate(x : Fixed*, y : Fixed*, a : Angle)
+
+  fun am_draw_line_character = AM_drawLineCharacter(lineguy : Mline*,
+                                                    lineguylines : LibC::Int,
+                                                    scale : Fixed,
+                                                    angle : Angle,
+                                                    color : LibC::Int,
+                                                    x : Fixed,
+                                                    y : Fixed)
+
+  fun am_draw_players = AM_drawPlayers
+
+  fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
+
+  fun am_draw_marks = AM_drawMarks()
+
+  fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
+
+  fun am_drawer = AM_Drawer
 
 end

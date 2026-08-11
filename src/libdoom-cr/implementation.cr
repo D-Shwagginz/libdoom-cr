@@ -329,3 +329,39 @@ end
 fun am_rotate = AM_rotate(x : CDoom::Fixed*, y : CDoom::Fixed*, a : CDoom::Angle)
   LibDoom.am_rotate(x, y, a)
 end
+
+fun am_draw_line_character = AM_drawLineCharacter(lineguy : CDoom::Mline*,
+                                                  lineguylines : LibC::Int,
+                                                  scale : CDoom::Fixed,
+                                                  angle : CDoom::Angle,
+                                                  color : LibC::Int,
+                                                  x : CDoom::Fixed,
+                                                  y : CDoom::Fixed)
+  LibDoom.am_draw_line_character(lineguy,
+    lineguylines,
+    scale,
+    angle,
+    color,
+    x,
+    y)
+end
+
+fun am_draw_players = AM_drawPlayers
+  LibDoom.am_draw_players
+end
+
+fun am_draw_things = AM_drawThings(colors : LibC::Int, colorrange : LibC::Int)
+  LibDoom.am_draw_things(colors, colorrange)
+end
+
+  fun am_draw_marks = AM_drawMarks()
+LibDoom.am_draw_marks
+  end
+
+  fun am_draw_crosshair = AM_drawCrosshair(color : LibC::Int)
+LibDoom.am_draw_crosshair(color)
+  end
+
+  fun am_drawer = AM_Drawer
+LibDoom.am_drawer
+  end
