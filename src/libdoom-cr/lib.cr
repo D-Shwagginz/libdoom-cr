@@ -4089,7 +4089,7 @@ lib CDoom
   # Sound FX volume has default, 0 - 15
   # Music volume has default, 0 - 15
   # These are multiplied by 8.
-  $snd_sfx_volume = snd_SfxVolume : LibC::Int   # maximum volume for sound
+  $snd_sfx_volume = snd_SfxVolume : LibC::Int     # maximum volume for sound
   $snd_music_volume = snd_MusicVolume : LibC::Int # maximum volume for music
 
   # -------------------------
@@ -6358,19 +6358,19 @@ lib CDoom
 
   fun d_do_advance_demo = D_DoAdvanceDemo
 
-    fun d_start_title = D_StartTitle
+  fun d_start_title = D_StartTitle
 
-      fun d_add_file = D_AddFile(file : LibC::Char*)
+  fun d_add_file = D_AddFile(file : LibC::Char*)
 
-        fun identify_version = IdentifyVersion
+  fun identify_version = IdentifyVersion
 
-          fun find_response_file = FindResponseFile
+  fun find_response_file = FindResponseFile
 
-            fun d_doom_main = D_DoomMain
+  fun d_doom_main = D_DoomMain
 
-              $forwardmove : Fixed[2]
-              $sidemove : Fixed[2]
-              $angleturn : Fixed[3]
+  $forwardmove : Fixed[2]
+  $sidemove : Fixed[2]
+  $angleturn : Fixed[3]
 
-              $statcopy : Void* # for statistics driver
+  $statcopy : Void* # for statistics driver
 end

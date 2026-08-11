@@ -213,7 +213,7 @@ module LibDoom
   CDoom.sidemove[1] = 0x28
   CDoom.angleturn[0] = 640
   CDoom.angleturn[1] = 1280
-  CDoom.angleturn[3] = 320
+  CDoom.angleturn[2] = 320
 
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
@@ -1191,7 +1191,7 @@ module LibDoom
     end
   end
 
-  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc
+  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc(1)
 
   #
   # Clip lines, draw visible part sof lines.
