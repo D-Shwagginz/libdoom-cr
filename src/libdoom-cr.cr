@@ -29,6 +29,7 @@ def run
   Raylib.init_window(1024, 768, "LibDoom")
   Raylib.set_exit_key(Raylib::KeyboardKey::Null)
   Raylib.disable_cursor
+  # Raylib.toggle_fullscreen
   # Raylib.set_target_fps(60)
 
   image = Raylib.gen_image_color(320, 200, Raylib::BLACK)
@@ -52,7 +53,6 @@ def run
   RAudio.play_audio_stream(music_stream)
   music_buffer = Pointer(Int16).malloc(2048)
   midi_tick_accumulator = 0.0
-  last_time = Raylib.get_time
 
   ARGV.insert(0, "LibDoom")
 
@@ -61,6 +61,8 @@ def run
   CDoom.doom_set_default_int("key_strafeleft", CDoom::DoomKey::A.value)
   CDoom.doom_set_default_int("key_straferight", CDoom::DoomKey::D.value)
   CDoom.doom_init(ARGV.size, ARGV.map(&.to_unsafe), 0)
+
+  last_time = Raylib.get_time
 
   until Raylib.close_window?
     now = Raylib.get_time
@@ -215,9 +217,5 @@ def run
   Raylib.unload_texture(screen_texture)
   Raylib.close_window
 end
-
-# fun crystal_D_DoomMain()
-#   puts "D_DoomMain called"
-# end
 
 run()

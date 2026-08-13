@@ -304,6 +304,89 @@ module LibDoom
 
   CDoom.castorder[17] = CDoom::Castinfo.new
 
+  CDoom.go = 0
+
+  CDoom.mousebuttons = CDoom.mousearray.to_unsafe + 1
+
+  CDoom.joybuttons = CDoom.joyarray.to_unsafe + 1
+
+  # DOOM Par Times
+  CDoom.pars[0][0] = 0
+  CDoom.pars[0][1] = 0
+  CDoom.pars[0][2] = 0
+  CDoom.pars[0][3] = 0
+  CDoom.pars[0][4] = 0
+  CDoom.pars[0][5] = 0
+  CDoom.pars[0][6] = 0
+  CDoom.pars[0][7] = 0
+  CDoom.pars[0][8] = 0
+  CDoom.pars[0][9] = 0
+  CDoom.pars[1][0] = 0
+  CDoom.pars[1][1] = 30
+  CDoom.pars[1][2] = 75
+  CDoom.pars[1][3] = 120
+  CDoom.pars[1][4] = 90
+  CDoom.pars[1][5] = 165
+  CDoom.pars[1][6] = 180
+  CDoom.pars[1][7] = 180
+  CDoom.pars[1][8] = 30
+  CDoom.pars[1][9] = 165
+  CDoom.pars[2][0] = 0
+  CDoom.pars[2][1] = 90
+  CDoom.pars[2][2] = 90
+  CDoom.pars[2][3] = 90
+  CDoom.pars[2][4] = 120
+  CDoom.pars[2][5] = 90
+  CDoom.pars[2][6] = 360
+  CDoom.pars[2][7] = 240
+  CDoom.pars[2][8] = 30
+  CDoom.pars[2][9] = 170
+  CDoom.pars[3][0] = 0
+  CDoom.pars[3][1] = 90
+  CDoom.pars[3][2] = 45
+  CDoom.pars[3][3] = 90
+  CDoom.pars[3][4] = 150
+  CDoom.pars[3][5] = 90
+  CDoom.pars[3][6] = 90
+  CDoom.pars[3][7] = 165
+  CDoom.pars[3][8] = 30
+  CDoom.pars[3][9] = 135
+
+  # DOOM II Par Times
+  CDoom.cpars[0] = 30
+  CDoom.cpars[1] = 90
+  CDoom.cpars[2] = 120
+  CDoom.cpars[3] = 120
+  CDoom.cpars[4] = 90
+  CDoom.cpars[5] = 150
+  CDoom.cpars[6] = 120
+  CDoom.cpars[7] = 120
+  CDoom.cpars[8] = 270
+  CDoom.cpars[9] = 90
+  CDoom.cpars[10] = 210
+  CDoom.cpars[11] = 150
+  CDoom.cpars[12] = 150
+  CDoom.cpars[13] = 150
+  CDoom.cpars[14] = 210
+  CDoom.cpars[15] = 150
+  CDoom.cpars[16] = 420
+  CDoom.cpars[17] = 150
+  CDoom.cpars[18] = 210
+  CDoom.cpars[19] = 150
+  CDoom.cpars[20] = 240
+  CDoom.cpars[21] = 150
+  CDoom.cpars[22] = 180
+  CDoom.cpars[23] = 150
+  CDoom.cpars[24] = 150
+  CDoom.cpars[25] = 300
+  CDoom.cpars[26] = 330
+  CDoom.cpars[27] = 420
+  CDoom.cpars[28] = 300
+  CDoom.cpars[29] = 180
+  CDoom.cpars[30] = 120
+  CDoom.cpars[31] = 30
+
+
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -3084,7 +3167,7 @@ module LibDoom
 
     return if CDoom.gamemode == CDoom::GameMode::Commercial
 
-    if CDoom.finalestage == 0 && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
+    if CDoom.finalestage == 0 # && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
       CDoom.finalecount = 0
       CDoom.finalestage = 1
       CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
@@ -3261,7 +3344,7 @@ module LibDoom
 
     if CDoom.castattacking != 0
       if CDoom.castframes == 24 ||
-        CDoom.caststate == CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+         CDoom.caststate == CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
         CDoom.castattacking = 0
         CDoom.castframes = 0
         CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
@@ -3348,6 +3431,436 @@ module LibDoom
       CDoom.v_draw_patch_flipped(160, 170, 0, patch)
     else
       CDoom.v_draw_patch(160, 170, 0, patch)
+    end
+  end
+
+  #
+  # f_draw_patch_col
+  #
+  def self.f_draw_patch_col(x : Int32, patch : CDoom::Patch*, col : Int32)
+    column = (patch.as(UInt8*) + (patch.value.columnofs.to_unsafe + col).value.to_i32!).as(CDoom::Column*)
+    desttop = CDoom.screens[0] + x
+
+    # step through the posts in a column
+    while column.value.topdelta != 0xff
+      source = column.as(UInt8*) + 3
+      dest = desttop + column.value.topdelta * CDoom::SCREENWIDTH
+      count = column.value.length
+
+      while count != 0
+        dest.value = source.value
+        source += 1
+        dest += CDoom::SCREENWIDTH
+        count -= 1
+      end
+      column = (column.as(UInt8*) + column.value.length + 4).as(CDoom::Column*)
+    end
+  end
+
+  @@laststage = 0
+
+  #
+  # f_bunny_scroll
+  #
+  def self.f_bunny_scroll
+    p1 = CDoom.w_cache_lump_name("PFUB2", CDoom::PU_LEVEL).as(CDoom::Patch*)
+    p2 = CDoom.w_cache_lump_name("PFUB1", CDoom::PU_LEVEL).as(CDoom::Patch*)
+
+    CDoom.v_mark_rect(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
+
+    scrolled = 320 - (CDoom.finalecount - 230) // 2
+    scrolled = 320 if scrolled > 320
+    scrolled = 0 if scrolled < 0
+
+    CDoom::SCREENWIDTH.times do |x|
+      if x + scrolled < 320
+        CDoom.f_draw_patch_col(x, p1, x + scrolled)
+      else
+        CDoom.f_draw_patch_col(x, p2, x + scrolled - 320)
+      end
+    end
+
+    return if CDoom.finalecount < 1130
+    if CDoom.finalecount < 1180
+      CDoom.v_draw_patch((CDoom::SCREENWIDTH - 13 * 8) // 2,
+        (CDoom::SCREENHEIGHT - 8 * 8) // 2, 0, CDoom.w_cache_lump_name("END0", CDoom::PU_CACHE).as(CDoom::Patch*))
+      @@laststage = 0
+      return
+    end
+
+    stage = (CDoom.finalecount - 1180) // 5
+    stage = 6 if stage > 6
+    if stage > @@laststage
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol)
+      @@laststage = stage
+    end
+
+    name = Pointer(UInt8).malloc(10)
+
+    CDoom.doom_strcpy(name, "END")
+    CDoom.doom_concat(name, CDoom.doom_itoa(stage, 10))
+    CDoom.v_draw_patch((CDoom::SCREENWIDTH - 13 * 8) // 2, (CDoom::SCREENHEIGHT - 8 * 8) // 2, 0, CDoom.w_cache_lump_name(name, CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.f_drawer
+    if CDoom.finalestage == 2
+      CDoom.f_cast_drawer
+      return
+    end
+
+    if CDoom.finalestage == 0
+      CDoom.f_text_write
+    else
+      case CDoom.gameepisode
+      when 1
+        if CDoom.gamemode == CDoom::GameMode::Retail
+          CDoom.v_draw_patch(0, 0, 0,
+            CDoom.w_cache_lump_name("CREDIT", CDoom::PU_CACHE).as(CDoom::Patch*))
+        else
+          CDoom.v_draw_patch(0, 0, 0,
+            CDoom.w_cache_lump_name("HELP2", CDoom::PU_CACHE).as(CDoom::Patch*))
+        end
+      when 2
+        CDoom.v_draw_patch(0, 0, 0,
+          CDoom.w_cache_lump_name("VICTORY2", CDoom::PU_CACHE).as(CDoom::Patch*))
+      when 3
+        CDoom.f_bunny_scroll
+      when 4
+        CDoom.v_draw_patch(0, 0, 0,
+          CDoom.w_cache_lump_name("ENDPIC", CDoom::PU_CACHE).as(CDoom::Patch*))
+      end
+    end
+  end
+
+  def self.wipe_shitty_col_major_x_form(array : Int16*, width : Int32, height : Int32)
+    dest = CDoom.z_malloc(width * height * sizeof(Int16), CDoom::PU_STATIC, Pointer(Void).null).as(Int16*)
+
+    height.times do |y|
+      width.times do |x|
+        dest[x * height + y] = array[y * width + x]
+      end
+    end
+
+    CDoom.doom_memcpy(array, dest, width * height * 2)
+
+    CDoom.z_free(dest)
+  end
+
+  def self.wipe_init_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
+    CDoom.doom_memcpy(CDoom.wipe_scr, CDoom.wipe_scr_start, width * height)
+    return 0
+  end
+
+  def self.wipe_do_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
+    changes = 0
+    w = CDoom.wipe_scr
+    e = CDoom.wipe_scr_end
+    newval = 0
+
+    while w != CDoom.wipe_scr + width * height
+      if w.value != e.value
+        if w.value > e.value
+          newval = w.value - ticks
+          if newval < e.value
+            w.value = e.value
+          else
+            w.value = newval
+          end
+          changed = 1
+        elsif w.value < e.value
+          newval = w.value + ticks
+          if newval > e.value
+            w.value = e.value
+          else
+            w.value = newval
+          end
+          changed = 1
+        end
+      end
+      w += 1
+      e += 1
+    end
+
+    return (changed == 0).to_unsafe
+  end
+
+  def self.wipe_exit_color_x_form(width : Int32, height : Int32, ticks : Int32) : Int32
+    return 0
+  end
+
+  def self.wipe_init_melt(width : Int32, height : Int32, ticks : Int32) : Int32
+    # copy start screen to main screen
+    CDoom.doom_memcpy(CDoom.wipe_scr, CDoom.wipe_scr_start, width * height)
+
+    # makes this wipe faster (in theory)
+    # to have stuff in column-major format
+    CDoom.wipe_shitty_col_major_x_form(CDoom.wipe_scr_start.as(Int16*), width // 2, height)
+    CDoom.wipe_shitty_col_major_x_form(CDoom.wipe_scr_end.as(Int16*), width // 2, height)
+
+    # setup initial column positions
+    # (y<0 => not ready to scroll yet)
+    CDoom.y = CDoom.z_malloc(width * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
+    CDoom.y[0] = -(CDoom.m_random % 16)
+    i = 1
+    while i < width
+      r = (CDoom.m_random % 3) - 1
+      CDoom.y[i] = CDoom.y[i - 1] + r
+      if (CDoom.y[i] > 0)
+        CDoom.y[i] = 0
+      elsif CDoom.y[i] == -16
+        CDoom.y[i] = -15
+      end
+      i += 1
+    end
+
+    return 0
+  end
+
+  def self.wipe_do_melt(width : Int32, height : Int32, ticks : Int32) : Int32
+    done = 1
+
+    width //= 2
+
+    while ticks != 0
+      width.times do |i|
+        if CDoom.y[i] < 0
+          CDoom.y[i] += 1
+          done = 0
+        elsif CDoom.y[i] < height
+          dy = (CDoom.y[i] < 16) ? CDoom.y[i] + 1 : 8
+          dy = height - CDoom.y[i] if CDoom.y[i] + dy >= height
+          s = CDoom.wipe_scr_end.as(Int16*) + (i * height + CDoom.y[i])
+          d = CDoom.wipe_scr.as(Int16*) + (CDoom.y[i] * width + i)
+          idx = 0
+          j = dy
+          while j != 0
+            d[idx] = s.value
+            s += 1
+            idx += width
+            j -= 1
+          end
+          CDoom.y[i] += dy
+          s = CDoom.wipe_scr_start.as(Int16*) + (i * height)
+          d = CDoom.wipe_scr.as(Int16*) + (CDoom.y[i] * width + i)
+          idx = 0
+          j = height - CDoom.y[i]
+          while j != 0
+            d[idx] = s.value
+            s += 1
+            idx += width
+            j -= 1
+          end
+          done = 0
+        end
+      end
+
+      ticks -= 1
+    end
+
+    return done
+  end
+
+  def self.wipe_exit_melt(width : Int32, height : Int32, ticks : Int32) : Int32
+    CDoom.z_free(CDoom.y)
+    return 0
+  end
+
+  def self.wipe_start_screen(x : Int32, y : Int32, width : Int32, height : Int32) : Int32
+    CDoom.wipe_scr_start = CDoom.screens[2]
+    CDoom.i_read_screen(CDoom.wipe_scr_start)
+    return 0
+  end
+
+  def self.wipe_end_screen(x : Int32, y : Int32, width : Int32, height : Int32) : Int32
+    CDoom.wipe_scr_end = CDoom.screens[3]
+    CDoom.i_read_screen(CDoom.wipe_scr_end)
+    CDoom.v_draw_block(x, y, 0, width, height, CDoom.wipe_scr_start) # restore start scr
+    return 0
+  end
+
+  @@wipes : Array(Proc(Int32, Int32, Int32, Int32)) = [
+    ->CDoom.wipe_init_color_x_form(Int32, Int32, Int32), ->CDoom.wipe_do_color_x_form(Int32, Int32, Int32),
+    ->CDoom.wipe_exit_color_x_form(Int32, Int32, Int32), ->CDoom.wipe_init_melt(Int32, Int32, Int32),
+    ->CDoom.wipe_do_melt(Int32, Int32, Int32), ->CDoom.wipe_exit_melt(Int32, Int32, Int32),
+  ]
+
+  def self.wipe_screen_wipe(wipeno : Int32, x : Int32, y : Int32, width : Int32, height : Int32, ticks : Int32) : Int32
+    # initial stuff
+    if CDoom.go == 0
+      CDoom.go = 1
+      CDoom.wipe_scr = CDoom.screens[0]
+      @@wipes[wipeno * 3].call(width, height, ticks)
+    end
+
+    # do a piece of wipe-in
+    CDoom.v_mark_rect(0, 0, width, height)
+    rc = @@wipes[wipeno * 3 + 1].call(width, height, ticks)
+
+    # final stuff
+    if rc != 0
+      CDoom.go = 0
+      @@wipes[wipeno * 3 + 2].call(width, height, ticks)
+    end
+
+    return (CDoom.go == 0).to_unsafe
+  end
+
+  #
+# g_build_ticcmd
+# Builds a ticcmd from all of the available inputs
+# or reads it from the demo buffer. 
+# If recording a demo, write it out 
+# 
+  def self.g_build_ticcmd(cmd : CDoom::Ticcmd*)
+    base = CDoom.i_base_ticcmd # empty, or external driver
+    CDoom.doom_memcpy(cmd, base, sizeof(CDoom::Ticcmd))
+
+    cmd.value.consistancy =
+      CDoom.consistancy[CDoom.consoleplayer][CDoom.maketic % CDoom::BACKUPTICS]
+
+    strafe = (CDoom.gamekeydown[CDoom.key_strafe] != 0 || CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
+    CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
+
+    running = CDoom.always_run != 0 ? (CDoom.gamekeydown[CDoom.key_speed] != 0 ? false : true) : (CDoom.gamekeydown[CDoom.key_speed] != 0 ? true : false)
+    speed = (running || CDoom.joybuttons[CDoom.joybspeed] != 0).to_unsafe
+
+    forward = 0
+    side = 0
+
+    # use two stage accelerative turning
+    # on the keyboard and joystick
+    if CDoom.joyxmove < 0 ||
+      CDoom.joyxmove > 0 ||
+      CDoom.gamekeydown[CDoom.key_right] != 0 ||
+      CDoom.gamekeydown[CDoom.key_left] != 0
+      CDoom.turnheld += CDoom.ticdup
+    else
+      CDoom.turnheld = 0
+    end
+
+    tspeed = speed
+    tspeed = 2 if CDoom.turnheld < CDoom::SLOWTURNTICS # slow turn
+
+    # let movement keys cancel each other out
+    if strafe != 0
+      side += CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_right] != 0
+      side -= CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_left] != 0
+      side += CDoom.sidemove[speed] if CDoom.joyxmove > 0
+      side -= CDoom.sidemove[speed] if CDoom.joyxmove < 0
+    else
+      cmd.value.angleturn = cmd.value.angleturn - CDoom.angleturn[tspeed] if CDoom.gamekeydown[CDoom.key_right] != 0
+      cmd.value.angleturn = cmd.value.angleturn + CDoom.angleturn[tspeed] if CDoom.gamekeydown[CDoom.key_left] != 0
+      cmd.value.angleturn = cmd.value.angleturn - CDoom.angleturn[tspeed] if CDoom.joyxmove > 0
+      cmd.value.angleturn = cmd.value.angleturn + CDoom.angleturn[tspeed] if CDoom.joyxmove < 0
+    end
+
+    forward += CDoom.forwardmove[speed] if CDoom.gamekeydown[CDoom.key_up] != 0
+    forward -= CDoom.forwardmove[speed] if CDoom.gamekeydown[CDoom.key_down] != 0
+    forward += CDoom.forwardmove[speed] if CDoom.joyymove < 0
+    forward -= CDoom.forwardmove[speed] if CDoom.joyymove > 0
+
+    side += CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_straferight] != 0
+    side -= CDoom.sidemove[speed] if CDoom.gamekeydown[CDoom.key_strafeleft] != 0
+
+    # buttons
+    cmd.value.chatchar = CDoom.hu_dequeue_chat_char
+
+    if CDoom.gamekeydown[CDoom.key_fire] != 0 || CDoom.mousebuttons[CDoom.mousebfire] != 0 ||
+      CDoom.joybuttons[CDoom.joybfire] != 0
+      cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_ATTACK.value
+    end
+
+    if CDoom.gamekeydown[CDoom.key_use] != 0 || CDoom.joybuttons[CDoom.joybuse] != 0
+      cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
+      # clear double clicks if hit use button
+      CDoom.dclicks = 0
+    end
+
+    # chainsaw overrides
+    (CDoom::Weapontype::NUMWEAPONS.value - 1).times do |i|
+      if CDoom.gamekeydown['1'.ord + i] != 0
+        cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_CHANGE.value
+        cmd.value.buttons = cmd.value.buttons | i << CDoom::Buttoncode::BT_WEAPONSHIFT.value
+        break
+      end
+    end
+
+    # mouse
+    forward += CDoom.forwardmove[speed] if CDoom.mousebuttons[CDoom.mousebforward] != 0
+
+    # forward double click
+    if CDoom.mousebuttons[CDoom.mousebforward] != CDoom.dclickstate && CDoom.dclicktime > 1
+      CDoom.dclickstate = CDoom.mousebuttons[CDoom.mousebforward]
+      CDoom.dclicks += 1 if CDoom.dclickstate != 0
+      if CDoom.dclicks == 2
+        cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
+        CDoom.dclicks = 0
+      else
+        CDoom.dclicktime = 0
+      end
+    else
+      CDoom.dclicktime += CDoom.ticdup
+      if CDoom.dclicktime > 20
+        CDoom.dclicks = 0
+        CDoom.dclickstate = 0
+      end
+    end
+
+    # strafe double click
+    bstrafe =
+    (CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
+    CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
+    if  bstrafe != CDoom.dclickstate2 && CDoom.dclicktime2 > 1
+      CDoom.dclickstate2 = bstrafe
+      CDoom.dclicks2 += 1 if CDoom.dclickstate2 != 0
+      if CDoom.dclicks2 == 2
+        cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_USE.value
+        CDoom.dclicks2 = 0
+      else
+        CDoom.dclicktime2 = 0
+      end
+    else
+      CDoom.dclicktime2 += CDoom.ticdup
+      if CDoom.dclicktime2 > 20
+        CDoom.dclicks2 = 0
+        CDoom.dclickstate2 = 0
+      end
+    end
+
+    forward += CDoom.mousey if CDoom.mousemove != 0
+    if strafe != 0
+    side += CDoom.mousex * 2
+    else
+      cmd.value.angleturn = cmd.value.angleturn - CDoom.mousex * 0x8
+    end
+
+    CDoom.mousex = 0
+    CDoom.mousey = 0
+
+    if forward > CDoom::MAXPLMOVE
+      forward = CDoom::MAXPLMOVE
+    elsif forward < -CDoom::MAXPLMOVE
+      forward = -CDoom::MAXPLMOVE
+    end
+    if side > CDoom::MAXPLMOVE
+      side = CDoom::MAXPLMOVE
+    elsif side < -CDoom::MAXPLMOVE
+      side = -CDoom::MAXPLMOVE
+    end
+
+    cmd.value.forwardmove = cmd.value.forwardmove + forward
+    cmd.value.sidemove = cmd.value.sidemove + side
+
+
+    # special buttons
+    if CDoom.sendpause != 0
+      CDoom.sendpause = 0
+      cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_PAUSE.value
+    end
+
+    if CDoom.sendsave != 0
+      CDoom.sendsave = 0
+      cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_SAVEGAME.value | (CDoom.savegameslot << CDoom::Buttoncode::BTS_SAVESHIFT.value)
     end
   end
 end

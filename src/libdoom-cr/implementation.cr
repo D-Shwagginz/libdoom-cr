@@ -494,14 +494,70 @@ fun f_cast_ticker = F_CastTicker
   LibDoom.f_cast_ticker
 end
 
-    fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : CDoom::DoomBool
-LibDoom.f_cast_responder(ev)
+fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : CDoom::DoomBool
+  LibDoom.f_cast_responder(ev)
+end
+
+fun f_cast_print = F_CastPrint(text : LibC::Char*)
+  LibDoom.f_cast_print(text)
+end
+
+fun f_cast_drawer = F_CastDrawer
+  LibDoom.f_cast_drawer
+end
+
+fun f_draw_patch_col = F_DrawPatchCol(x : LibC::Int, patch : CDoom::Patch*, col : LibC::Int)
+  LibDoom.f_draw_patch_col(x, patch, col)
+end
+
+fun f_bunny_scroll = F_BunnyScroll
+  LibDoom.f_bunny_scroll
+end
+
+fun f_drawer = F_Drawer
+  LibDoom.f_drawer
+end
+
+fun wipe_shitty_col_major_x_form = wipe_shittyColMajorXform(array : LibC::Short*, width : LibC::Int, height : LibC::Int)
+  LibDoom.wipe_shitty_col_major_x_form(array, width, height)
+end
+
+fun wipe_init_color_x_form = wipe_initColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_init_color_x_form(width, height, ticks)
+end
+
+fun wipe_do_color_x_form = wipe_doColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_do_color_x_form(width, height, ticks)
+end
+
+fun wipe_exit_color_x_form = wipe_exitColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_exit_color_x_form(width, height, ticks)
+end
+
+fun wipe_init_melt = wipe_initMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_init_melt(width, height, ticks)
+end
+
+fun wipe_do_melt = wipe_doMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_do_melt(width, height, ticks)
+end
+
+fun wipe_exit_melt = wipe_exitMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_exit_melt(width, height, ticks)
+end
+
+fun wipe_start_screen = wipe_StartScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
+  LibDoom.wipe_start_screen(x, y, width, height)
+end
+
+fun wipe_end_screen = wipe_EndScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
+  LibDoom.wipe_end_screen(x, y, width, height)
+end
+
+fun wipe_screen_wipe = wipe_ScreenWipe(wipeno : LibC::Int, x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+  LibDoom.wipe_screen_wipe(wipeno, x, y, width, height, ticks)
+end
+
+    fun g_build_ticcmd = G_BuildTiccmd(cmd : CDoom::Ticcmd*) 
+LibDoom.g_build_ticcmd(cmd)
     end
-
-      fun f_cast_print = F_CastPrint(text : LibC::Char*)
-LibDoom.f_cast_print(text)
-      end
-
-        fun f_cast_drawer = F_CastDrawer
-LibDoom.f_cast_drawer
-        end

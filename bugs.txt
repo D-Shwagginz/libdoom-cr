@@ -11,6 +11,10 @@ add plutonia tnt pack detection for version printing and stuff
 -- Note that check abort has been fixed. Pure doom seems to have put the increment outside of the loop
 -- Also fixed finalestage startcast loop bug
 -- Also fixed bug not checking to make sure there are at least 2 parameters after -warp on doom 1
+-- Fixed midi bug in i_ticksong
+  mus_delay = mus_delay * 128 + delay_byte & 0b01111111;
+  Fixes into
+  mus_delay = mus_delay * 128 + (delay_byte & 0b01111111);
 
 cast not checking if button is down as well as key (so you can shoot with mouse)
 quit messages dont map to the correct game

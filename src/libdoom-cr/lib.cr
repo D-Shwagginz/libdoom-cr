@@ -1298,8 +1298,8 @@ lib CDoom
   # Mainly movements/button commands per game tick,
   # plus a checksum for internal state consistency.
   struct Ticcmd
-    forwardmove : LibC::Char  # *2048 for move
-    sidemove : LibC::Char     # *2048 for move
+    forwardmove : LibC::SChar  # *2048 for move
+    sidemove : LibC::SChar     # *2048 for move
     angleturn : LibC::Short   # <<16 for angle delta
     consistancy : LibC::Short # checks for net game
     chatchar : Byte
@@ -1444,7 +1444,7 @@ lib CDoom
 
     # Bounding box for each child,
     # clip against view frustum.
-    bbox : LibC::Short[2][4]
+    bbox : LibC::Short[4][2]
 
     # If NF_SUBSECTOR its a subsector,
     # else it's a node of another subtree.
@@ -4224,7 +4224,7 @@ lib CDoom
   $maketic : LibC::Int
   $nettics : LibC::Int[MAXNETNODES]
 
-  $netcmds : Ticcmd[MAXPLAYERS][BACKUPTICS]
+  $netcmds : Ticcmd[BACKUPTICS][MAXPLAYERS]
   $ticdup : LibC::Int
 
   # __I_SOUND__
@@ -4488,7 +4488,7 @@ lib CDoom
     dy : Fixed
 
     # Bounding box for each child.
-    bbox : Fixed[2][4]
+    bbox : Fixed[4][2]
 
     # If NF_SUBSECTOR its a subsector.
     children : LibC::UShort[2]
@@ -5380,9 +5380,9 @@ lib CDoom
   MAXLIGHTZ       = 128
   LIGHTZSHIFT     =  20
 
-  $scalelight : Lighttable*[LIGHTLEVELS][MAXLIGHTSCALE]
+  $scalelight : Lighttable*[MAXLIGHTSCALE][LIGHTLEVELS]
   $scalelightfixed : Lighttable*[MAXLIGHTSCALE]
-  $zlight : Lighttable*[LIGHTLEVELS][MAXLIGHTZ]
+  $zlight : Lighttable*[MAXLIGHTZ][LIGHTLEVELS]
 
   $extralight : LibC::Int
   $fixedcolormap : Lighttable*
@@ -5820,7 +5820,7 @@ lib CDoom
   # Screen 1 is an extra buffer.
   $screens : Byte*[5]
   $dirtybox : LibC::Int[4]
-  $gammatable : Byte[5][256]
+  $gammatable : Byte[256][5]
   $usegamma : LibC::Int
 
   # Allocates buffer screens, call before R_Init.
@@ -6383,7 +6383,7 @@ lib CDoom
 
   $localcmds : Ticcmd[BACKUPTICS]
 
-  $netcmds : Ticcmd[MAXPLAYERS][BACKUPTICS]
+  $netcmds : Ticcmd[BACKUPTICS][MAXPLAYERS]
   $nettics : LibC::Int[MAXNETNODES]
   $nodeingame : DoomBool[MAXNETNODES]   # set false as nodes leave game
   $remoteresend : DoomBool[MAXNETNODES] # set when local needs tics
@@ -6523,15 +6523,178 @@ lib CDoom
 
   fun f_cast_ticker = F_CastTicker
 
-    fun f_cast_responder = F_CastResponder(ev : Event*) : DoomBool
+  fun f_cast_responder = F_CastResponder(ev : Event*) : DoomBool
 
-      fun f_cast_print = F_CastPrint(text : LibC::Char*)
+  fun f_cast_print = F_CastPrint(text : LibC::Char*)
 
-        fun f_cast_drawer = F_CastDrawer
+  fun f_cast_drawer = F_CastDrawer
+
+  fun f_draw_patch_col = F_DrawPatchCol(x : LibC::Int, patch : Patch*, col : LibC::Int)
+
+  fun f_bunny_scroll = F_BunnyScroll
+
+  fun f_drawer = F_Drawer
+
+  $go : DoomBool
+
+  $wipe_scr_start : Byte*
+  $wipe_scr_end : Byte*
+  $wipe_scr : Byte*
+
+  $y : LibC::Int*
+
+  fun wipe_shitty_col_major_x_form = wipe_shittyColMajorXform(array : LibC::Short*, width : LibC::Int, height : LibC::Int)
+
+  fun wipe_init_color_x_form = wipe_initColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_do_color_x_form = wipe_doColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_exit_color_x_form = wipe_exitColorXForm(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_init_melt = wipe_initMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_do_melt = wipe_doMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_exit_melt = wipe_exitMelt(width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  fun wipe_start_screen = wipe_StartScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
+
+  fun wipe_end_screen = wipe_EndScreen(x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int) : LibC::Int
+
+  fun wipe_screen_wipe = wipe_ScreenWipe(wipeno : LibC::Int, x : LibC::Int, y : LibC::Int, width : LibC::Int, height : LibC::Int, ticks : LibC::Int) : LibC::Int
+
+  SAVEGAMESIZE   = 0x2c000
+  SAVESTRINGSIZE =      24
+  MAXPLMOVE      = CDoom.forwardmove[1]
+  TURBOTHRESHOLD = 0x32
+  SLOWTURNTICS   =    6
+  NUMKEYS        =  256
+  BODYQUESIZE    =   32
+  VERSIONSIZE    =   16
+  DEMOMARKER     = 0x80
+
+  # Prototypes
+  fun g_check_demo_status = G_CheckDemoStatus : DoomBool
+  fun g_read_demo_ticcmd = G_ReadDemoTiccmd(cmd : Ticcmd*)
+  fun g_write_demo_ticcmd = G_WriteDemoTiccmd(cmd : Ticcmd*)
+  fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
+  fun g_init_new = G_InitNew(skill : Skill, episode : LibC::Int, map : LibC::Int)
+  fun g_do_reborn = G_DoReborn(playernum : LibC::Int)
+  fun g_do_load_level = G_DoLoadLevelfun
+  fun g_do_new_game = G_DoNewGamefun
+  fun g_do_load_game = G_DoLoadGamefun
+  fun g_do_play_demo = G_DoPlayDemofun
+  fun g_do_completed = G_DoCompletedfun
+  fun g_do_world_done = G_DoWorldDonefun
+  fun g_do_save_game = G_DoSaveGamefun
+  fun p_spawn_player = P_SpawnPlayer(mthing : Mapthing*)
+  fun r_execute_set_view_size = R_ExecuteSetViewSize
+
+  $gameaction : Gameaction
+  $gamestate : Gamestate
+  $gameskill : Skill
+  $respawnmonsters : DoomBool
+  $gameepisode : LibC::Int
+  $gamemap : LibC::Int
+
+  $paused : DoomBool
+  $sendpause : DoomBool # send a pause event next tic
+  $sendsave : DoomBool  # send a save event next tic
+  $usergame : DoomBool  # ok to save / end game
+
+  $timingdemo : DoomBool # if true, exit with report on completion
+  $nodrawers : DoomBool  # for comparative timing purposes
+  $noblit : DoomBool     # for comparative timing purposes
+  $starttime : LibC::Int # for comparative timing purposes
+
+  $viewactive : DoomBool
+
+  $deathmatch : DoomBool # only if started as net death 
+
+  $demoname : LibC::Char[32]
+  $netdemo : DoomBool
+  $demobuffer : Byte*
+  $demo_p : Byte*
+  $demoend : Byte*
+
+    $consistancy : LibC::Short[BACKUPTICS][MAXPLAYERS]
+
+  $savebuffer : Byte*
+
+    #
+    # controls (have defaults)
+    #
+    $key_right : LibC::Int
+    $key_left : LibC::Int
+
+    $key_up : LibC::Int
+    $key_down : LibC::Int
+    $key_strafeleft : LibC::Int
+    $key_straferight : LibC::Int
+    $key_fire : LibC::Int
+    $key_use : LibC::Int
+    $key_strafe : LibC::Int
+    $key_speed : LibC::Int
+
+    $mousebfire : LibC::Int
+    $mousebstrafe : LibC::Int
+    $mousebforward : LibC::Int
+    $mousemove : LibC::Int
+
+    $joybfire : LibC::Int
+    $joybstrafe : LibC::Int
+    $joybuse : LibC::Int
+    $joybspeed : LibC::Int
 
   $forwardmove : Fixed[2]
   $sidemove : Fixed[2]
-  $angleturn : Fixed[3]
+  $angleturn : Fixed[3] # + slow turn
+
+  $gamekeydown : DoomBool[NUMKEYS]
+  $turnheld : LibC::Int # for accelerative turning
+
+  $mousearray : DoomBool[4]
+  $mousebuttons : DoomBool* # allow [-1]
+
+  # mouse values are used once
+  $mousex : LibC::Int
+  $mousey : LibC::Int
+
+  $dclicktime : LibC::Int
+  $dclickstate : LibC::Int
+  $dclicks : LibC::Int
+  $dclicktime2 : LibC::Int
+  $dclickstate2 : LibC::Int
+  $dclicks2 : LibC::Int
+
+  # joystick values are repeated
+  $joyxmove : LibC::Int
+  $joyymove : LibC::Int
+  $joyarray : DoomBool[5]
+  $joybuttons : DoomBool* # allow [-1]
+
+  $savegameslot : LibC::Int
+  $savedescription : LibC::Char[32]
+
+  $bodyque : Mobj*[BODYQUESIZE]
 
   $statcopy : Void* # for statistics driver
+
+  # DOOM Par Times
+  $pars : LibC::Int[10][4]
+
+  $cpars : LibC::Int[32]
+
+  $secretexit : DoomBool
+
+  $savename : LibC::Char[256]
+
+  $d_skill : Skill
+    $d_episode : LibC::Int
+    $d_map : LibC::Int
+
+    $defdemoname : LibC::Char*
+
+    fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*) 
+  
 end
