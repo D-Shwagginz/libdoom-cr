@@ -370,54 +370,102 @@ fun d_post_event = D_PostEvent(ev : CDoom::Event*)
   LibDoom.d_post_event(ev)
 end
 
-  fun d_process_events = D_ProcessEvents
-LibDoom.d_process_events
-  end
+fun d_process_events = D_ProcessEvents
+  LibDoom.d_process_events
+end
 
-  fun d_display = D_Display
-LibDoom.d_display
-  end
+fun d_display = D_Display
+  LibDoom.d_display
+end
 
-  fun d_update_wipe = D_UpdateWipe
-LibDoom.d_update_wipe
-  end
+fun d_update_wipe = D_UpdateWipe
+  LibDoom.d_update_wipe
+end
 
-  fun d_doom_loop = D_DoomLoop
-    LibDoom.d_doom_loop
-  end
+fun d_doom_loop = D_DoomLoop
+  LibDoom.d_doom_loop
+end
 
-    fun d_page_ticker = D_PageTicker
-LibDoom.d_page_ticker
-    end
+fun d_page_ticker = D_PageTicker
+  LibDoom.d_page_ticker
+end
 
-    fun d_page_drawer = D_PageDrawer
-LibDoom.d_page_drawer
-    end
+fun d_page_drawer = D_PageDrawer
+  LibDoom.d_page_drawer
+end
 
-      fun d_advance_demo = D_AdvanceDemo
-LibDoom.d_advance_demo
-      end
+fun d_advance_demo = D_AdvanceDemo
+  LibDoom.d_advance_demo
+end
 
-        fun d_do_advance_demo = D_DoAdvanceDemo
-LibDoom.d_do_advance_demo
-        end
+fun d_do_advance_demo = D_DoAdvanceDemo
+  LibDoom.d_do_advance_demo
+end
 
-    fun d_start_title = D_StartTitle
-LibDoom.d_start_title
-    end
+fun d_start_title = D_StartTitle
+  LibDoom.d_start_title
+end
 
-      fun d_add_file = D_AddFile(file : LibC::Char*)
-LibDoom.d_add_file(file)
-      end
+fun d_add_file = D_AddFile(file : LibC::Char*)
+  LibDoom.d_add_file(file)
+end
 
-        fun identify_version = IdentifyVersion
-LibDoom.identify_version
-        end
+fun identify_version = IdentifyVersion
+  LibDoom.identify_version
+end
 
-          fun find_response_file = FindResponseFile
-LibDoom.find_response_file
-          end
+fun find_response_file = FindResponseFile
+  LibDoom.find_response_file
+end
 
-            fun d_doom_main = D_DoomMain
-LibDoom.d_doom_main
-            end
+fun d_doom_main = D_DoomMain
+  LibDoom.d_doom_main
+end
+
+fun net_buffer_size = NetBufferSize : LibC::Int
+  LibDoom.net_buffer_size
+end
+
+fun net_buffer_checksum = NetbufferChecksum : LibC::UInt
+  LibDoom.net_buffer_checksum
+end
+
+fun expand_tics = ExpandTics(low : LibC::Int) : LibC::Int
+  LibDoom.expand_tics(low)
+end
+
+fun h_send_packet = HSendPacket(node : LibC::Int, flags : LibC::Int)
+  LibDoom.h_send_packet(node, flags)
+end
+
+fun h_get_packet = HGetPacket : CDoom::DoomBool
+  LibDoom.h_get_packet
+end
+
+fun get_packets = GetPackets
+  LibDoom.get_packets
+end
+
+fun net_update = NetUpdate
+  LibDoom.net_update
+end
+
+fun check_abort = CheckAbort
+  LibDoom.check_abort
+end
+
+fun d_arbitrate_net_start = D_ArbitrateNetStart
+  LibDoom.d_arbitrate_net_start
+end
+
+fun d_check_net_game = D_CheckNetGame
+  LibDoom.d_check_net_game
+end
+
+fun d_quit_net_game = D_QuitNetGame
+  LibDoom.d_quit_net_game
+end
+
+fun try_run_tics = TryRunTics
+  LibDoom.try_run_tics
+end

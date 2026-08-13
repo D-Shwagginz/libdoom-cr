@@ -2230,13 +2230,14 @@ module LibDoom
     CDoom.st_init
 
     # check for a driver that wants intermission stats
-    {% if false %} # [pd] Unsure how to test this
-    p = CDoom.m_check_parm("-statcopy")
-    if p != 0 && p < CDoom.myargc - 1
-      # for statistics driver
-      CDoom.statcopy = String.new(CDoom.myargv[p + 1]).to_i64.as(Void*)
-      CDoom.doom_print.call("External statistics registered.\n".to_unsafe)
-    end
+    {% if false %}
+      # [pd] Unsure how to test this
+      p = CDoom.m_check_parm("-statcopy")
+      if p != 0 && p < CDoom.myargc - 1
+        # for statistics driver
+        CDoom.statcopy = String.new(CDoom.myargv[p + 1]).to_i64.as(Void*)
+        CDoom.doom_print.call("External statistics registered.\n".to_unsafe)
+      end
     {% end %}
 
     # start the apropriate game based on parms
@@ -2262,23 +2263,19 @@ module LibDoom
 
     p = CDoom.m_check_parm("-loadgame")
     if p != 0 && p < CDoom.myargc - 1
-      {% if false %} # [pd] We don't support the cdrom flag
-      if CDoom.m_check_parm("-cdrom")
-        CDoom.doom_strcpy(file, "c:\\doomdata\\")
-        CDoom.doom_concat(file, CDoom::SAVEGAMENAME)
-        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
-        CDoom.doom_concat(file, ".dsg")
-      else
-        {% end %}
-        CDoom.doom_strcpy(file, CDoom::SAVEGAMENAME)
-        CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
-        CDoom.doom_concat(file, ".dsg")
-        {% if false %} # Love you Crystal
-      end
-      {% end %}
+      # [pd] We don't support the cdrom flag
+      # if CDoom.m_check_parm("-cdrom")
+      #   CDoom.doom_strcpy(file, "c:\\doomdata\\")
+      #   CDoom.doom_concat(file, CDoom::SAVEGAMENAME)
+      #   CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
+      #   CDoom.doom_concat(file, ".dsg")
+      # else
+      CDoom.doom_strcpy(file, CDoom::SAVEGAMENAME)
+      CDoom.doom_concat(file, CDoom.doom_ctoa(CDoom.myargv[p + 1][0]))
+      CDoom.doom_concat(file, ".dsg")
+      # end
       CDoom.g_load_game(file)
     end
-
 
     if CDoom.gameaction != CDoom::Gameaction::Loadgame
       if CDoom.autostart != 0 || CDoom.netgame != 0
@@ -2306,4 +2303,588 @@ module LibDoom
 
     CDoom.i_init_graphics
   end
+
+  def self.net_buffer_size : Int32
+    return offsetof(CDoom::Doomdata, @cmds) + sizeof(CDoom::Ticcmd) * CDoom.netbuffer.value.numtics
+  end
+
+  #
+  # Checksum
+  #
+  def self.net_buffer_checksum : UInt32
+    c = 0x1234567_u32
+
+    l = (CDoom.net_buffer_size - offsetof(CDoom::Doomdata, @retransmitfrom)) // 4
+    l.times do |i|
+      c += (pointerof(CDoom.netbuffer.value.@retransmitfrom)).as(UInt32*)[i] * (i + 1)
+    end
+
+    return c & CDoom::NCMD_CHECKSUM
+  end
+
+  def self.expand_tics(low : Int32) : Int32
+    delta = low - (CDoom.maketic & 0xff)
+
+    if delta >= -64 && delta <= 64
+      return (CDoom.maketic & ~0xff) + low
+    end
+    if delta > 64
+      return (CDoom.maketic & ~0xff) - 256 + low
+    end
+    if delta < -64
+      return (CDoom.maketic & ~0xff) + 256 + low
+    end
+
+    CDoom.doom_strcpy(CDoom.error_buf, "Error: expand_tics: strange value ")
+    CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(low, 10))
+    CDoom.doom_concat(CDoom.error_buf, " at maketic ")
+    CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.maketic, 10))
+    CDoom.i_error(CDoom.error_buf)
+    return 0
+  end
+
+  def self.h_send_packet(node : Int32, flags : Int32)
+    CDoom.netbuffer.value.checksum = CDoom.net_buffer_checksum | flags
+
+    if node == 0
+      CDoom.reboundstore = CDoom.netbuffer.value
+      CDoom.reboundpacket = 1
+      return
+    end
+
+    return if CDoom.demoplayback != 0
+
+    CDoom.i_error("Error: Tried to transmit to another node") if CDoom.netgame == 0
+
+    CDoom.doomcom.value.command = CDoom::Command::SEND
+    CDoom.doomcom.value.remotenode = node
+    CDoom.doomcom.value.datalength = CDoom.net_buffer_size
+
+    if !CDoom.debugfile.null?
+      realretrans = -1
+      if CDoom.netbuffer.value.checksum & CDoom::NCMD_RETRANSMIT != 0
+        realretrans = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
+      end
+
+      CDoom.doom_fprint(CDoom.debugfile, "send (")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
+      CDoom.doom_fprint(CDoom.debugfile, " + ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+      CDoom.doom_fprint(CDoom.debugfile, ", R ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realretrans, 10))
+      CDoom.doom_fprint(CDoom.debugfile, ") [")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "] ")
+
+      CDoom.doomcom.value.datalength.times do |i|
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
+        CDoom.doom_fprint(CDoom.debugfile, " ")
+      end
+
+      CDoom.doom_fprint(CDoom.debugfile, "\n")
+    end
+
+    CDoom.i_net_cmd
+  end
+
+  #
+  # h_get_packet
+  # Returns false if no packet is waiting
+  #
+  def self.h_get_packet
+    if CDoom.reboundpacket != 0
+      CDoom.netbuffer.value = CDoom.reboundstore
+      CDoom.doomcom.value.remotenode = 0
+      CDoom.reboundpacket = 0
+      return 1
+    end
+
+    return 0 if CDoom.netgame == 0
+
+    return 0 if CDoom.demoplayback != 0
+
+    CDoom.doomcom.value.command = CDoom::Command::GET
+    CDoom.i_net_cmd
+
+    return 0 if CDoom.doomcom.value.remotenode == -1
+
+    if CDoom.doomcom.value.datalength != CDoom.net_buffer_size
+      if !CDoom.debugfile.null?
+        CDoom.doom_fprint(CDoom.debugfile, "bad packet length ")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+        CDoom.doom_fprint(CDoom.debugfile, "\n")
+      end
+      return 0
+    end
+
+    if CDoom.net_buffer_checksum != CDoom.netbuffer.value.checksum & CDoom::NCMD_CHECKSUM
+      if !CDoom.debugfile.null?
+        CDoom.doom_fprint(CDoom.debugfile, "bad packet checksum\n")
+      end
+      return 0
+    end
+
+    if !CDoom.debugfile.null?
+      if CDoom.netbuffer.value.checksum & CDoom::NCMD_SETUP != 0
+        CDoom.doom_fprint(CDoom.debugfile, "setup packet\n")
+      else
+        realretrans = -1
+        if CDoom.netbuffer.value.checksum & CDoom::NCMD_RETRANSMIT != 0
+          realretrans = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
+        end
+
+        CDoom.doom_fprint(CDoom.debugfile, "get ")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.remotenode, 10))
+        CDoom.doom_fprint(CDoom.debugfile, " = (")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.expand_tics(CDoom.netbuffer.value.starttic), 10))
+        CDoom.doom_fprint(CDoom.debugfile, " + ")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+        CDoom.doom_fprint(CDoom.debugfile, ", R ")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realretrans, 10))
+        CDoom.doom_fprint(CDoom.debugfile, ")[")
+        CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.doomcom.value.datalength, 10))
+        CDoom.doom_fprint(CDoom.debugfile, "]")
+
+        CDoom.doomcom.value.datalength.times do |i|
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.as(UInt8*)[i], 10))
+          CDoom.doom_fprint(CDoom.debugfile, " ")
+        end
+        CDoom.doom_fprint(CDoom.debugfile, "\n")
+      end
+    end
+    return 1
+  end
+
+  #
+  # get_packets
+  #
+  def self.get_packets
+    while CDoom.h_get_packet != 0
+      next if CDoom.netbuffer.value.checksum & CDoom::NCMD_SETUP != 0 # extra setup packet
+
+      netconsole = CDoom.netbuffer.value.player & ~CDoom::PL_DRONE
+      netnode = CDoom.doomcom.value.remotenode
+
+      # to save bytes, only the low byte of tic numbers are sent
+      # Figure out what the rest of the bytes are
+      realstart = CDoom.expand_tics(CDoom.netbuffer.value.starttic)
+      realend = realstart + CDoom.netbuffer.value.numtics
+
+      # check for exiting the game
+      if CDoom.netbuffer.value.checksum & CDoom::NCMD_EXIT != 0
+        next if CDoom.nodeingame[netnode] == 0
+        CDoom.nodeingame[netnode] = 0
+        CDoom.playeringame[netconsole] = 0
+        CDoom.doom_strcpy(CDoom.exitmsg, "Player 1 left the game")
+        CDoom.exitmsg[7] += netconsole
+        CDoom.players[CDoom.consoleplayer].message = CDoom.exitmsg
+        CDoom.g_check_demo_status if CDoom.demorecording != 0
+        next
+      end
+
+      # check for a remote game kill
+      CDoom.i_error("Error: Killed by network driver") if CDoom.netbuffer.value.checksum & CDoom::NCMD_KILL != 0
+
+      CDoom.nodeforplayer[netconsole] = netnode
+
+      # check for retransmit request
+      if CDoom.resendcount[netnode] <= 0 &&
+         (CDoom.netbuffer.value.checksum & CDoom::NCMD_RETRANSMIT) != 0
+        CDoom.resendto[netnode] = CDoom.expand_tics(CDoom.netbuffer.value.retransmitfrom)
+        if !CDoom.debugfile.null?
+          CDoom.doom_fprint(CDoom.debugfile, "retransmit from ")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.resendto[netnode], 10))
+          CDoom.doom_fprint(CDoom.debugfile, "\n")
+        end
+        CDoom.resendcount[netnode] = CDoom::RESENDCOUNT
+      else
+        CDoom.resendcount[netnode] -= 1
+      end
+
+      # check for out of order / duplicated packet
+      next if realend == CDoom.nettics[netnode]
+
+      if realend < CDoom.nettics[netnode]
+        if !CDoom.debugfile.null?
+          CDoom.doom_fprint(CDoom.debugfile, "out of order packet (")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
+          CDoom.doom_fprint(CDoom.debugfile, " + ")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.netbuffer.value.numtics, 10))
+          CDoom.doom_fprint(CDoom.debugfile, ")\n")
+        end
+        next
+      end
+
+      # check for a missed packet
+      if realstart > CDoom.nettics[netnode]
+        # stop processing until the other system resends the missed tics
+        if !CDoom.debugfile.null?
+          CDoom.doom_fprint(CDoom.debugfile, "missed tics from ")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(netnode, 10))
+          CDoom.doom_fprint(CDoom.debugfile, " (")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realstart, 10))
+          CDoom.doom_fprint(CDoom.debugfile, " - ")
+          CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(CDoom.nettics[netnode], 10))
+          CDoom.doom_fprint(CDoom.debugfile, ")\n")
+        end
+        CDoom.remoteresend[netnode] = 1
+        next
+      end
+
+      # update command store from the packet
+      CDoom.remoteresend[netnode] = 0
+
+      start = CDoom.nettics[netnode] - realstart
+      src = CDoom.netbuffer.value.cmds.to_unsafe + start
+
+      while CDoom.nettics[netnode] < realend
+        dest = CDoom.netcmds[netconsole].to_unsafe + CDoom.nettics[netnode] % CDoom::BACKUPTICS
+        CDoom.nettics[netnode] += 1
+        dest.value = src.value
+        src += 1
+      end
+    end
+  end
+
+  #
+  # net_update
+  # Builds ticcmds for console player,
+  # sends out a packet
+  #
+  def self.net_update
+    # check time
+    nowtime = CDoom.i_get_time // CDoom.ticdup
+    newtics = nowtime - CDoom.gametime
+    CDoom.gametime = nowtime
+
+    if newtics > 0 # something new to update
+      if CDoom.skiptics <= newtics
+        newtics -= CDoom.skiptics
+        CDoom.skiptics = 0
+      else
+        CDoom.skiptics -= newtics
+        newtics = 0
+      end
+
+      CDoom.netbuffer.value.player = CDoom.consoleplayer
+
+      # build new ticcmds for console player
+      gameticdiv = CDoom.gametic // CDoom.ticdup
+      newtics.times do |i|
+        CDoom.i_start_tic
+        CDoom.d_process_events
+        break if CDoom.maketic - gameticdiv >= CDoom::BACKUPTICS // 2 - 1 # can't hold any more
+
+        CDoom.g_build_ticcmd(CDoom.localcmds.to_unsafe + CDoom.maketic % CDoom::BACKUPTICS)
+        CDoom.maketic += 1
+      end
+
+      return if CDoom.singletics != 0 # singletic update is syncronous
+
+      # send the packet to the other nodes
+      CDoom.numnodes.times do |i|
+        if CDoom.nodeingame[i] != 0
+          CDoom.netbuffer.value.starttic = CDoom.resendto[i]
+          realstart = CDoom.resendto[i]
+          CDoom.netbuffer.value.numtics = CDoom.maketic - realstart
+          if CDoom.netbuffer.value.numtics > CDoom::BACKUPTICS
+            CDoom.i_error("Error: net_update: netbuffer.value.numtics > BACKUPTICS")
+          end
+
+          CDoom.resendto[i] = CDoom.maketic - CDoom.doomcom.value.extratics
+
+          CDoom.netbuffer.value.numtics.times do |j|
+            CDoom.netbuffer.value.cmds[j] =
+              CDoom.localcmds[(realstart + j) % CDoom::BACKUPTICS]
+          end
+
+          if CDoom.remoteresend[i] != 0
+            CDoom.netbuffer.value.retransmitfrom = CDoom.nettics[i]
+            CDoom.h_send_packet(i, CDoom::NCMD_RETRANSMIT)
+          else
+            CDoom.netbuffer.value.retransmitfrom = 0
+            CDoom.h_send_packet(i, 0)
+          end
+        end
+      end
+    end
+    # listen for other packets
+    CDoom.get_packets
+  end
+
+  #
+  # check_abort
+  #
+  def self.check_abort
+    stoptic = CDoom.i_get_time + 2
+    while CDoom.i_get_time < stoptic
+      CDoom.i_start_tic
+    end
+
+    CDoom.i_start_tic
+    while CDoom.eventtail != CDoom.eventhead
+      ev = CDoom.events.to_unsafe + CDoom.eventtail
+      if ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == CDoom::KEY_ESCAPE
+        CDoom.i_error("Error: Network game synchronization aborted.")
+      end
+      CDoom.eventtail += 1
+      CDoom.eventtail = (CDoom.eventtail) & (CDoom::MAXEVENTS - 1)
+    end
+  end
+
+  #
+  # d_arbitrate_net_start
+  #
+  def self.d_arbitrate_net_start
+    gotinfo = uninitialized StaticArray(CDoom::DoomBool, CDoom::MAXNETNODES)
+
+    CDoom.autostart = 1
+    CDoom.doom_memset(gotinfo, 0, gotinfo.size * sizeof(CDoom::DoomBool))
+
+    if CDoom.doomcom.value.consoleplayer != 0
+      # listen for setup info from key player
+      CDoom.doom_print.call("listening for network start info...\n".to_unsafe)
+      while true
+        CDoom.check_abort
+        next if CDoom.h_get_packet == 0
+        if CDoom.netbuffer.value.checksum & CDoom::NCMD_SETUP != 0
+          if CDoom.netbuffer.value.player != CDoom::VERSION
+            CDoom.i_error("Error: Different DOOM versions cannot play a net game!")
+          end
+          CDoom.startskill = CDoom::Skill.new(CDoom.netbuffer.value.retransmitfrom & 15)
+          CDoom.deathmatch = (CDoom.netbuffer.value.retransmitfrom & 0xc0) >> 6
+          CDoom.nomonsters = (CDoom.netbuffer.value.retransmitfrom & 0x20) > 0
+          CDoom.respawnparm = (CDoom.netbuffer.value.retransmitfrom & 0x10) > 0
+          CDoom.startmap = CDoom.netbuffer.value.starttic & 0x3f
+          CDoom.startepisode = CDoom.netbuffer.value.starttic >> 6
+          return
+        end
+      end
+    else
+      # key player, send the setup info
+      CDoom.doom_print.call("sending network start info...\n".to_unsafe)
+      loop do
+        CDoom.check_abort
+        CDoom.doomcom.value.numnodes.times do |i|
+          CDoom.netbuffer.value.retransmitfrom = CDoom.startskill
+          if CDoom.deathmatch != 0
+            CDoom.netbuffer.value.retransmitfrom |= (CDoom.deathmatch << 6)
+          end
+          if CDoom.nomonsters != 0
+            CDoom.netbuffer.value.retransmitfrom |= 0x20
+          end
+          if CDoom.respawnparm != 0
+            CDoom.netbuffer.value.retransmitfrom |= 0x10
+          end
+          CDoom.netbuffer.value.starttic = CDoom.startepisode * 64 + CDoom.startmap
+          CDoom.netbuffer.value.player = CDoom::VERSION
+          CDoom.netbuffer.value.numtics = 0
+          CDoom.h_send_packet(i, CDoom::NCMD_SETUP)
+        end
+
+        {% if true %}
+          i = 10
+          while i != 0 && CDoom.h_get_packet != 0
+            if (CDoom.netbuffer.value.player & 0x7f) < CDoom::MAXNETNODES
+              gotinfo[CDoom.netbuffer.value.player & 0x7f] = 1
+              i -= 1
+            end
+          end
+        {% else %}
+          while CDoom.h_get_packet
+            CDoom.gotinfo[CDoom.netbuffer.value.player & 0x7f] = 1
+          end
+        {% end %}
+
+        i = 1
+        while i < CDoom.doomcom.value.numnodes
+          break if gotinfo[i] == 0
+          i += 1
+        end
+
+        break unless i < CDoom.doomcom.value.numnodes
+      end
+    end
+  end
+
+  #
+  # d_check_net_game
+  # Works out player numbers among the net participants
+  #
+  def self.d_check_net_game
+    CDoom::MAXNETNODES.times do |i|
+      CDoom.nodeingame[i] = 0
+      CDoom.nettics[i] = 0
+      CDoom.remoteresend[i] = 0 # set when local needs tics
+      CDoom.resendto[i] = 0     # which tic to start sending
+    end
+
+    # i_init_network sets doomcom and netgame
+    CDoom.i_init_network
+    CDoom.i_error("Error: Doomcom buffer invalid!") if CDoom.doomcom.value.id != CDoom::DOOMCOM_ID
+
+    CDoom.netbuffer = (CDoom.doomcom + offsetof(CDoom::Doomcom, @data)).as(CDoom::Doomdata*)
+    CDoom.consoleplayer = CDoom.doomcom.value.consoleplayer
+    CDoom.displayplayer = CDoom.consoleplayer
+    CDoom.d_arbitrate_net_start if CDoom.netgame != 0
+
+    CDoom.doom_print.call("startskill ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.startskill, 10))
+    CDoom.doom_print.call("  deathmatch: ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.deathmatch, 10))
+    CDoom.doom_print.call("  startmap: ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.startmap, 10))
+    CDoom.doom_print.call("  startepisode: ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.startepisode, 10))
+    CDoom.doom_print.call("\n".to_unsafe)
+
+    # read values out of doomcom
+    CDoom.ticdup = CDoom.doomcom.value.ticdup
+    CDoom.maxsend = CDoom::BACKUPTICS // (2 * CDoom.ticdup) - 1
+    CDoom.maxsend = 1 if CDoom.maxsend < 1
+
+    CDoom.doomcom.value.numplayers.times { |i| CDoom.playeringame[i] = 1 }
+    CDoom.doomcom.value.numnodes.times { |i| CDoom.nodeingame[i] = 1 }
+
+    CDoom.doom_print.call("player ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.consoleplayer + 1, 10))
+    CDoom.doom_print.call(" of ".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.doomcom.value.numplayers, 10))
+    CDoom.doom_print.call(" (".to_unsafe)
+    CDoom.doom_print.call(CDoom.doom_itoa(CDoom.doomcom.value.numnodes, 10))
+    CDoom.doom_print.call(" nodes)\n".to_unsafe)
+  end
+
+  #
+  # d_quit_net_game
+  # Called before quitting to leave a net game
+  # without hanging the other players
+  #
+  def self.d_quit_net_game
+    CDoom.doom_close.call(CDoom.debugfile) if !CDoom.debugfile.null?
+
+    return if CDoom.netgame == 0 || CDoom.usergame == 0 || CDoom.consoleplayer == -1 || CDoom.demoplayback == 1
+
+    # send a bunch of packets for security
+    CDoom.netbuffer.value.player = CDoom.consoleplayer
+    CDoom.netbuffer.value.numtics = 0
+    4.times do |i|
+      (CDoom.doomcom.value.numnodes - 1).times do |j|
+        j += 1
+        CDoom.h_send_packet(j, CDoom::NCMD_EXIT) if CDoom.nodeingame[j] != 0
+        CDoom.i_wait_vbl(1)
+      end
+    end
+  end
+
+  @@oldentertics : Int32 = 0
+
+  #
+  # try_run_tics
+  #
+  def self.try_run_tics
+    # get real tics
+    entertic = CDoom.i_get_time // CDoom.ticdup
+    realtics = entertic - @@oldentertics
+    @@oldentertics = entertic
+
+    # get available tics
+    CDoom.net_update
+
+    lowtic = Int32::MAX
+    numplaying = 0
+    CDoom.doomcom.value.numnodes.times do |i|
+      if CDoom.nodeingame[i] != 0
+        numplaying += 1
+        lowtic = CDoom.nettics[i] if CDoom.nettics[i] < lowtic
+      end
+    end
+    availabletics = lowtic - CDoom.gametic // CDoom.ticdup
+
+    counts = availabletics
+    # decide how many tics to run
+    if realtics < availabletics - 1
+      counts = realtics + 1
+    elsif realtics < availabletics
+      counts = realtics
+    end
+
+    counts = 1 if counts < 1
+
+    CDoom.frameon += 1
+
+    if !CDoom.debugfile.null?
+      CDoom.doom_fprint(CDoom.debugfile, "=======real: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(realtics, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "  avail: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(availabletics, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "  game: ")
+      CDoom.doom_fprint(CDoom.debugfile, CDoom.doom_itoa(counts, 10))
+      CDoom.doom_fprint(CDoom.debugfile, "\n")
+    end
+
+    if CDoom.demoplayback == 0
+      i = 0
+      while i < CDoom::MAXPLAYERS
+        break if CDoom.playeringame[i] != 0
+        i += 1
+      end
+      if CDoom.consoleplayer == i
+        # the key player does not adapt
+      else
+        if CDoom.nettics[0] <= CDoom.nettics[CDoom.nodeforplayer[i]]
+          CDoom.gametime -= 1
+        end
+        CDoom.frameskip[CDoom.frameon & 3] = (CDoom.oldnettics > CDoom.nettics[CDoom.nodeforplayer[i]]).to_unsafe
+        CDoom.oldnettics = CDoom.nettics[0]
+        if CDoom.frameskip[0] != 0 && CDoom.frameskip[1] != 0 && CDoom.frameskip[2] != 0 && CDoom.frameskip[3] != 0
+          CDoom.skiptics = 1
+        end
+      end
+    end
+
+    # wait for new tics if needed
+    while lowtic < CDoom.gametic // CDoom.ticdup + counts
+      CDoom.net_update
+      lowtic = Int32::MAX
+
+      CDoom.doomcom.value.numnodes.times do |i|
+        lowtic = CDoom.nettics[i] if CDoom.nodeingame[i] != 0 && CDoom.nettics[i] < lowtic
+      end
+
+      CDoom.i_error("Error: try_run_tics: lowtic < CDoom.gametic") if lowtic < CDoom.gametic // CDoom.ticdup
+
+      # don't stay in here forever -- give the menu a chance to work
+      if CDoom.i_get_time // CDoom.ticdup - entertic >= 20
+        CDoom.m_ticker
+        return
+      end
+    end
+
+    # run the count * ticdup dics
+    while counts != 0
+      CDoom.ticdup.times do |i|
+        CDoom.i_error("Error: gametic>lowtic") if CDoom.gametic // CDoom.ticdup > lowtic
+        CDoom.d_do_advance_demo if CDoom.advancedemo != 0
+        CDoom.m_ticker
+        CDoom.g_ticker
+        CDoom.gametic += 1
+
+        # modify command for duplicated tics
+        if i != CDoom.ticdup - 1
+          buf = (CDoom.gametic // CDoom.ticdup) % CDoom::BACKUPTICS
+          CDoom::MAXPLAYERS.times do |j|
+            cmd = CDoom.netcmds[j].to_unsafe + buf
+            cmd.value.chatchar = 0
+            cmd.value.buttons = 0 if cmd.value.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
+          end
+        end
+      end
+      CDoom.net_update # check for new console commands
+
+      counts -= 1
+    end
+  end
+
+  
 end
