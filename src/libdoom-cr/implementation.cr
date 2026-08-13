@@ -469,3 +469,39 @@ end
 fun try_run_tics = TryRunTics
   LibDoom.try_run_tics
 end
+
+fun f_start_finale = F_StartFinale
+  LibDoom.f_start_finale
+end
+
+fun f_responder = F_Responder(event : CDoom::Event*) : CDoom::DoomBool
+  LibDoom.f_responder(event)
+end
+
+fun f_ticker = F_Ticker
+  LibDoom.f_ticker
+end
+
+fun f_text_write = F_TextWrite
+  LibDoom.f_text_write
+end
+
+fun f_start_cast = F_StartCast
+  LibDoom.f_start_cast
+end
+
+fun f_cast_ticker = F_CastTicker
+  LibDoom.f_cast_ticker
+end
+
+    fun f_cast_responder = F_CastResponder(ev : CDoom::Event*) : CDoom::DoomBool
+LibDoom.f_cast_responder(ev)
+    end
+
+      fun f_cast_print = F_CastPrint(text : LibC::Char*)
+LibDoom.f_cast_print(text)
+      end
+
+        fun f_cast_drawer = F_CastDrawer
+LibDoom.f_cast_drawer
+        end

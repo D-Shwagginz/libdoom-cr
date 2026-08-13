@@ -215,6 +215,95 @@ module LibDoom
   CDoom.angleturn[1] = 1280
   CDoom.angleturn[2] = 320
 
+  CDoom.gamemode = CDoom::GameMode::Indetermined
+  CDoom.gamemission = CDoom::GameMission::Doom
+
+  # Language.
+  CDoom.language = CDoom::Language::English
+
+  # Set if homebrew PWAD stuff has been added.
+  CDoom.modifiedgame
+  # DOOM1
+  CDoom.endmsg[0] = CDoom::QUITMSG.to_unsafe
+  CDoom.endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
+  CDoom.endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
+  CDoom.endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
+  CDoom.endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
+  CDoom.endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
+  CDoom.endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
+  CDoom.endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
+
+  # QuitDOOM II messages
+  CDoom.endmsg[8] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
+  CDoom.endmsg[9] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
+  CDoom.endmsg[10] = "get outta here and go back\nto your boring programs.".to_unsafe
+  CDoom.endmsg[11] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
+  CDoom.endmsg[12] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
+  CDoom.endmsg[13] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
+  CDoom.endmsg[14] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
+
+  # FinalDOOM?
+  CDoom.endmsg[15] = "fuck you, pussy!\nget the fuck out!".to_unsafe
+  CDoom.endmsg[16] = "you quit and i'll jizz\nin your cystholes!".to_unsafe
+  CDoom.endmsg[17] = "if you leave, i'll make\nthe lord drink my jizz.".to_unsafe
+  CDoom.endmsg[18] = "hey, ron! can we say\n'fuck' in the game?".to_unsafe
+  CDoom.endmsg[19] = "i'd leave: this is just\nmore monsters and levels.\nwhat a load.".to_unsafe
+  CDoom.endmsg[20] = "suck it down, asshole!\nyou're a fucking wimp!".to_unsafe
+  CDoom.endmsg[21] = "don't quit now! we're \nstill spending your money!".to_unsafe
+
+  # Internal debug. Different style, too.
+  CDoom.endmsg[22] = "THIS IS NO MESSAGE!\nPage intentionally left blank.".to_unsafe
+
+  # Stage of animation:
+  #  0 = text, 1 = art screen, 2 = character cast
+  # CDoom.finalstage
+
+  CDoom.e1text = CDoom::E1TEXT
+  CDoom.e2text = CDoom::E2TEXT
+  CDoom.e3text = CDoom::E3TEXT
+  CDoom.e4text = CDoom::E4TEXT
+
+  CDoom.c1text = CDoom::C1TEXT
+  CDoom.c2text = CDoom::C2TEXT
+  CDoom.c3text = CDoom::C3TEXT
+  CDoom.c4text = CDoom::C4TEXT
+  CDoom.c5text = CDoom::C5TEXT
+  CDoom.c6text = CDoom::C6TEXT
+
+  CDoom.p1text = CDoom::P1TEXT
+  CDoom.p2text = CDoom::P2TEXT
+  CDoom.p3text = CDoom::P3TEXT
+  CDoom.p4text = CDoom::P4TEXT
+  CDoom.p5text = CDoom::P5TEXT
+  CDoom.p6text = CDoom::P6TEXT
+
+  CDoom.t1text = CDoom::T1TEXT
+  CDoom.t2text = CDoom::T2TEXT
+  CDoom.t3text = CDoom::T3TEXT
+  CDoom.t4text = CDoom::T4TEXT
+  CDoom.t5text = CDoom::T5TEXT
+  CDoom.t6text = CDoom::T6TEXT
+
+  CDoom.castorder[0] = CDoom::Castinfo.new(name: CDoom::CC_ZOMBIE, type: CDoom::Mobjtype::MT_POSSESSED)
+  CDoom.castorder[1] = CDoom::Castinfo.new(name: CDoom::CC_SHOTGUN, type: CDoom::Mobjtype::MT_SHOTGUY)
+  CDoom.castorder[2] = CDoom::Castinfo.new(name: CDoom::CC_HEAVY, type: CDoom::Mobjtype::MT_CHAINGUY)
+  CDoom.castorder[3] = CDoom::Castinfo.new(name: CDoom::CC_IMP, type: CDoom::Mobjtype::MT_TROOP)
+  CDoom.castorder[4] = CDoom::Castinfo.new(name: CDoom::CC_DEMON, type: CDoom::Mobjtype::MT_SERGEANT)
+  CDoom.castorder[5] = CDoom::Castinfo.new(name: CDoom::CC_LOST, type: CDoom::Mobjtype::MT_SKULL)
+  CDoom.castorder[6] = CDoom::Castinfo.new(name: CDoom::CC_CACO, type: CDoom::Mobjtype::MT_HEAD)
+  CDoom.castorder[7] = CDoom::Castinfo.new(name: CDoom::CC_HELL, type: CDoom::Mobjtype::MT_KNIGHT)
+  CDoom.castorder[8] = CDoom::Castinfo.new(name: CDoom::CC_BARON, type: CDoom::Mobjtype::MT_BRUISER)
+  CDoom.castorder[9] = CDoom::Castinfo.new(name: CDoom::CC_ARACH, type: CDoom::Mobjtype::MT_BABY)
+  CDoom.castorder[10] = CDoom::Castinfo.new(name: CDoom::CC_PAIN, type: CDoom::Mobjtype::MT_PAIN)
+  CDoom.castorder[11] = CDoom::Castinfo.new(name: CDoom::CC_REVEN, type: CDoom::Mobjtype::MT_UNDEAD)
+  CDoom.castorder[12] = CDoom::Castinfo.new(name: CDoom::CC_MANCU, type: CDoom::Mobjtype::MT_FATSO)
+  CDoom.castorder[13] = CDoom::Castinfo.new(name: CDoom::CC_ARCH, type: CDoom::Mobjtype::MT_VILE)
+  CDoom.castorder[14] = CDoom::Castinfo.new(name: CDoom::CC_SPIDER, type: CDoom::Mobjtype::MT_SPIDER)
+  CDoom.castorder[15] = CDoom::Castinfo.new(name: CDoom::CC_CYBER, type: CDoom::Mobjtype::MT_CYBORG)
+  CDoom.castorder[16] = CDoom::Castinfo.new(name: CDoom::CC_HERO, type: CDoom::Mobjtype::MT_PLAYER)
+
+  CDoom.castorder[17] = CDoom::Castinfo.new
+
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -2126,10 +2215,10 @@ module LibDoom
     end
 
     p = CDoom.m_check_parm("-warp")
-    if p != 0 && p < CDoom.myargc - 1
-      if CDoom.gamemode == CDoom::GameMode::Commercial
+    if p != 0
+      if p < CDoom.myargc - 1 && CDoom.gamemode == CDoom::GameMode::Commercial
         CDoom.startmap = CDoom.doom_atoi(CDoom.myargv[p + 1])
-      else
+      elsif p < CDoom.myargc - 2
         CDoom.startepisode = CDoom.myargv[p + 1][0] - '0'.ord
         CDoom.startmap = CDoom.myargv[p + 2][0] - '0'.ord
       end
@@ -2886,5 +2975,379 @@ module LibDoom
     end
   end
 
-  
+  #
+  # f_start_finale
+  #
+  def self.f_start_finale
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.gamestate = CDoom::Gamestate::Finale
+    CDoom.viewactive = 0
+    CDoom.automapactive = 0
+
+    # Okay - IWAD dependend stuff.
+    # This has been changed severly, and
+    #  some stuff might have changed in the process.
+    case CDoom.gamemode
+    # DOOM 1 - E1, E3 or E4, but each nine missions
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
+      CDoom.s_change_music(CDoom::Musicenum::MUS_victor, 1)
+
+      case CDoom.gameepisode
+      when 1
+        CDoom.finaleflat = "FLOOR4_8"
+        CDoom.finaletext = CDoom.e1text
+      when 2
+        CDoom.finaleflat = "SFLR6_1"
+        CDoom.finaletext = CDoom.e2text
+      when 3
+        CDoom.finaleflat = "MFLR8_4"
+        CDoom.finaletext = CDoom.e3text
+      when 4
+        CDoom.finaleflat = "MFLR8_3"
+        CDoom.finaletext = CDoom.e4text
+      else
+        # Ouch.
+      end
+      # DOOM II and missions packs with E1, M34
+    when CDoom::GameMode::Commercial
+      CDoom.s_change_music(CDoom::Musicenum::MUS_read_m, 1)
+
+      case CDoom.gamemap
+      when 6
+        CDoom.finaleflat = "SLIME16"
+        CDoom.finaletext = CDoom.c1text
+      when 11
+        CDoom.finaleflat = "RROCK14"
+        CDoom.finaletext = CDoom.c2text
+      when 20
+        CDoom.finaleflat = "RROCK07"
+        CDoom.finaletext = CDoom.c3text
+      when 30
+        CDoom.finaleflat = "RROCK17"
+        CDoom.finaletext = CDoom.c4text
+      when 15
+        CDoom.finaleflat = "RROCK13"
+        CDoom.finaletext = CDoom.c5text
+      when 31
+        CDoom.finaleflat = "RROCK19"
+        CDoom.finaletext = CDoom.c6text
+      else
+        # Ouch
+      end
+
+      # Indeterminate.
+    else
+      CDoom.s_change_music(CDoom::Musicenum::MUS_read_m, 1)
+      CDoom.finaleflat = "F_SKY1"     # Not used anywhere else.
+      CDoom.finaletext = CDoom.c1text # FIXME - other text, music?
+    end
+
+    CDoom.finalestage = 0
+    CDoom.finalecount = 0
+  end
+
+  def self.f_responder(event : CDoom::Event*) : CDoom::DoomBool
+    return CDoom.f_cast_responder(event) if CDoom.finalestage == 2
+
+    return 0
+  end
+
+  #
+  # f_ticker
+  #
+  def self.f_ticker
+    # check for skipping
+    if CDoom.gamemode == CDoom::GameMode::Commercial && CDoom.finalecount > 50
+      # go on to the next level
+      i = 0
+      CDoom::MAXPLAYERS.times do |j|
+        break if CDoom.players[i].cmd.buttons != 0
+        i += 1
+      end
+
+      if i < CDoom::MAXPLAYERS
+        if CDoom.gamemap == 30
+          CDoom.f_start_cast
+        else
+          CDoom.gameaction = CDoom::Gameaction::Worlddone
+        end
+      end
+    end
+
+    # advance animation
+    CDoom.finalecount += 1
+
+    if CDoom.finalestage == 2
+      CDoom.f_cast_ticker
+      return
+    end
+
+    return if CDoom.gamemode == CDoom::GameMode::Commercial
+
+    if CDoom.finalestage == 0 && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
+      CDoom.finalecount = 0
+      CDoom.finalestage = 1
+      CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
+      if CDoom.gameepisode == 3
+        CDoom.s_start_music(CDoom::Musicenum::MUS_bunny)
+      end
+    end
+  end
+
+  #
+  # f_text_write
+  #
+  def self.f_text_write
+    # erase the entire screen to a tiled background
+    src = CDoom.w_cache_lump_name(CDoom.finaleflat, CDoom::PU_CACHE)
+    dest = CDoom.screens[0]
+
+    CDoom::SCREENHEIGHT.times do |y|
+      (CDoom::SCREENWIDTH // 64).times do |x|
+        CDoom.doom_memcpy(dest, src + ((y & 63) << 6), 64)
+        dest += 64
+      end
+      if CDoom::SCREENWIDTH & 63 != 0
+        CDoom.doom_memcpy(dest, src + ((y & 63) << 6), CDoom::SCREENWIDTH & 63)
+        dest += CDoom::SCREENWIDTH & 63
+      end
+    end
+
+    CDoom.v_mark_rect(0, 0, CDoom::SCREENWIDTH, CDoom::SCREENHEIGHT)
+
+    # draw some of the text onto the screen
+    cx = 10
+    cy = 10
+    ch = CDoom.finaletext
+
+    count = (CDoom.finalecount - 10) // CDoom::TEXTSPEED
+    count = 0 if count < 0
+    while count != 0
+      c = ch.value
+      ch += 1
+      break if c == '\0'.ord
+      if c == '\n'.ord
+        cx = 10
+        cy += 11
+        next
+      end
+
+      c = CDoom.doom_toupper(c) - CDoom::HU_FONTSTART
+      if c < 0 || c > CDoom::HU_FONTSIZE
+        cx += 4
+        next
+      end
+
+      w = CDoom.hu_font[c].value.width.to_i16!
+      break if cx + w > CDoom::SCREENWIDTH
+      CDoom.v_draw_patch(cx, cy, 0, CDoom.hu_font[c])
+      cx += w
+
+      count -= 1
+    end
+  end
+
+  #
+  # Final DOOM 2 animation
+  # Casting by id Software.
+  #   in order of appearance
+  #
+  def self.f_start_cast
+    return if CDoom.finalestage == 2
+
+    CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a screen wipe
+    CDoom.castnum = 0
+    CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+    CDoom.casttics = CDoom.caststate.value.tics
+    CDoom.castdeath = 0
+    CDoom.finalestage = 2
+    CDoom.castframes = 0
+    CDoom.castonmelee = 0
+    CDoom.castattacking = 0
+    CDoom.s_change_music(CDoom::Musicenum::MUS_evil, 1)
+  end
+
+  #
+  # f_cast_ticker
+  #
+  def self.f_cast_ticker
+    CDoom.casttics -= 1
+    return if CDoom.casttics > 0 # not time to change state yet
+
+    if CDoom.caststate.value.tics == -1 || CDoom.caststate.value.nextstate == CDoom::Statenum::S_NULL
+      # switch from deathstate to next monster
+      CDoom.castnum += 1
+      CDoom.castdeath = 0
+      CDoom.castnum = 0 if CDoom.castorder[CDoom.castnum].name.null?
+      if CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound != 0
+        CDoom.s_start_sound(Pointer(Void).null, CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seesound)
+      end
+      CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+      CDoom.castframes = 0
+    else
+      # just advance to next state in amnimation
+      if CDoom.caststate == CDoom.states.to_unsafe + CDoom::Statenum::S_PLAY_ATK1.value
+        # Yes, it is a gross hack!
+        CDoom.castattacking = 0
+        CDoom.castframes = 0
+        CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+        CDoom.casttics = CDoom.caststate.value.tics
+        CDoom.casttics = 15 if CDoom.casttics == -1
+        return
+      end
+      st = CDoom.caststate.value.nextstate
+      CDoom.caststate = CDoom.states.to_unsafe + st.value
+      CDoom.castframes += 1
+
+      sfx = 0
+      # sound hacks....
+      case st
+      when CDoom::Statenum::S_PLAY_ATK1
+        sfx = CDoom::Sfxenum::SFX_dshtgn
+      when CDoom::Statenum::S_POSS_ATK2
+        sfx = CDoom::Sfxenum::SFX_pistol
+      when CDoom::Statenum::S_SPOS_ATK2
+        sfx = CDoom::Sfxenum::SFX_shotgn
+      when CDoom::Statenum::S_VILE_ATK2
+        sfx = CDoom::Sfxenum::SFX_vilatk
+      when CDoom::Statenum::S_SKEL_FIST2
+        sfx = CDoom::Sfxenum::SFX_skeswg
+      when CDoom::Statenum::S_SKEL_FIST4
+        sfx = CDoom::Sfxenum::SFX_skepch
+      when CDoom::Statenum::S_SKEL_MISS2
+        sfx = CDoom::Sfxenum::SFX_skeatk
+      when CDoom::Statenum::S_FATT_ATK8, CDoom::Statenum::S_FATT_ATK5, CDoom::Statenum::S_FATT_ATK2
+        sfx = CDoom::Sfxenum::SFX_firsht
+      when CDoom::Statenum::S_CPOS_ATK2, CDoom::Statenum::S_CPOS_ATK3, CDoom::Statenum::S_CPOS_ATK4
+        sfx = CDoom::Sfxenum::SFX_shotgn
+      when CDoom::Statenum::S_TROO_ATK3
+        sfx = CDoom::Sfxenum::SFX_claw
+      when CDoom::Statenum::S_SARG_ATK2
+        sfx = CDoom::Sfxenum::SFX_sgtatk
+      when CDoom::Statenum::S_BOSS_ATK2, CDoom::Statenum::S_BOS2_ATK2, CDoom::Statenum::S_HEAD_ATK2
+        sfx = CDoom::Sfxenum::SFX_firsht
+      when CDoom::Statenum::S_SKULL_ATK2
+        sfx = CDoom::Sfxenum::SFX_sklatk
+      when CDoom::Statenum::S_SPID_ATK2, CDoom::Statenum::S_SPID_ATK3
+        sfx = CDoom::Sfxenum::SFX_shotgn
+      when CDoom::Statenum::S_BSPI_ATK2
+        sfx = CDoom::Sfxenum::SFX_plasma
+      when CDoom::Statenum::S_CYBER_ATK2, CDoom::Statenum::S_CYBER_ATK4, CDoom::Statenum::S_CYBER_ATK6
+        sfx = CDoom::Sfxenum::SFX_rlaunc
+      when CDoom::Statenum::S_PAIN_ATK3
+        sfx = CDoom::Sfxenum::SFX_sklatk
+      end
+
+      CDoom.s_start_sound(Pointer(Void).null, sfx) if sfx != 0
+    end
+
+    if CDoom.castframes == 12
+      # go into attack frame
+      CDoom.castattacking = 1
+      if CDoom.castonmelee != 0
+        CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+      else
+        CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+      end
+      CDoom.castonmelee ^= 1
+      if CDoom.caststate == CDoom.states.to_unsafe + CDoom::Statenum::S_NULL.value
+        if CDoom.castonmelee != 0
+          CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].meleestate
+        else
+          CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].missilestate
+        end
+      end
+    end
+
+    if CDoom.castattacking != 0
+      if CDoom.castframes == 24 ||
+        CDoom.caststate == CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+        CDoom.castattacking = 0
+        CDoom.castframes = 0
+        CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].seestate
+      end
+    end
+
+    CDoom.casttics = CDoom.caststate.value.tics
+    CDoom.casttics = 15 if CDoom.casttics == -1
+  end
+
+  def self.f_cast_responder(ev : CDoom::Event*) : CDoom::DoomBool
+    return 0 if ev.value.type != CDoom::Evtype::Keydown
+
+    return 1 if CDoom.castdeath != 0 # already in dying frames
+
+    # go into death frame
+    CDoom.castdeath = 1
+    CDoom.caststate = CDoom.states.to_unsafe + CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathstate
+    CDoom.casttics = CDoom.caststate.value.tics
+    CDoom.castframes = 0
+    CDoom.castattacking = 0
+    if CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound != 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom.mobjinfo[CDoom.castorder[CDoom.castnum].type.value].deathsound)
+    end
+
+    return 1
+  end
+
+  def self.f_cast_print(text : UInt8*)
+    # find width
+    ch = text
+    width = 0
+
+    while ch != 0
+      c = ch.value
+      ch += 1
+      break if c == '\0'.ord
+      c = CDoom.doom_toupper(c) - CDoom::HU_FONTSTART
+      if c < 0 || c > CDoom::HU_FONTSIZE
+        width += 4
+        next
+      end
+
+      w = CDoom.hu_font[c].value.width.to_i16!
+      width += w
+    end
+
+    # draw it
+    cx = 160 - width // 2
+    ch = text
+    while ch != 0
+      c = ch.value
+      ch += 1
+      break if c == '\0'.ord
+      c = CDoom.doom_toupper(c) - CDoom::HU_FONTSTART
+      if c < 0 || c > CDoom::HU_FONTSIZE
+        cx += 4
+        next
+      end
+
+      w = CDoom.hu_font[c].value.width.to_i16!
+      CDoom.v_draw_patch(cx, 180, 0, CDoom.hu_font[c])
+      cx += w
+    end
+  end
+
+  #
+  # f_cast_drawer
+  #
+  def self.f_cast_drawer
+    # erase the entire screen to a background
+    CDoom.v_draw_patch(0, 0, 0, CDoom.w_cache_lump_name("BOSSBACK", CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.f_cast_print(CDoom.castorder[CDoom.castnum].name)
+
+    # draw the current frame in the middle of the screen
+    sprdef = CDoom.sprites + CDoom.caststate.value.sprite.value
+    sprframe = sprdef.value.spriteframes + (CDoom.caststate.value.frame & CDoom::FF_FRAMEMASK)
+    lump = sprframe.value.lump[0]
+    flip = sprframe.value.flip[0]
+
+    patch = CDoom.w_cache_lump_num(lump + CDoom.firstspritelump, CDoom::PU_CACHE).as(CDoom::Patch*)
+    if flip != 0
+      CDoom.v_draw_patch_flipped(160, 170, 0, patch)
+    else
+      CDoom.v_draw_patch(160, 170, 0, patch)
+    end
+  end
 end

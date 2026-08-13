@@ -1007,6 +1007,7 @@ lib CDoom
   # playing, gazing at the intermission screen,
   # the game final animation, or a demo.
   enum Gamestate
+    Needwipe     = -1
     Level
     Intermission
     Finale
@@ -1570,8 +1571,8 @@ lib CDoom
 
   #
   # Globally visible constants.
-  HU_FONTSTART = '!'.ord # the first font characters
-  HU_FONTEND   = '_'.ord # the last font characters
+  HU_FONTSTART = 33 # the first font characters
+  HU_FONTEND   = 95 # the last font characters
 
   # Calculate # of glyphs in font.
   HU_FONTSIZE = (HU_FONTEND - HU_FONTSTART + 1)
@@ -6437,6 +6438,96 @@ lib CDoom
   fun d_quit_net_game = D_QuitNetGame
 
   fun try_run_tics = TryRunTics
+
+  $gamemode : GameMode
+  $gamemission : GameMission
+
+  $language : Language
+
+  $modifiedgame : DoomBool
+  ENDMSG_SIZE = NUM_QUITMESSAGES + 1
+  $endmsg : LibC::Char*[ENDMSG_SIZE]
+
+  TEXTSPEED =   3
+  TEXTWAIT  = 250
+
+  struct Castinfo
+    name : LibC::Char*
+    type : Mobjtype
+  end
+
+  $finalestage : LibC::Int
+
+  $finalecount : LibC::Int
+
+  $e1text : LibC::Char*
+  $e2text : LibC::Char*
+  $e3text : LibC::Char*
+  $e4text : LibC::Char*
+
+  $c1text : LibC::Char*
+  $c2text : LibC::Char*
+  $c3text : LibC::Char*
+  $c4text : LibC::Char*
+  $c5text : LibC::Char*
+  $c6text : LibC::Char*
+
+  $p1text : LibC::Char*
+  $p2text : LibC::Char*
+  $p3text : LibC::Char*
+  $p4text : LibC::Char*
+  $p5text : LibC::Char*
+  $p6text : LibC::Char*
+
+  $t1text : LibC::Char*
+  $t2text : LibC::Char*
+  $t3text : LibC::Char*
+  $t4text : LibC::Char*
+  $t5text : LibC::Char*
+  $t6text : LibC::Char*
+
+  $finaletext : LibC::Char*
+  $finaleflat : LibC::Char*
+
+  $castorder : Castinfo[18]
+
+  $castnum : LibC::Int
+  $casttics : LibC::Int
+  $caststate : State*
+  $castdeath : DoomBool
+  $castframes : LibC::Int
+  $castonmelee : LibC::Int
+  $castattacking : DoomBool
+
+  #
+  # f_start_cast
+  #
+  $wipegamestate : Gamestate
+  $hu_font : Patch*[HU_FONTSIZE]
+
+  fun f_start_cast = F_StartCast
+  fun f_cast_ticker = F_CastTicker
+  fun f_cast_responder = F_CastResponder(ev : Event*) : DoomBool
+  fun f_cast_drawer = F_CastDrawer
+  fun v_draw_patch_flipped = V_DrawPatchFlipped(x : LibC::Int, y : LibC::Int, scrn : LibC::Int, patch : Patch*)
+
+  fun f_start_finale = F_StartFinale
+
+  fun f_responder = F_Responder(event : Event*) : DoomBool
+
+  fun f_ticker = F_Ticker
+
+  fun f_text_write = F_TextWrite
+
+  fun f_start_cast = F_StartCast
+
+  fun f_cast_ticker = F_CastTicker
+
+    fun f_cast_responder = F_CastResponder(ev : Event*) : DoomBool
+
+      fun f_cast_print = F_CastPrint(text : LibC::Char*)
+
+        fun f_cast_drawer = F_CastDrawer
 
   $forwardmove : Fixed[2]
   $sidemove : Fixed[2]
