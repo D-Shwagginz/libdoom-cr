@@ -558,6 +558,34 @@ fun wipe_screen_wipe = wipe_ScreenWipe(wipeno : LibC::Int, x : LibC::Int, y : Li
   LibDoom.wipe_screen_wipe(wipeno, x, y, width, height, ticks)
 end
 
-    fun g_build_ticcmd = G_BuildTiccmd(cmd : CDoom::Ticcmd*) 
-LibDoom.g_build_ticcmd(cmd)
+fun g_build_ticcmd = G_BuildTiccmd(cmd : CDoom::Ticcmd*)
+  LibDoom.g_build_ticcmd(cmd)
+end
+
+fun g_do_load_level = G_DoLoadLevel
+  LibDoom.g_do_load_level
+end
+
+  fun g_responder = G_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+LibDoom.g_responder(ev)
+  end
+
+  fun g_ticker = G_Ticker
+LibDoom.g_ticker
+  end
+
+  fun g_init_player = G_InitPlayer(player : LibC::Int)
+LibDoom.g_init_player(player)
+  end
+
+  fun g_player_finish_level = G_PlayerFinishLevel(player : LibC::Int)
+LibDoom.g_player_finish_level(player)
+  end
+
+  fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
+LibDoom.g_player_reborn(player)
+  end
+
+    fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : CDoom::DoomBool
+LibDoom.g_check_spot(playernum, mthing)
     end

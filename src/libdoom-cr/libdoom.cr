@@ -386,7 +386,6 @@ module LibDoom
   CDoom.cpars[30] = 120
   CDoom.cpars[31] = 30
 
-
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -2811,7 +2810,7 @@ module LibDoom
     gotinfo = uninitialized StaticArray(CDoom::DoomBool, CDoom::MAXNETNODES)
 
     CDoom.autostart = 1
-    CDoom.doom_memset(gotinfo, 0, gotinfo.size * sizeof(CDoom::DoomBool))
+    CDoom.doom_memset(gotinfo, 0, sizeof(typeof(gotinfo)))
 
     if CDoom.doomcom.value.consoleplayer != 0
       # listen for setup info from key player
@@ -3706,20 +3705,20 @@ module LibDoom
   end
 
   #
-# g_build_ticcmd
-# Builds a ticcmd from all of the available inputs
-# or reads it from the demo buffer. 
-# If recording a demo, write it out 
-# 
+  # g_build_ticcmd
+  # Builds a ticcmd from all of the available inputs
+  # or reads it from the demo buffer.
+  # If recording a demo, write it out
+  #
   def self.g_build_ticcmd(cmd : CDoom::Ticcmd*)
     base = CDoom.i_base_ticcmd # empty, or external driver
-    CDoom.doom_memcpy(cmd, base, sizeof(CDoom::Ticcmd))
+    CDoom.doom_memcpy(cmd, base, sizeof(typeof(cmd.value)))
 
     cmd.value.consistancy =
       CDoom.consistancy[CDoom.consoleplayer][CDoom.maketic % CDoom::BACKUPTICS]
 
     strafe = (CDoom.gamekeydown[CDoom.key_strafe] != 0 || CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
-    CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
+              CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
 
     running = CDoom.always_run != 0 ? (CDoom.gamekeydown[CDoom.key_speed] != 0 ? false : true) : (CDoom.gamekeydown[CDoom.key_speed] != 0 ? true : false)
     speed = (running || CDoom.joybuttons[CDoom.joybspeed] != 0).to_unsafe
@@ -3730,9 +3729,9 @@ module LibDoom
     # use two stage accelerative turning
     # on the keyboard and joystick
     if CDoom.joyxmove < 0 ||
-      CDoom.joyxmove > 0 ||
-      CDoom.gamekeydown[CDoom.key_right] != 0 ||
-      CDoom.gamekeydown[CDoom.key_left] != 0
+       CDoom.joyxmove > 0 ||
+       CDoom.gamekeydown[CDoom.key_right] != 0 ||
+       CDoom.gamekeydown[CDoom.key_left] != 0
       CDoom.turnheld += CDoom.ticdup
     else
       CDoom.turnheld = 0
@@ -3766,7 +3765,7 @@ module LibDoom
     cmd.value.chatchar = CDoom.hu_dequeue_chat_char
 
     if CDoom.gamekeydown[CDoom.key_fire] != 0 || CDoom.mousebuttons[CDoom.mousebfire] != 0 ||
-      CDoom.joybuttons[CDoom.joybfire] != 0
+       CDoom.joybuttons[CDoom.joybfire] != 0
       cmd.value.buttons = cmd.value.buttons | CDoom::Buttoncode::BT_ATTACK.value
     end
 
@@ -3808,9 +3807,9 @@ module LibDoom
 
     # strafe double click
     bstrafe =
-    (CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
-    CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
-    if  bstrafe != CDoom.dclickstate2 && CDoom.dclicktime2 > 1
+      (CDoom.mousebuttons[CDoom.mousebstrafe] != 0 ||
+        CDoom.joybuttons[CDoom.joybstrafe] != 0).to_unsafe
+    if bstrafe != CDoom.dclickstate2 && CDoom.dclicktime2 > 1
       CDoom.dclickstate2 = bstrafe
       CDoom.dclicks2 += 1 if CDoom.dclickstate2 != 0
       if CDoom.dclicks2 == 2
@@ -3829,7 +3828,7 @@ module LibDoom
 
     forward += CDoom.mousey if CDoom.mousemove != 0
     if strafe != 0
-    side += CDoom.mousex * 2
+      side += CDoom.mousex * 2
     else
       cmd.value.angleturn = cmd.value.angleturn - CDoom.mousex * 0x8
     end
@@ -3851,7 +3850,6 @@ module LibDoom
     cmd.value.forwardmove = cmd.value.forwardmove + forward
     cmd.value.sidemove = cmd.value.sidemove + side
 
-
     # special buttons
     if CDoom.sendpause != 0
       CDoom.sendpause = 0
@@ -3863,4 +3861,348 @@ module LibDoom
       cmd.value.buttons = CDoom::Buttoncode::BT_SPECIAL.value | CDoom::Buttoncode::BTS_SAVEGAME.value | (CDoom.savegameslot << CDoom::Buttoncode::BTS_SAVESHIFT.value)
     end
   end
+
+  #
+  # g_do_load_level
+  #
+  def self.g_do_load_level
+    # Set the sky map.
+    # First thing, we have a dummy sky texture name,
+    #  a flat. The data is in the WAD only because
+    #  we look for an actual index, instead of simply
+    #  setting one.
+    CDoom.skyflatnum = CDoom.r_flat_num_for_name(CDoom::SKYFLATNAME)
+
+    # DOOM determines the sky texture to be used
+    # depending on the current episode, and the game version.
+    if CDoom.gamemode == CDoom::GameMode::Commercial ||
+       CDoom.gamemission == CDoom::GameMission::PackTnt ||
+       CDoom.gamemission == CDoom::GameMission::PackPlut
+      CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
+      if CDoom.gamemap < 12
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
+      elsif CDoom.gamemap < 21
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
+      end
+    end
+
+    CDoom.levelstarttic = CDoom.gametic # for time calculation
+
+    CDoom.wipegamestate = CDoom::Gamestate::Needwipe if CDoom.wipegamestate == CDoom::Gamestate::Level # force a wipe
+
+    CDoom.gamestate = CDoom::Gamestate::Level
+
+    CDoom::MAXPLAYERS.times do |i|
+      if CDoom.playeringame[i] != 0 && CDoom.players[i].playerstate == CDoom::Playerstate::PST_DEAD
+        CDoom.players[i].playerstate = CDoom::Playerstate::PST_REBORN
+      end
+      CDoom.doom_memset(CDoom.players[i].frags, 0, sizeof(typeof(CDoom.players[i].frags)))
+    end
+
+    CDoom.p_setup_level(CDoom.gameepisode, CDoom.gamemap, 0, CDoom.gameskill)
+    CDoom.displayplayer = CDoom.consoleplayer # view the guy you are playing
+    CDoom.starttime = CDoom.i_get_time
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.z_check_heap
+
+    # clear cmd building stuff
+    CDoom.doom_memset(CDoom.gamekeydown, 0, sizeof(typeof(CDoom.gamekeydown)))
+    CDoom.joyxmove = 0
+    CDoom.joyymove = 0
+    CDoom.mousex = 0
+    CDoom.mousey = 0
+    CDoom.sendpause = 0
+    CDoom.sendsave = 0
+    CDoom.paused = 0
+    CDoom.doom_memset(CDoom.mousebuttons, 0, sizeof(typeof(CDoom.mousebuttons.value)) * 3)
+    CDoom.doom_memset(CDoom.joybuttons, 0, sizeof(typeof(CDoom.joybuttons.value)) * 3)
+  end
+
+  def self.g_responder(ev : CDoom::Event*) : CDoom::DoomBool
+    # allow spy mode changes even during the demo
+    if CDoom.gamestate == CDoom::Gamestate::Level && ev.value.type == CDoom::Evtype::Keydown &&
+      ev.value.data1 == CDoom::KEY_F12 && (CDoom.singledemo != 0 || CDoom.deathmatch == 0)
+      # spy mode
+      loop do
+        CDoom.displayplayer += 1
+        CDoom.displayplayer = 0 if CDoom.displayplayer == CDoom::MAXPLAYERS
+
+        break unless CDoom.playeringame[CDoom.displayplayer] == 0 && CDoom.displayplayer != CDoom.consoleplayer
+      end
+      return 1
+    end
+
+    # any other key pops up menu if in demos
+    if CDoom.gameaction == CDoom::Gameaction::Nothing && CDoom.singledemo == 0 &&
+      (CDoom.demoplayback != 0 || CDoom.gamestate == CDoom::Gamestate::Demoscreen)
+      if ev.value.type == CDoom::Evtype::Keydown ||
+        (ev.value.type == CDoom::Evtype::Mouse && ev.value.data1 != 0) ||
+        (ev.value.type == CDoom::Evtype::Joystick && ev.value.data1 != 0)
+        CDoom.m_start_control_panel
+        return 1
+      end
+      return 0
+    end
+
+    if CDoom.gamestate == CDoom::Gamestate::Level
+      {% if false %}
+      if CDoom.devparm != 0 && ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == ';'.ord
+        CDoom.g_deathmatch_spawn_player(0)
+        return 1
+      end
+      {% end %}
+      return 1 if CDoom.hu_responder(ev) != 0 # chat ate the event
+      return 1 if CDoom.st_responder(ev) != 0 # status window ate it
+      return 1 if CDoom.am_responder(ev) != 0 # automap ate it
+    end
+
+    if CDoom.gamestate == CDoom::Gamestate::Finale
+      return 1 if CDoom.f_responder(ev) != 0 # finale ate the event
+    end
+
+    case ev.value.type
+    when CDoom::Evtype::Keydown
+      if ev.value.data1 == CDoom::KEY_PAUSE
+        CDoom.sendpause = 1
+        return 1
+      end
+      CDoom.gamekeydown[ev.value.data1] = 1 if ev.value.data1 < CDoom::NUMKEYS
+      return 1 # eat key down events
+    when CDoom::Evtype::Keyup
+      CDoom.gamekeydown[ev.value.data1] = 0 if ev.value.data1 < CDoom::NUMKEYS
+      return 0 # always let key up events filter down
+    when CDoom::Evtype::Mouse
+      CDoom.mousebuttons[0] = ev.value.data1 & 1
+      CDoom.mousebuttons[1] = ev.value.data1 & 2
+      CDoom.mousebuttons[2] = ev.value.data1 & 4
+      CDoom.mousex = ev.value.data2 * (CDoom.mouse_sensitivity + 5) // 10
+      CDoom.mousey = ev.value.data3 * (CDoom.mouse_sensitivity + 5) // 10
+      return 1 # eat events
+    when CDoom::Evtype::Joystick
+      CDoom.joybuttons[0] = ev.value.data1 & 1
+      CDoom.joybuttons[1] = ev.value.data1 & 2
+      CDoom.joybuttons[2] = ev.value.data1 & 4
+      CDoom.joybuttons[3] = ev.value.data1 & 8
+      CDoom.joyxmove = ev.value.data2
+      CDoom.joyymove = ev.value.data3
+      return 1 # eat events
+    end
+
+    return 0
+  end
+
+  @@turbomessage = uninitialized StaticArray(UInt8, 80)
+  #
+  # g_ticker
+  # Make ticcmds for the players.
+  def self.g_ticker
+    # do player reborns if needed
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.g_do_reborn(i) if CDoom.playeringame[i] != 0 && CDoom.players[i].playerstate == CDoom::Playerstate::PST_REBORN
+    end
+
+    # do things to change the game state
+    while CDoom.gameaction != CDoom::Gameaction::Nothing
+      case CDoom.gameaction
+      when CDoom::Gameaction::Loadlevel
+        CDoom.g_do_load_level
+      when CDoom::Gameaction::Newgame
+        CDoom.g_do_new_game
+      when CDoom::Gameaction::Loadgame
+        CDoom.g_do_load_game
+      when CDoom::Gameaction::Savegame
+        CDoom.g_do_save_game
+      when CDoom::Gameaction::Playdemo
+        CDoom.g_do_play_demo
+        when CDoom::Gameaction::Completed
+        CDoom.g_do_completed
+        when CDoom::Gameaction::Victory
+        CDoom.f_start_finale
+        when CDoom::Gameaction::Worlddone
+        CDoom.g_do_world_done
+        when CDoom::Gameaction::Screenshot
+        CDoom.m_screenshot
+        CDoom.gameaction = CDoom::Gameaction::Nothing
+        when CDoom::Gameaction::Nothing
+        end
+    end
+
+    # get commands, check consistancy,
+    # and build new consistancy check
+    buf = (CDoom.gametic // CDoom.ticdup) % CDoom::BACKUPTICS
+
+    CDoom::MAXPLAYERS.times do |i|
+      if CDoom.playeringame[i] != 0
+        cmd = ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*) # Gotta be a better way to do this
+
+        CDoom.doom_memcpy(cmd, (CDoom.netcmds.to_unsafe + i).value.to_unsafe + buf, sizeof(CDoom::Ticcmd))
+
+        CDoom.g_read_demo_ticcmd(cmd) if CDoom.demoplayback != 0
+        CDoom.g_write_demo_ticcmd(cmd) if CDoom.demorecording != 0
+
+        # check for turbo cheats
+        if cmd.value.forwardmove > CDoom::TURBOTHRESHOLD &&
+          (CDoom.gametic & 31) == 0 && (CDoom.gametic >> 5) & 3 == i
+          CDoom.doom_strcpy(@@turbomessage, CDoom.player_names[i])
+          CDoom.doom_concat(@@turbomessage, " is turbo!")
+          CDoom.players[CDoom.consoleplayer].message = @@turbomessage
+        end
+
+        if CDoom.netgame != 0 && CDoom.netdemo == 0 && (CDoom.gametic % CDoom.ticdup) == 0
+          if CDoom.gametic > CDoom::BACKUPTICS &&
+            CDoom.consistancy[i][buf] != cmd.value.consistancy
+            CDoom.doom_strcpy(CDoom.error_buf, "Error: consistency failure (")
+            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(cmd.value.consistancy, 10))
+            CDoom.doom_concat(CDoom.error_buf, " should be ")
+            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.consistancy[i][buf], 10))
+            CDoom.doom_concat(CDoom.error_buf, ")")
+            CDoom.i_error(CDoom.error_buf)
+          end
+          if !CDoom.players[i].mo.null?
+            CDoom.consistancy[i][buf] = CDoom.players[i].mo.value.x.to_i16!
+          else
+            CDoom.consistancy[i][buf] = CDoom.rndindex.to_i16!
+          end
+        end
+      end
+    end
+
+    # check for special buttons
+    CDoom::MAXPLAYERS.times do |i|
+      if CDoom.playeringame[i] !+ 0
+        if CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
+          case CDoom::Buttoncode.new(CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
+          when CDoom::Buttoncode::BTS_PAUSE
+            CDoom.paused ^= 1
+            if CDoom.paused != 0
+              CDoom.s_pause_sound
+            else
+              CDoom.s_resume_sound
+            end
+          when CDoom::Buttoncode::BTS_SAVEGAME
+            CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") if CDoom.savedescription[0] == '\0'.ord
+            CDoom.savegameslot = 
+            (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
+            CDoom.gameaction = CDoom::Gameaction::Savegame
+          end
+        end
+      end
+    end
+
+    # do main actions
+    case CDoom.gamestate
+    when CDoom::Gamestate::Level
+      CDoom.p_ticker
+      CDoom.st_ticker
+      CDoom.am_ticker
+      CDoom.hu_ticker
+    when CDoom::Gamestate::Intermission
+      CDoom.wi_ticker
+    when CDoom::Gamestate::Finale
+      CDoom.f_ticker
+    when CDoom::Gamestate::Demoscreen
+      CDoom.d_page_ticker
+    end
+  end
+
+  #
+# g_init_player 
+# Called at the start.
+# Called by the game initialization functions.
+#
+  def self.g_init_player(player : Int32)
+    # set up the saved info
+    p = CDoom.players.to_unsafe + player
+
+    # clear everything else to defaults
+    CDoom.g_player_reborn(player)
+  end
+
+  #
+# g_player_finish_level
+# Can when a player completes a level.
+#
+  def self.g_player_finish_level(player : Int32)
+    p = CDoom.players.to_unsafe + player
+
+    CDoom.doom_memset(p.value.powers.to_unsafe, 0, sizeof(typeof(p.value.powers)))
+    CDoom.doom_memset(p.value.cards.to_unsafe, 0, sizeof(typeof(p.value.cards)))
+    p.value.mo.value.flags = p.value.mo.value.flags & ~CDoom::Mobjflag::MF_SHADOW.value # cancel invisibility
+    p.value.extralight = 0 # cancel gun flashes
+    p.value.fixedcolormap = 0 # cancel ir gogles
+    p.value.damagecount = 0 # no palette changes
+    p.value.bonuscount = 0
+  end
+
+  #
+# g_player_reborn
+# Called after a player dies 
+# almost everything is cleared and initialized 
+#
+  def self.g_player_reborn(player : Int32)
+    frags = uninitialized StaticArray(Int32, CDoom::MAXPLAYERS)
+
+    CDoom.doom_memcpy(frags.to_unsafe, CDoom.players[player].frags.to_unsafe, sizeof(typeof(frags)))
+    killcount = CDoom.players[player].killcount
+    itemcount = CDoom.players[player].itemcount
+    secretcount = CDoom.players[player].secretcount
+
+    p = CDoom.players.to_unsafe + player
+    CDoom.doom_memset(p, 0, sizeof(typeof(p.value)))
+
+    CDoom.doom_memcpy(CDoom.players[player].frags.to_unsafe, frags.to_unsafe, sizeof(typeof(CDoom.players[player].frags)))
+    CDoom.players[player].killcount = killcount
+    CDoom.players[player].itemcount = itemcount
+    CDoom.players[player].secretcount = secretcount
+
+    p.value.usedown = 0 # don't do anything immediately
+    p.value.attackdown = 0
+    p.value.playerstate = CDoom::Playerstate::PST_LIVE
+    p.value.health = CDoom::MAXHEALTH
+    p.value.readyweapon = CDoom::Weapontype::Pistol
+    p.value.pendingweapon = CDoom::Weapontype::Pistol
+    p.value.weaponowned[CDoom::Weapontype::Fist.value] = 1
+    p.value.weaponowned[CDoom::Weapontype::Pistol.value] = 1
+    p.value.ammo[CDoom::Ammotype::Clip.value] = 50
+
+    CDoom::Ammotype::NUMAMMO.value.times do |i|
+      p.value.maxammo[i] = CDoom.maxammo[i]
+    end
+  end
+
+  def self.g_check_spot(playernum : Int32, mthing : CDoom::Mapthing*) : CDoom::DoomBool
+    if CDoom.players[playernum].mo.null?
+      # first spawn of level, before corpses
+      playernum.times do |i|
+        return 0 if (CDoom.players[i].mo.value.x == mthing.value.x << CDoom::FRACBITS &&
+        CDoom.players[i].mo.value.y == mthing.value.y << CDoom::FRACBITS)
+        return 1
+      end
+    end
+
+    x = mthing.value.x << CDoom::FRACBITS
+    y = mthing.value.y << CDoom::FRACBITS
+
+    return 0 if CDoom.p_check_position(CDoom.players[playernum].mo, x, y) == 0
+
+    # flush an old corpse if needed
+    if CDoom.bodyqueslot >= CDoom::BODYQUESIZE
+      CDoom.p_remove_mobj(CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE])
+    end
+    CDoom.bodyque[CDoom.bodyqueslot % CDoom::BODYQUESIZE] = CDoom.players[playernum].mo
+    CDoom.bodyqueslot += 1
+
+    # spawn a teleport fog
+    ss = CDoom.r_point_in_subsector(x, y)
+    an = (CDoom::ANG45 * (mthing.value.angle // 45)) >> CDoom::ANGLETOFINESHIFT
+
+    mo = CDoom.p_spawn_mobj(x + 20 * CDoom.finecosine[an], y + 20 * CDoom.finesine[an],
+    ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
+
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if CDoom.players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
+
+    return 1
+  end
+
+  
 end

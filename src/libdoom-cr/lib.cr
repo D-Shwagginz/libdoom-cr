@@ -1298,8 +1298,8 @@ lib CDoom
   # Mainly movements/button commands per game tick,
   # plus a checksum for internal state consistency.
   struct Ticcmd
-    forwardmove : LibC::SChar  # *2048 for move
-    sidemove : LibC::SChar     # *2048 for move
+    forwardmove : LibC::SChar # *2048 for move
+    sidemove : LibC::SChar    # *2048 for move
     angleturn : LibC::Short   # <<16 for angle delta
     consistancy : LibC::Short # checks for net game
     chatchar : Byte
@@ -3844,7 +3844,7 @@ lib CDoom
     readyweapon : Weapontype
 
     # Is wp_nochange if not changing.
-    pendingweapons : Weapontype
+    pendingweapon : Weapontype
 
     weaponowned : DoomBool[Weapontype::NUMWEAPONS]
     ammo : LibC::Int[Ammotype::NUMAMMO]
@@ -4198,7 +4198,7 @@ lib CDoom
   # to force a wipe on the next draw
   $wipegamestate : Gamestate
 
-  $mouse_sensitivity : LibC::Int
+  $mouse_sensitivity = mouseSensitivity : LibC::Int
   # ?
   # debug flag to cancel adaptiveness
   $singletics : DoomBool
@@ -5922,7 +5922,7 @@ lib CDoom
   end
 
   # Called by main loop, animate the intermission.
-  fun wi_ticker = WI_Ticer
+  fun wi_ticker = WI_Ticker
 
   # Called by main loop,
   # draws the intermission directly into the screen buffer.
@@ -6580,13 +6580,13 @@ lib CDoom
   fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
   fun g_init_new = G_InitNew(skill : Skill, episode : LibC::Int, map : LibC::Int)
   fun g_do_reborn = G_DoReborn(playernum : LibC::Int)
-  fun g_do_load_level = G_DoLoadLevelfun
-  fun g_do_new_game = G_DoNewGamefun
-  fun g_do_load_game = G_DoLoadGamefun
-  fun g_do_play_demo = G_DoPlayDemofun
-  fun g_do_completed = G_DoCompletedfun
-  fun g_do_world_done = G_DoWorldDonefun
-  fun g_do_save_game = G_DoSaveGamefun
+  fun g_do_load_level = G_DoLoadLevel
+  fun g_do_new_game = G_DoNewGame
+  fun g_do_load_game = G_DoLoadGame
+  fun g_do_play_demo = G_DoPlayDemo
+  fun g_do_completed = G_DoCompleted
+  fun g_do_world_done = G_DoWorldDone
+  fun g_do_save_game = G_DoSaveGame
   fun p_spawn_player = P_SpawnPlayer(mthing : Mapthing*)
   fun r_execute_set_view_size = R_ExecuteSetViewSize
 
@@ -6609,7 +6609,7 @@ lib CDoom
 
   $viewactive : DoomBool
 
-  $deathmatch : DoomBool # only if started as net death 
+  $deathmatch : DoomBool # only if started as net death
 
   $demoname : LibC::Char[32]
   $netdemo : DoomBool
@@ -6617,34 +6617,34 @@ lib CDoom
   $demo_p : Byte*
   $demoend : Byte*
 
-    $consistancy : LibC::Short[BACKUPTICS][MAXPLAYERS]
+  $consistancy : LibC::Short[BACKUPTICS][MAXPLAYERS]
 
   $savebuffer : Byte*
 
-    #
-    # controls (have defaults)
-    #
-    $key_right : LibC::Int
-    $key_left : LibC::Int
+  #
+  # controls (have defaults)
+  #
+  $key_right : LibC::Int
+  $key_left : LibC::Int
 
-    $key_up : LibC::Int
-    $key_down : LibC::Int
-    $key_strafeleft : LibC::Int
-    $key_straferight : LibC::Int
-    $key_fire : LibC::Int
-    $key_use : LibC::Int
-    $key_strafe : LibC::Int
-    $key_speed : LibC::Int
+  $key_up : LibC::Int
+  $key_down : LibC::Int
+  $key_strafeleft : LibC::Int
+  $key_straferight : LibC::Int
+  $key_fire : LibC::Int
+  $key_use : LibC::Int
+  $key_strafe : LibC::Int
+  $key_speed : LibC::Int
 
-    $mousebfire : LibC::Int
-    $mousebstrafe : LibC::Int
-    $mousebforward : LibC::Int
-    $mousemove : LibC::Int
+  $mousebfire : LibC::Int
+  $mousebstrafe : LibC::Int
+  $mousebforward : LibC::Int
+  $mousemove : LibC::Int
 
-    $joybfire : LibC::Int
-    $joybstrafe : LibC::Int
-    $joybuse : LibC::Int
-    $joybspeed : LibC::Int
+  $joybfire : LibC::Int
+  $joybstrafe : LibC::Int
+  $joybuse : LibC::Int
+  $joybspeed : LibC::Int
 
   $forwardmove : Fixed[2]
   $sidemove : Fixed[2]
@@ -6690,11 +6690,22 @@ lib CDoom
   $savename : LibC::Char[256]
 
   $d_skill : Skill
-    $d_episode : LibC::Int
-    $d_map : LibC::Int
+  $d_episode : LibC::Int
+  $d_map : LibC::Int
 
-    $defdemoname : LibC::Char*
+  $defdemoname : LibC::Char*
 
-    fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*) 
-  
+  fun g_build_ticcmd = G_BuildTiccmd(cmd : Ticcmd*)
+
+  fun g_init_player = G_InitPlayer(player : LibC::Int)
+
+  fun g_player_finish_level = G_PlayerFinishLevel(player : LibC::Int)
+
+  fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
+
+    fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : Mapthing*) : DoomBool
+
+
+    
+  $player_names : LibC::Char*[4]
 end
