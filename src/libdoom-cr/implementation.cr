@@ -566,26 +566,393 @@ fun g_do_load_level = G_DoLoadLevel
   LibDoom.g_do_load_level
 end
 
-  fun g_responder = G_Responder(ev : CDoom::Event*) : CDoom::DoomBool
-LibDoom.g_responder(ev)
-  end
+fun g_responder = G_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+  LibDoom.g_responder(ev)
+end
 
-  fun g_ticker = G_Ticker
-LibDoom.g_ticker
-  end
+fun g_ticker = G_Ticker
+  LibDoom.g_ticker
+end
 
-  fun g_init_player = G_InitPlayer(player : LibC::Int)
-LibDoom.g_init_player(player)
-  end
+fun g_init_player = G_InitPlayer(player : LibC::Int)
+  LibDoom.g_init_player(player)
+end
 
-  fun g_player_finish_level = G_PlayerFinishLevel(player : LibC::Int)
-LibDoom.g_player_finish_level(player)
-  end
+fun g_player_finish_level = G_PlayerFinishLevel(player : LibC::Int)
+  LibDoom.g_player_finish_level(player)
+end
 
-  fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
-LibDoom.g_player_reborn(player)
-  end
+fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
+  LibDoom.g_player_reborn(player)
+end
 
-    fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : CDoom::DoomBool
-LibDoom.g_check_spot(playernum, mthing)
-    end
+fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : CDoom::Mapthing*) : CDoom::DoomBool
+  LibDoom.g_check_spot(playernum, mthing)
+end
+
+fun g_deathmatch_spawn_player = G_DeathMatchSpawnPlayer(playernum : LibC::Int)
+  LibDoom.g_deathmatch_spawn_player(playernum)
+end
+
+fun g_do_reborn = G_DoReborn(playernum : LibC::Int)
+  LibDoom.g_do_reborn(playernum)
+end
+
+fun g_screenshot = G_ScreenShot
+  LibDoom.g_screenshot
+end
+
+fun g_exit_level = G_ExitLevel
+  LibDoom.g_exit_level
+end
+
+fun g_secret_exit_level = G_SecretExitLevel
+  LibDoom.g_secret_exit_level
+end
+
+fun g_do_completed = G_DoCompleted
+  LibDoom.g_do_completed
+end
+
+fun g_world_done = G_WorldDone
+  LibDoom.g_world_done
+end
+
+fun g_do_world_done = G_DoWorldDone
+  LibDoom.g_do_world_done
+end
+
+fun g_load_game = G_LoadGame(name : LibC::Char*)
+  LibDoom.g_load_game(name)
+end
+
+fun g_do_load_game = G_DoLoadGame
+  LibDoom.g_do_load_game
+end
+
+fun g_save_game = G_SaveGame(slot : LibC::Int, description : LibC::Char*)
+  LibDoom.g_save_game(slot, description)
+end
+
+fun g_do_save_game = G_DoSaveGame
+  LibDoom.g_do_save_game
+end
+
+fun g_defered_init_new = G_DeferedInitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
+  LibDoom.g_defered_init_new(skill, episode, map)
+end
+
+fun g_do_new_game = G_DoNewGame
+  LibDoom.g_do_new_game
+end
+
+fun g_init_new = G_InitNew(skill : CDoom::Skill, episode : LibC::Int, map : LibC::Int)
+  LibDoom.g_init_new(skill, episode, map)
+end
+
+fun g_read_demo_ticcmd = G_ReadDemoTiccmd(cmd : CDoom::Ticcmd*)
+  LibDoom.g_read_demo_ticcmd(cmd)
+end
+
+fun g_write_demo_ticcmd = G_WriteDemoTiccmd(cmd : CDoom::Ticcmd*)
+  LibDoom.g_write_demo_ticcmd(cmd)
+end
+
+fun g_record_demo = G_RecordDemo(name : LibC::Char*)
+  LibDoom.g_record_demo(name)
+end
+
+fun g_begin_recording = G_BeginRecording
+  LibDoom.g_begin_recording
+end
+
+fun g_defered_play_demo = G_DeferedPlayDemo(demo : LibC::Char*)
+  LibDoom.g_defered_play_demo(demo)
+end
+
+fun g_do_play_demo = G_DoPlayDemo
+  LibDoom.g_do_play_demo
+end
+
+fun g_time_demo = G_TimeDemo(name : LibC::Char*)
+  LibDoom.g_time_demo(name)
+end
+
+fun g_check_demo_status = G_CheckDemoStatus : CDoom::DoomBool
+  LibDoom.g_check_demo_status
+end
+
+fun hulib_clear_text_line = HUlib_clearTextLine(t : CDoom::HU_Textline*)
+  LibDoom.hulib_clear_text_line(t)
+end
+
+fun hulib_init_text_line = HUlib_initTextLine(t : CDoom::HU_Textline*, x : LibC::Int, y : LibC::Int, f : CDoom::Patch**, sc : LibC::Int)
+  LibDoom.hulib_init_text_line(t, x, y, f, sc)
+end
+
+fun hulib_add_char_to_text_line = HUlib_addCharToTextLine(t : CDoom::HU_Textline*, ch : LibC::Char) : CDoom::DoomBool
+  LibDoom.hulib_add_char_to_text_line(t, ch)
+end
+
+fun hulib_del_char_from_text_line = HUlib_delCharFromTextLine(t : CDoom::HU_Textline*) : CDoom::DoomBool
+  LibDoom.hulib_del_char_from_text_line(t)
+end
+
+fun hulib_draw_text_line = HUlib_drawTextLine(l : CDoom::HU_Textline*, drawcursor : CDoom::DoomBool)
+  LibDoom.hulib_draw_text_line(l, drawcursor)
+end
+
+fun hulib_erase_text_line = HUlib_eraseTextLine(l : CDoom::HU_Textline*)
+  LibDoom.hulib_erase_text_line(l)
+end
+
+fun hulib_init_s_text = HUlib_initSText(s : CDoom::HU_Stext*,
+                                        x : LibC::Int,
+                                        y : LibC::Int,
+                                        h : LibC::Int,
+                                        font : CDoom::Patch**,
+                                        startchar : LibC::Int,
+                                        on : CDoom::DoomBool*)
+  LibDoom.hulib_init_s_text(s, x, y, h, font, startchar, on)
+end
+
+fun hulib_add_line_to_s_text = HUlib_addLineToSText(s : CDoom::HU_Stext*)
+  LibDoom.hulib_add_line_to_s_text(s)
+end
+
+fun hulib_add_message_to_s_text = HUlib_addMessageToSText(s : CDoom::HU_Stext*, prefix : LibC::Char*, msg : LibC::Char*)
+  LibDoom.hulib_add_message_to_s_text(s, prefix, msg)
+end
+
+fun hulib_draw_s_text = HUlib_drawSText(s : CDoom::HU_Stext*)
+  LibDoom.hulib_draw_s_text(s)
+end
+
+fun hulib_erase_s_text = HUlib_eraseSText(s : CDoom::HU_Stext*)
+  LibDoom.hulib_erase_s_text(s)
+end
+
+fun hulib_init_i_text = HUlib_initIText(it : CDoom::HU_Itext*,
+                                        x : LibC::Int,
+                                        y : LibC::Int,
+                                        font : CDoom::Patch**,
+                                        startchar : LibC::Int,
+                                        on : CDoom::DoomBool*)
+  LibDoom.hulib_init_i_text(it, x, y, font, startchar, on)
+end
+
+fun hulib_del_char_from_i_text = HUlib_delCharFromIText(it : CDoom::HU_Itext*)
+  LibDoom.hulib_del_char_from_i_text(it)
+end
+
+fun hulib_erase_line_from_i_text = HUlib_eraseLineFromIText(it : CDoom::HU_Itext*)
+  LibDoom.hulib_erase_line_from_i_text(it)
+end
+
+fun hulib_reset_i_text = HUlib_resetIText(it : CDoom::HU_Itext*)
+  LibDoom.hulib_reset_i_text(it)
+end
+
+fun hulib_add_prefix_to_i_text = HUlib_addPrefixToIText(it : CDoom::HU_Itext*, str : LibC::Char*)
+  LibDoom.hulib_add_prefix_to_i_text(it, str)
+end
+
+fun hulib_key_in_i_text = HUlib_keyInIText(it : CDoom::HU_Itext*, ch : LibC::UChar) : CDoom::DoomBool
+  LibDoom.hulib_key_in_i_text(it, ch)
+end
+
+fun hulib_draw_i_text = HUlib_drawIText(it : CDoom::HU_Itext*)
+  LibDoom.hulib_draw_i_text(it)
+end
+
+fun hulib_erase_i_text = HUlib_eraseIText(it : CDoom::HU_Itext*)
+  LibDoom.hulib_erase_i_text(it)
+end
+
+fun foreign_translation = ForeignTranslation(ch : LibC::Char) : LibC::Char
+  LibDoom.foreign_translation(ch)
+end
+
+fun hu_init = HU_Init
+  LibDoom.hu_init
+end
+
+fun hu_stop = HU_Stop
+  LibDoom.hu_stop
+end
+
+fun hu_start = HU_Start
+  LibDoom.hu_start
+end
+
+fun hu_drawer = HU_Drawer
+  LibDoom.hu_drawer
+end
+
+fun hu_erase = HU_Erase
+  LibDoom.hu_erase
+end
+
+fun hu_ticker = HU_Ticker
+  LibDoom.hu_ticker
+end
+
+fun hu_queue_chat_char = HU_queueChatChar(c : LibC::Char)
+  LibDoom.hu_queue_chat_char(c)
+end
+
+fun hu_dequeue_chat_char = HU_dequeueChatChar : LibC::Char
+  LibDoom.hu_dequeue_chat_char
+end
+
+fun hu_responder = HU_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+  LibDoom.hu_responder(ev)
+end
+
+fun i_init_network = I_InitNetwork
+  LibDoom.i_init_network
+end
+
+fun i_net_cmd = I_NetCmd
+  LibDoom.i_net_cmd
+end
+
+fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
+  LibDoom.getsfx(sfxname, len)
+end
+
+fun addsfx(sfxid : LibC::Int, volume : LibC::Int, step : LibC::Int, seperation : LibC::Int) : LibC::Int
+  LibDoom.addsfx(sfxid, volume, step, seperation)
+end
+
+fun i_set_channels = I_SetChannels
+  LibDoom.i_set_channels
+end
+
+fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
+  LibDoom.i_set_sfx_volume(volume)
+end
+
+fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
+  LibDoom.i_set_music_volume(volume)
+end
+
+fun i_get_sfx_lump_num = I_GetSfxLumpNum(sfx : CDoom::Sfxinfo*) : LibC::Int
+  LibDoom.i_get_sfx_lump_num(sfx)
+end
+
+fun i_start_sound = I_StartSound(id : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int, priority : LibC::Int) : LibC::Int
+  LibDoom.i_start_sound(id, vol, sep, pitch, priority)
+end
+
+fun i_stop_sound = I_StopSound(handle : LibC::Int)
+  LibDoom.i_stop_sound(handle)
+end
+
+fun i_sound_is_playing = I_SoundIsPlaying(handle : LibC::Int) : LibC::Int
+  LibDoom.i_sound_is_playing(handle)
+end
+
+fun i_update_sound = I_UpdateSound
+  LibDoom.i_update_sound
+end
+
+fun i_submit_sound = I_SubmitSound
+  LibDoom.i_submit_sound
+end
+
+fun i_update_sound_params = I_UpdateSoundParams(handle : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int)
+  LibDoom.i_update_sound_params(handle, vol, sep, pitch)
+end
+
+fun i_shutdown_sound = I_ShutdownSound
+  LibDoom.i_shutdown_sound
+end
+
+fun i_init_sound = I_InitSound
+  LibDoom.i_init_sound
+end
+
+fun i_init_music = I_InitMusic
+  LibDoom.i_init_music
+end
+
+fun i_shutdown_music = I_ShutdownMusic
+  LibDoom.i_shutdown_music
+end
+
+fun i_play_song = I_PlaySong(handle : LibC::Int, looping : LibC::Int)
+  LibDoom.i_play_song(handle, looping)
+end
+
+fun i_pause_song = I_PauseSong(handle : LibC::Int)
+  LibDoom.i_pause_song(handle)
+end
+
+fun i_resume_song = I_ResumeSong(handle : LibC::Int)
+  LibDoom.i_resume_song(handle)
+end
+
+fun reset_all_channels
+  LibDoom.reset_all_channels
+end
+
+fun i_stop_song = I_StopSong(handle : LibC::Int)
+  LibDoom.i_stop_song(handle)
+end
+
+fun i_unregister_song = I_UnRegisterSong(handle : LibC::Int)
+  LibDoom.i_unregister_song(handle)
+end
+
+fun i_register_song = I_RegisterSong(data : Void*) : LibC::Int
+  LibDoom.i_register_song(data)
+end
+
+fun i_qry_song_playing = I_QrySongPlaying(handle : LibC::Int) : LibC::Int
+  LibDoom.i_qry_song_playing(handle)
+end
+
+fun i_tick_song = I_TickSong : LibC::ULong
+  LibDoom.i_tick_song
+end
+
+fun i_tactile = I_Tactile(on : LibC::Int, off : LibC::Int, total : LibC::Int)
+  LibDoom.i_tactile(on, off, total)
+end
+
+fun i_base_ticcmd = I_BaseTiccmd : CDoom::Ticcmd*
+  LibDoom.i_base_ticcmd
+end
+
+fun i_get_heap_size = I_GetHeapSize : LibC::Int
+  LibDoom.i_get_heap_size
+end
+
+fun i_zone_base = I_ZoneBase(size : LibC::Int*) : CDoom::Byte*
+  LibDoom.i_zone_base(size)
+end
+
+fun i_get_time = I_GetTime : LibC::Int
+  LibDoom.i_get_time
+end
+
+fun i_init = I_Init
+  LibDoom.i_init
+end
+
+fun i_quit = I_Quit
+  LibDoom.i_quit
+end
+
+fun i_wait_vbl = I_WaitVBL(count : LibC::Int)
+  LibDoom.i_wait_vbl(count)
+end
+
+fun i_shutdown_graphics = I_ShutdownGraphics
+  LibDoom.i_shutdown_graphics
+end
+
+fun i_init_graphics = I_InitGraphics
+  LibDoom.i_init_graphics
+end

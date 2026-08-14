@@ -4247,7 +4247,7 @@ lib CDoom
   fun i_set_channels = I_SetChannels
 
   # Get raw data lump index for sound descriptor.
-  fun i_get_sfx_lump_num = I_GetSfxLumpNum(sfxinfo : Sfxinfo*) : LibC::Int
+  fun i_get_sfx_lump_num = I_GetSfxLumpNum(sfx : Sfxinfo*) : LibC::Int
 
   # Starts a sound in a particular sound channel.
   fun i_start_sound = I_StartSound(id : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int, priority : LibC::Int) : LibC::Int
@@ -4262,7 +4262,7 @@ lib CDoom
 
   # Updates the volume, separation,
   #  and pitch of a sound channel.
-  fun i_update_sound_params(handle : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int)
+  fun i_update_sound_params = I_UpdateSoundParams(handle : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int)
 
   #
   #  MUSIC I/O
@@ -6703,9 +6703,205 @@ lib CDoom
 
   fun g_player_reborn = G_PlayerReborn(player : LibC::Int)
 
-    fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : Mapthing*) : DoomBool
+  fun g_check_spot = G_CheckSpot(playernum : LibC::Int, mthing : Mapthing*) : DoomBool
 
+  fun g_deathmatch_spawn_player = G_DeathMatchSpawnPlayer(playernum : LibC::Int)
 
-    
+  NOTERASED = CDoom.viewwindowx
+
+  HU_TITLE       = mapnames[(gameepisode - 1)*9 + gamemap - 1]
+  HU_TITLE2      = mapnames2[gamemap - 1]
+  HU_TITLEP      = mapnamesp[gamemap - 1]
+  HU_TITLET      = mapnamest[gamemap - 1]
+  HU_TITLEHEIGHT = 1
+  HU_INPUTTOGGLE = 't'.ord
+  HU_INPUTWIDTH  =  64
+  HU_INPUTHEIGHT =   1
+  QUEUESIZE      = 128
+
+  $w_title : HU_Textline
+  $w_chat : HU_Itext
+  $always_off : DoomBool
+  $chat_dest : LibC::Char[MAXPLAYERS]
+  $w_inputbuffer : HU_Itext[MAXPLAYERS]
+  $message_on : DoomBool
+  $message_nottobefuckedwith : DoomBool
+  $w_message : HU_Stext
+  $message_counter : LibC::Int
+  $headsupactive : DoomBool
+  $chatchars : LibC::Char[QUEUESIZE]
+  $head : LibC::Int
+  $tail : LibC::Int
+
+  $chat_macros : LibC::Char*[10]
+
   $player_names : LibC::Char*[4]
+
+  $shiftxform : LibC::Char*
+
+  $french_shiftxform : LibC::Char[128]
+
+  $english_shiftxform : LibC::Char[128]
+
+  $french_key_map = frenchKeyMap : LibC::Char[128]
+
+  $chat_char : LibC::Char # remove later.
+  $chat_on : DoomBool
+  $message_dontfuckwithme : DoomBool
+
+  $show_messages = showMessages : LibC::Int
+
+  # DOOM shareware/registered/retail (Ultimate) names.
+  $mapnames : LibC::Char*[45]
+
+  # DOOM 2 map names.
+  $mapnames2 : LibC::Char*[32]
+
+  $mapnamesp : LibC::Char*[32]
+
+  $mapnamest : LibC::Char*[32]
+
+  fun foreign_translation = ForeignTranslation(ch : LibC::Char) : LibC::Char
+
+  fun hu_stop = HU_Stop
+
+  fun hu_queue_chat_char = HU_queueChatChar(c : LibC::Char)
+
+  IPPORT_USERRESERVED = 5000
+
+  SAMPLECOUNT  = 512
+  NUM_CHANNELS =   8
+  # It is 2 for 16bit, and 2 for two channels.
+  BUFMUL        = 4
+  MIXBUFFERSIZE = SAMPLECOUNT * BUFMUL
+
+  SAMPLERATE = 11025 # Hz
+  SAMPLESIZE =     2 # 16bit
+
+  MAX_QUEUED_MIDI_MSGS = 256
+
+  EVENT_RELEASE_NOTE   = 0
+  EVENT_PLAY_NOTE      = 1
+  EVENT_PITCH_BEND     = 2
+  EVENT_SYSTEM_EVENT   = 3
+  EVENT_CONTROLLER     = 4
+  EVENT_END_OF_MEASURE = 5
+  EVENT_FINISH         = 6
+  EVENT_UNUSED         = 7
+
+  CONTROLLER_EVENT_ALL_SOUNDS_OFF        = 10
+  CONTROLLER_EVENT_ALL_NOTES_OFF         = 11
+  CONTROLLER_EVENT_MONO                  = 12
+  CONTROLLER_EVENT_POLY                  = 13
+  CONTROLLER_EVENT_RESET_ALL_CONTROLLERS = 14
+  CONTROLLER_EVENT_EVENT                 = 15
+
+  CONTROLLER_CHANGE_INSTRUMENT = 0
+  CONTROLLER_BANK_SELECT       = 1
+  CONTROLLER_MODULATION        = 2
+  CONTROLLER_VOLUME            = 3
+  CONTROLLER_PAN               = 4
+  CONTROLLER_EXPRESSION        = 5
+  CONTROLLER_REVERB            = 6
+  CONTROLLER_CHORUS            = 7
+  CONTROLLER_SUSTAIN           = 8
+  CONTROLLER_SOFT              = 9
+
+  struct MusHeader
+    id : LibC::Char[4]
+    score_len : LibC::UShort
+    score_start : LibC::UShort
+    channels : LibC::UShort
+    sec_channels : LibC::UShort
+    instr_cnt : LibC::UShort
+    dummy : LibC::UShort
+  end
+
+  # A quick hack to establish a protocol between
+  # synchronous mix buffer updates and asynchronous
+  # audio writes. Probably redundant with gametic.
+  $flag : LibC::Int
+
+  $mus_data : LibC::Char*
+  $mus_header : MusHeader
+  $mus_offset : LibC::Int
+  $mus_delay : LibC::Int
+  $mus_loop : DoomBool
+  $mus_playing : DoomBool
+  $mus_volume : LibC::Int
+  $mus_channel_volumes : LibC::Int[16]
+
+  $looping : LibC::Int
+  $musicdies : LibC::Int
+
+  # The number of internal mixing channels,
+  #  the samples calculated for each mixing step,
+  #  the size of the 16bit, 2 hardware channel (stereo)
+  #  mixing buffer, and the samplerate of the raw data.
+
+  # The actual lengths of all sound effects.
+  $lengths : LibC::Int[Sfxenum::NUMSFX]
+
+  # The global mixing buffer.
+  # Basically, samples from all active internal channels
+  #  are modifed and added, and stored in the buffer
+  #  that is submitted to the audio device.
+  $mixbuffer : LibC::Short[MIXBUFFERSIZE]
+
+  # The channel step amount...
+  $channelstep : LibC::UInt[NUM_CHANNELS]
+  # ... and a 0.16 bit remainder of last step.
+  $channelstepremainder : LibC::UInt[NUM_CHANNELS]
+
+  # The channel data pointers, start and end.
+  $channels : LibC::Char*[NUM_CHANNELS]
+  $channelsend : LibC::Char*[NUM_CHANNELS]
+
+  # Time/gametic that the channel started playing,
+  #  used to determine oldest, which automatically
+  #  has lowest priority.
+  # In case number of active sounds exceeds
+  #  available channels.
+  $channelstart : LibC::Int[NUM_CHANNELS]
+
+  # The sound in channel handles,
+  #  determined on registration,
+  #  might be used to unregister/stop/modify,
+  #  currently unused.
+  $channelhandles : LibC::Int[NUM_CHANNELS]
+
+  # SFX id of the playing sound effect.
+  # Used to catch duplicates (like chainsaw).
+  $channelids : LibC::Int[NUM_CHANNELS]
+
+  # Pitch to stepping lookup, unused.
+  $steptable : LibC::Int[256]
+
+  # Volume lookups.
+  $vol_lookup : LibC::Int[32768]
+
+  # Hardware left and right channel volume lookup.
+  $channelleftvol_lookup : LibC::Int*[NUM_CHANNELS]
+  $channelrightvol_lookup : LibC::Int*[NUM_CHANNELS]
+
+  $queued_midi_msgs : LibC::ULong[MAX_QUEUED_MIDI_MSGS]
+  $queue_midi_head : LibC::Int
+  $queue_midi_tail : LibC::Int
+
+  fun tick_song = TickSong
+
+  fun getsfx(sfxname : LibC::Char*, len : LibC::Int*) : Void*
+  fun addsfx(sfxid : LibC::Int, volume : LibC::Int, step : LibC::Int, seperation : LibC::Int) : LibC::Int
+
+  fun i_set_sfx_volume = I_SetSfxVolume(volume : LibC::Int)
+  fun i_set_music_volume = I_SetMusicVolume(volume : LibC::Int)
+
+  fun reset_all_channels
+
+  fun i_qry_song_playing = I_QrySongPlaying(handle : LibC::Int) : LibC::Int
+
+  $mb_used : LibC::Int
+  $emptycmd : Ticcmd
+
+  fun i_get_heap_size = I_GetHeapSize : LibC::Int
 end

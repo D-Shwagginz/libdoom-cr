@@ -15,7 +15,10 @@ add plutonia tnt pack detection for version printing and stuff
   mus_delay = mus_delay * 128 + delay_byte & 0b01111111;
   Fixes into
   mus_delay = mus_delay * 128 + (delay_byte & 0b01111111);
+-- Fixed using strcpy instead of concat for M_QuickSave tempstring
+-- Fixed quitting not playing sound - This fix does require at least a dual core cpu
 
 cast not checking if button is down as well as key (so you can shoot with mouse)
 quit messages dont map to the correct game
 add accurate "UploadNewPalette" from doom source into i_set_palette to make colormaps work
+messages not showing when screensize is less than full

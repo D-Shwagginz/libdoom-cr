@@ -9,6 +9,19 @@ module LibDoom
   @@litelevels : StaticArray(Int32, 8) = StaticArray[0, 4, 7, 10, 12, 14, 15, 15]
   @@litelevelscnt = 0
 
+  @@doomport : Int32 = CDoom::IPPORT_USERRESERVED + 0x1d
+  @@doomport_send : Int32 = CDoom::IPPORT_USERRESERVED + 0x1e
+
+  closing = false
+
+  @@screen_texture : Raylib::Texture?
+  @@audio_stream : RAudio::AudioStream?
+  @@adl_player : ADLMIDI::Player*?
+  @@music_stream : RAudio::AudioStream?
+  @@last_time = 0
+  @@music_buffer = Pointer(Int16).null
+  @@midi_tick_accumulator = 0.0
+
   CDoom.screen_buffer = Pointer(UInt8).null
   CDoom.final_screen_buffer = Pointer(UInt8).null
   CDoom.last_update_time = 0
@@ -386,6 +399,606 @@ module LibDoom
   CDoom.cpars[30] = 120
   CDoom.cpars[31] = 30
 
+  CDoom.always_off = 0
+  CDoom.headsupactive = 0
+  CDoom.head = 0
+  CDoom.tail = 0
+
+  CDoom.chat_macros[0] = CDoom::HUSTR_CHATMACRO0.to_unsafe
+  CDoom.chat_macros[1] = CDoom::HUSTR_CHATMACRO1.to_unsafe
+  CDoom.chat_macros[2] = CDoom::HUSTR_CHATMACRO2.to_unsafe
+  CDoom.chat_macros[3] = CDoom::HUSTR_CHATMACRO3.to_unsafe
+  CDoom.chat_macros[4] = CDoom::HUSTR_CHATMACRO4.to_unsafe
+  CDoom.chat_macros[5] = CDoom::HUSTR_CHATMACRO5.to_unsafe
+  CDoom.chat_macros[6] = CDoom::HUSTR_CHATMACRO6.to_unsafe
+  CDoom.chat_macros[7] = CDoom::HUSTR_CHATMACRO7.to_unsafe
+  CDoom.chat_macros[8] = CDoom::HUSTR_CHATMACRO8.to_unsafe
+  CDoom.chat_macros[9] = CDoom::HUSTR_CHATMACRO9.to_unsafe
+
+  CDoom.french_shiftxform[0] = 0_u8
+  CDoom.french_shiftxform[1] = 1
+  CDoom.french_shiftxform[2] = 2
+  CDoom.french_shiftxform[3] = 3
+  CDoom.french_shiftxform[4] = 4
+  CDoom.french_shiftxform[5] = 5
+  CDoom.french_shiftxform[6] = 6
+  CDoom.french_shiftxform[7] = 7
+  CDoom.french_shiftxform[8] = 8
+  CDoom.french_shiftxform[9] = 9
+  CDoom.french_shiftxform[10] = 10
+  CDoom.french_shiftxform[11] = 11
+  CDoom.french_shiftxform[12] = 12
+  CDoom.french_shiftxform[13] = 13
+  CDoom.french_shiftxform[14] = 14
+  CDoom.french_shiftxform[15] = 15
+  CDoom.french_shiftxform[16] = 16
+  CDoom.french_shiftxform[17] = 17
+  CDoom.french_shiftxform[18] = 18
+  CDoom.french_shiftxform[19] = 19
+  CDoom.french_shiftxform[20] = 20
+  CDoom.french_shiftxform[21] = 21
+  CDoom.french_shiftxform[22] = 22
+  CDoom.french_shiftxform[23] = 23
+  CDoom.french_shiftxform[24] = 24
+  CDoom.french_shiftxform[25] = 25
+  CDoom.french_shiftxform[26] = 26
+  CDoom.french_shiftxform[27] = 27
+  CDoom.french_shiftxform[28] = 28
+  CDoom.french_shiftxform[29] = 29
+  CDoom.french_shiftxform[30] = 30
+  CDoom.french_shiftxform[31] = 31
+  CDoom.french_shiftxform[32] = ' '.ord.to_u8
+  CDoom.french_shiftxform[33] = '!'.ord.to_u8
+  CDoom.french_shiftxform[34] = '"'.ord.to_u8
+  CDoom.french_shiftxform[35] = '#'.ord.to_u8
+  CDoom.french_shiftxform[36] = '$'.ord.to_u8
+  CDoom.french_shiftxform[37] = '%'.ord.to_u8
+  CDoom.french_shiftxform[38] = '&'.ord.to_u8
+  CDoom.french_shiftxform[39] = '"'.ord.to_u8
+  CDoom.french_shiftxform[40] = '('.ord.to_u8
+  CDoom.french_shiftxform[41] = ')'.ord.to_u8
+  CDoom.french_shiftxform[42] = '*'.ord.to_u8
+  CDoom.french_shiftxform[43] = '+'.ord.to_u8
+  CDoom.french_shiftxform[44] = '?'.ord.to_u8
+  CDoom.french_shiftxform[45] = '_'.ord.to_u8
+  CDoom.french_shiftxform[46] = '>'.ord.to_u8
+  CDoom.french_shiftxform[47] = '?'.ord.to_u8
+  CDoom.french_shiftxform[48] = '0'.ord.to_u8
+  CDoom.french_shiftxform[49] = '1'.ord.to_u8
+  CDoom.french_shiftxform[50] = '2'.ord.to_u8
+  CDoom.french_shiftxform[51] = '3'.ord.to_u8
+  CDoom.french_shiftxform[52] = '4'.ord.to_u8
+  CDoom.french_shiftxform[53] = '5'.ord.to_u8
+  CDoom.french_shiftxform[54] = '6'.ord.to_u8
+  CDoom.french_shiftxform[55] = '7'.ord.to_u8
+  CDoom.french_shiftxform[56] = '8'.ord.to_u8
+  CDoom.french_shiftxform[57] = '9'.ord.to_u8
+  CDoom.french_shiftxform[58] = '/'.ord.to_u8
+  CDoom.french_shiftxform[59] = '.'.ord.to_u8
+  CDoom.french_shiftxform[60] = '<'.ord.to_u8
+  CDoom.french_shiftxform[61] = '+'.ord.to_u8
+  CDoom.french_shiftxform[62] = '>'.ord.to_u8
+  CDoom.french_shiftxform[63] = '?'.ord.to_u8
+  CDoom.french_shiftxform[64] = '@'.ord.to_u8
+  CDoom.french_shiftxform[65] = 'A'.ord.to_u8
+  CDoom.french_shiftxform[66] = 'B'.ord.to_u8
+  CDoom.french_shiftxform[67] = 'C'.ord.to_u8
+  CDoom.french_shiftxform[68] = 'D'.ord.to_u8
+  CDoom.french_shiftxform[69] = 'E'.ord.to_u8
+  CDoom.french_shiftxform[70] = 'F'.ord.to_u8
+  CDoom.french_shiftxform[71] = 'G'.ord.to_u8
+  CDoom.french_shiftxform[72] = 'H'.ord.to_u8
+  CDoom.french_shiftxform[73] = 'I'.ord.to_u8
+  CDoom.french_shiftxform[74] = 'J'.ord.to_u8
+  CDoom.french_shiftxform[75] = 'K'.ord.to_u8
+  CDoom.french_shiftxform[76] = 'L'.ord.to_u8
+  CDoom.french_shiftxform[77] = 'M'.ord.to_u8
+  CDoom.french_shiftxform[78] = 'N'.ord.to_u8
+  CDoom.french_shiftxform[79] = 'O'.ord.to_u8
+  CDoom.french_shiftxform[80] = 'P'.ord.to_u8
+  CDoom.french_shiftxform[81] = 'Q'.ord.to_u8
+  CDoom.french_shiftxform[82] = 'R'.ord.to_u8
+  CDoom.french_shiftxform[83] = 'S'.ord.to_u8
+  CDoom.french_shiftxform[84] = 'T'.ord.to_u8
+  CDoom.french_shiftxform[85] = 'U'.ord.to_u8
+  CDoom.french_shiftxform[86] = 'V'.ord.to_u8
+  CDoom.french_shiftxform[87] = 'W'.ord.to_u8
+  CDoom.french_shiftxform[88] = 'X'.ord.to_u8
+  CDoom.french_shiftxform[89] = 'Y'.ord.to_u8
+  CDoom.french_shiftxform[90] = 'Z'.ord.to_u8
+  CDoom.french_shiftxform[91] = '['.ord.to_u8
+  CDoom.french_shiftxform[92] = '!'.ord.to_u8
+  CDoom.french_shiftxform[93] = ']'.ord.to_u8
+  CDoom.french_shiftxform[94] = '"'.ord.to_u8
+  CDoom.french_shiftxform[95] = '_'.ord.to_u8
+  CDoom.french_shiftxform[96] = '\''.ord.to_u8
+  CDoom.french_shiftxform[97] = 'A'.ord.to_u8
+  CDoom.french_shiftxform[98] = 'B'.ord.to_u8
+  CDoom.french_shiftxform[99] = 'C'.ord.to_u8
+  CDoom.french_shiftxform[100] = 'D'.ord.to_u8
+  CDoom.french_shiftxform[101] = 'E'.ord.to_u8
+  CDoom.french_shiftxform[102] = 'F'.ord.to_u8
+  CDoom.french_shiftxform[103] = 'G'.ord.to_u8
+  CDoom.french_shiftxform[104] = 'H'.ord.to_u8
+  CDoom.french_shiftxform[105] = 'I'.ord.to_u8
+  CDoom.french_shiftxform[106] = 'J'.ord.to_u8
+  CDoom.french_shiftxform[107] = 'K'.ord.to_u8
+  CDoom.french_shiftxform[108] = 'L'.ord.to_u8
+  CDoom.french_shiftxform[109] = 'M'.ord.to_u8
+  CDoom.french_shiftxform[110] = 'N'.ord.to_u8
+  CDoom.french_shiftxform[111] = 'O'.ord.to_u8
+  CDoom.french_shiftxform[112] = 'P'.ord.to_u8
+  CDoom.french_shiftxform[113] = 'Q'.ord.to_u8
+  CDoom.french_shiftxform[114] = 'R'.ord.to_u8
+  CDoom.french_shiftxform[115] = 'S'.ord.to_u8
+  CDoom.french_shiftxform[116] = 'T'.ord.to_u8
+  CDoom.french_shiftxform[117] = 'U'.ord.to_u8
+  CDoom.french_shiftxform[118] = 'V'.ord.to_u8
+  CDoom.french_shiftxform[119] = 'W'.ord.to_u8
+  CDoom.french_shiftxform[120] = 'X'.ord.to_u8
+  CDoom.french_shiftxform[121] = 'Y'.ord.to_u8
+  CDoom.french_shiftxform[122] = 'Z'.ord.to_u8
+  CDoom.french_shiftxform[123] = '{'.ord.to_u8
+  CDoom.french_shiftxform[124] = '|'.ord.to_u8
+  CDoom.french_shiftxform[125] = '}'.ord.to_u8
+  CDoom.french_shiftxform[126] = '~'.ord.to_u8
+  CDoom.french_shiftxform[127] = 127
+
+  CDoom.english_shiftxform[0] = 0
+  CDoom.english_shiftxform[1] = 1
+  CDoom.english_shiftxform[2] = 2
+  CDoom.english_shiftxform[3] = 3
+  CDoom.english_shiftxform[4] = 4
+  CDoom.english_shiftxform[5] = 5
+  CDoom.english_shiftxform[6] = 6
+  CDoom.english_shiftxform[7] = 7
+  CDoom.english_shiftxform[8] = 8
+  CDoom.english_shiftxform[9] = 9
+  CDoom.english_shiftxform[10] = 10
+  CDoom.english_shiftxform[11] = 11
+  CDoom.english_shiftxform[12] = 12
+  CDoom.english_shiftxform[13] = 13
+  CDoom.english_shiftxform[14] = 14
+  CDoom.english_shiftxform[15] = 15
+  CDoom.english_shiftxform[16] = 16
+  CDoom.english_shiftxform[17] = 17
+  CDoom.english_shiftxform[18] = 18
+  CDoom.english_shiftxform[19] = 19
+  CDoom.english_shiftxform[20] = 20
+  CDoom.english_shiftxform[21] = 21
+  CDoom.english_shiftxform[22] = 22
+  CDoom.english_shiftxform[23] = 23
+  CDoom.english_shiftxform[24] = 24
+  CDoom.english_shiftxform[25] = 25
+  CDoom.english_shiftxform[26] = 26
+  CDoom.english_shiftxform[27] = 27
+  CDoom.english_shiftxform[28] = 28
+  CDoom.english_shiftxform[29] = 29
+  CDoom.english_shiftxform[30] = 30
+  CDoom.english_shiftxform[31] = 31
+  CDoom.english_shiftxform[32] = ' '.ord.to_u8
+  CDoom.english_shiftxform[33] = '!'.ord.to_u8
+  CDoom.english_shiftxform[34] = '"'.ord.to_u8
+  CDoom.english_shiftxform[35] = '#'.ord.to_u8
+  CDoom.english_shiftxform[36] = '$'.ord.to_u8
+  CDoom.english_shiftxform[37] = '%'.ord.to_u8
+  CDoom.english_shiftxform[38] = '&'.ord.to_u8
+  CDoom.english_shiftxform[39] = '"'.ord.to_u8
+  CDoom.english_shiftxform[40] = '('.ord.to_u8
+  CDoom.english_shiftxform[41] = ')'.ord.to_u8
+  CDoom.english_shiftxform[42] = '*'.ord.to_u8
+  CDoom.english_shiftxform[43] = '+'.ord.to_u8
+  CDoom.english_shiftxform[44] = '<'.ord.to_u8
+  CDoom.english_shiftxform[45] = '_'.ord.to_u8
+  CDoom.english_shiftxform[46] = '>'.ord.to_u8
+  CDoom.english_shiftxform[47] = '?'.ord.to_u8
+  CDoom.english_shiftxform[48] = ')'.ord.to_u8
+  CDoom.english_shiftxform[49] = '!'.ord.to_u8
+  CDoom.english_shiftxform[50] = '@'.ord.to_u8
+  CDoom.english_shiftxform[51] = '#'.ord.to_u8
+  CDoom.english_shiftxform[52] = '$'.ord.to_u8
+  CDoom.english_shiftxform[53] = '%'.ord.to_u8
+  CDoom.english_shiftxform[54] = '^'.ord.to_u8
+  CDoom.english_shiftxform[55] = '&'.ord.to_u8
+  CDoom.english_shiftxform[56] = '*'.ord.to_u8
+  CDoom.english_shiftxform[57] = '('.ord.to_u8
+  CDoom.english_shiftxform[58] = ':'.ord.to_u8
+  CDoom.english_shiftxform[59] = ':'.ord.to_u8
+  CDoom.english_shiftxform[60] = '<'.ord.to_u8
+  CDoom.english_shiftxform[61] = '+'.ord.to_u8
+  CDoom.english_shiftxform[62] = '>'.ord.to_u8
+  CDoom.english_shiftxform[63] = '?'.ord.to_u8
+  CDoom.english_shiftxform[64] = '@'.ord.to_u8
+  CDoom.english_shiftxform[65] = 'A'.ord.to_u8
+  CDoom.english_shiftxform[66] = 'B'.ord.to_u8
+  CDoom.english_shiftxform[67] = 'C'.ord.to_u8
+  CDoom.english_shiftxform[68] = 'D'.ord.to_u8
+  CDoom.english_shiftxform[69] = 'E'.ord.to_u8
+  CDoom.english_shiftxform[70] = 'F'.ord.to_u8
+  CDoom.english_shiftxform[71] = 'G'.ord.to_u8
+  CDoom.english_shiftxform[72] = 'H'.ord.to_u8
+  CDoom.english_shiftxform[73] = 'I'.ord.to_u8
+  CDoom.english_shiftxform[74] = 'J'.ord.to_u8
+  CDoom.english_shiftxform[75] = 'K'.ord.to_u8
+  CDoom.english_shiftxform[76] = 'L'.ord.to_u8
+  CDoom.english_shiftxform[77] = 'M'.ord.to_u8
+  CDoom.english_shiftxform[78] = 'N'.ord.to_u8
+  CDoom.english_shiftxform[79] = 'O'.ord.to_u8
+  CDoom.english_shiftxform[80] = 'P'.ord.to_u8
+  CDoom.english_shiftxform[81] = 'Q'.ord.to_u8
+  CDoom.english_shiftxform[82] = 'R'.ord.to_u8
+  CDoom.english_shiftxform[83] = 'S'.ord.to_u8
+  CDoom.english_shiftxform[84] = 'T'.ord.to_u8
+  CDoom.english_shiftxform[85] = 'U'.ord.to_u8
+  CDoom.english_shiftxform[86] = 'V'.ord.to_u8
+  CDoom.english_shiftxform[87] = 'W'.ord.to_u8
+  CDoom.english_shiftxform[88] = 'X'.ord.to_u8
+  CDoom.english_shiftxform[89] = 'Y'.ord.to_u8
+  CDoom.english_shiftxform[90] = 'Z'.ord.to_u8
+  CDoom.english_shiftxform[91] = '['.ord.to_u8
+  CDoom.english_shiftxform[92] = '!'.ord.to_u8
+  CDoom.english_shiftxform[93] = ']'.ord.to_u8
+  CDoom.english_shiftxform[94] = '"'.ord.to_u8
+  CDoom.english_shiftxform[95] = '_'.ord.to_u8
+  CDoom.english_shiftxform[96] = '\''.ord.to_u8
+  CDoom.english_shiftxform[97] = 'A'.ord.to_u8
+  CDoom.english_shiftxform[98] = 'B'.ord.to_u8
+  CDoom.english_shiftxform[99] = 'C'.ord.to_u8
+  CDoom.english_shiftxform[100] = 'D'.ord.to_u8
+  CDoom.english_shiftxform[101] = 'E'.ord.to_u8
+  CDoom.english_shiftxform[102] = 'F'.ord.to_u8
+  CDoom.english_shiftxform[103] = 'G'.ord.to_u8
+  CDoom.english_shiftxform[104] = 'H'.ord.to_u8
+  CDoom.english_shiftxform[105] = 'I'.ord.to_u8
+  CDoom.english_shiftxform[106] = 'J'.ord.to_u8
+  CDoom.english_shiftxform[107] = 'K'.ord.to_u8
+  CDoom.english_shiftxform[108] = 'L'.ord.to_u8
+  CDoom.english_shiftxform[109] = 'M'.ord.to_u8
+  CDoom.english_shiftxform[110] = 'N'.ord.to_u8
+  CDoom.english_shiftxform[111] = 'O'.ord.to_u8
+  CDoom.english_shiftxform[112] = 'P'.ord.to_u8
+  CDoom.english_shiftxform[113] = 'Q'.ord.to_u8
+  CDoom.english_shiftxform[114] = 'R'.ord.to_u8
+  CDoom.english_shiftxform[115] = 'S'.ord.to_u8
+  CDoom.english_shiftxform[116] = 'T'.ord.to_u8
+  CDoom.english_shiftxform[117] = 'U'.ord.to_u8
+  CDoom.english_shiftxform[118] = 'V'.ord.to_u8
+  CDoom.english_shiftxform[119] = 'W'.ord.to_u8
+  CDoom.english_shiftxform[120] = 'X'.ord.to_u8
+  CDoom.english_shiftxform[121] = 'Y'.ord.to_u8
+  CDoom.english_shiftxform[122] = 'Z'.ord.to_u8
+  CDoom.english_shiftxform[123] = '{'.ord.to_u8
+  CDoom.english_shiftxform[124] = '|'.ord.to_u8
+  CDoom.english_shiftxform[125] = '}'.ord.to_u8
+  CDoom.english_shiftxform[126] = '~'.ord.to_u8
+  CDoom.english_shiftxform[127] = 127
+
+  CDoom.french_key_map[0] = 0
+  CDoom.french_key_map[1] = 1
+  CDoom.french_key_map[2] = 2
+  CDoom.french_key_map[3] = 3
+  CDoom.french_key_map[4] = 4
+  CDoom.french_key_map[5] = 5
+  CDoom.french_key_map[6] = 6
+  CDoom.french_key_map[7] = 7
+  CDoom.french_key_map[8] = 8
+  CDoom.french_key_map[9] = 9
+  CDoom.french_key_map[10] = 10
+  CDoom.french_key_map[11] = 11
+  CDoom.french_key_map[12] = 12
+  CDoom.french_key_map[13] = 13
+  CDoom.french_key_map[14] = 14
+  CDoom.french_key_map[15] = 15
+  CDoom.french_key_map[16] = 16
+  CDoom.french_key_map[17] = 17
+  CDoom.french_key_map[18] = 18
+  CDoom.french_key_map[19] = 19
+  CDoom.french_key_map[20] = 20
+  CDoom.french_key_map[21] = 21
+  CDoom.french_key_map[22] = 22
+  CDoom.french_key_map[23] = 23
+  CDoom.french_key_map[24] = 24
+  CDoom.french_key_map[25] = 25
+  CDoom.french_key_map[26] = 26
+  CDoom.french_key_map[27] = 27
+  CDoom.french_key_map[28] = 28
+  CDoom.french_key_map[29] = 29
+  CDoom.french_key_map[30] = 30
+  CDoom.french_key_map[31] = 31
+  CDoom.french_key_map[32] = ' '.ord.to_u8
+  CDoom.french_key_map[33] = '!'.ord.to_u8
+  CDoom.french_key_map[34] = '"'.ord.to_u8
+  CDoom.french_key_map[35] = '#'.ord.to_u8
+  CDoom.french_key_map[36] = '$'.ord.to_u8
+  CDoom.french_key_map[37] = '%'.ord.to_u8
+  CDoom.french_key_map[38] = '&'.ord.to_u8
+  CDoom.french_key_map[39] = '%'.ord.to_u8
+  CDoom.french_key_map[40] = '('.ord.to_u8
+  CDoom.french_key_map[41] = ')'.ord.to_u8
+  CDoom.french_key_map[42] = '*'.ord.to_u8
+  CDoom.french_key_map[43] = '+'.ord.to_u8
+  CDoom.french_key_map[44] = ';'.ord.to_u8
+  CDoom.french_key_map[45] = '-'.ord.to_u8
+  CDoom.french_key_map[46] = ':'.ord.to_u8
+  CDoom.french_key_map[47] = '!'.ord.to_u8
+  CDoom.french_key_map[48] = '0'.ord.to_u8
+  CDoom.french_key_map[49] = '1'.ord.to_u8
+  CDoom.french_key_map[50] = '2'.ord.to_u8
+  CDoom.french_key_map[51] = '3'.ord.to_u8
+  CDoom.french_key_map[52] = '4'.ord.to_u8
+  CDoom.french_key_map[53] = '5'.ord.to_u8
+  CDoom.french_key_map[54] = '6'.ord.to_u8
+  CDoom.french_key_map[55] = '7'.ord.to_u8
+  CDoom.french_key_map[56] = '8'.ord.to_u8
+  CDoom.french_key_map[57] = '9'.ord.to_u8
+  CDoom.french_key_map[58] = ':'.ord.to_u8
+  CDoom.french_key_map[59] = 'M'.ord.to_u8
+  CDoom.french_key_map[60] = '<'.ord.to_u8
+  CDoom.french_key_map[61] = '='.ord.to_u8
+  CDoom.french_key_map[62] = '>'.ord.to_u8
+  CDoom.french_key_map[63] = '?'.ord.to_u8
+  CDoom.french_key_map[64] = '@'.ord.to_u8
+  CDoom.french_key_map[65] = 'Q'.ord.to_u8
+  CDoom.french_key_map[66] = 'B'.ord.to_u8
+  CDoom.french_key_map[67] = 'C'.ord.to_u8
+  CDoom.french_key_map[68] = 'D'.ord.to_u8
+  CDoom.french_key_map[69] = 'E'.ord.to_u8
+  CDoom.french_key_map[70] = 'F'.ord.to_u8
+  CDoom.french_key_map[71] = 'G'.ord.to_u8
+  CDoom.french_key_map[72] = 'H'.ord.to_u8
+  CDoom.french_key_map[73] = 'I'.ord.to_u8
+  CDoom.french_key_map[74] = 'J'.ord.to_u8
+  CDoom.french_key_map[75] = 'K'.ord.to_u8
+  CDoom.french_key_map[76] = 'L'.ord.to_u8
+  CDoom.french_key_map[77] = ','.ord.to_u8
+  CDoom.french_key_map[78] = 'N'.ord.to_u8
+  CDoom.french_key_map[79] = 'O'.ord.to_u8
+  CDoom.french_key_map[80] = 'P'.ord.to_u8
+  CDoom.french_key_map[81] = 'A'.ord.to_u8
+  CDoom.french_key_map[82] = 'R'.ord.to_u8
+  CDoom.french_key_map[83] = 'S'.ord.to_u8
+  CDoom.french_key_map[84] = 'T'.ord.to_u8
+  CDoom.french_key_map[85] = 'U'.ord.to_u8
+  CDoom.french_key_map[86] = 'V'.ord.to_u8
+  CDoom.french_key_map[87] = 'Z'.ord.to_u8
+  CDoom.french_key_map[88] = 'X'.ord.to_u8
+  CDoom.french_key_map[89] = 'Y'.ord.to_u8
+  CDoom.french_key_map[90] = 'W'.ord.to_u8
+  CDoom.french_key_map[91] = '^'.ord.to_u8
+  CDoom.french_key_map[92] = '\\'.ord.to_u8
+  CDoom.french_key_map[93] = '$'.ord.to_u8
+  CDoom.french_key_map[94] = '^'.ord.to_u8
+  CDoom.french_key_map[95] = '_'.ord.to_u8
+  CDoom.french_key_map[96] = '@'.ord.to_u8
+  CDoom.french_key_map[97] = 'Q'.ord.to_u8
+  CDoom.french_key_map[98] = 'B'.ord.to_u8
+  CDoom.french_key_map[99] = 'C'.ord.to_u8
+  CDoom.french_key_map[100] = 'D'.ord.to_u8
+  CDoom.french_key_map[101] = 'E'.ord.to_u8
+  CDoom.french_key_map[102] = 'F'.ord.to_u8
+  CDoom.french_key_map[103] = 'G'.ord.to_u8
+  CDoom.french_key_map[104] = 'H'.ord.to_u8
+  CDoom.french_key_map[105] = 'I'.ord.to_u8
+  CDoom.french_key_map[106] = 'J'.ord.to_u8
+  CDoom.french_key_map[107] = 'K'.ord.to_u8
+  CDoom.french_key_map[108] = 'L'.ord.to_u8
+  CDoom.french_key_map[109] = ','.ord.to_u8
+  CDoom.french_key_map[110] = 'N'.ord.to_u8
+  CDoom.french_key_map[111] = 'O'.ord.to_u8
+  CDoom.french_key_map[112] = 'P'.ord.to_u8
+  CDoom.french_key_map[113] = 'A'.ord.to_u8
+  CDoom.french_key_map[114] = 'R'.ord.to_u8
+  CDoom.french_key_map[115] = 'S'.ord.to_u8
+  CDoom.french_key_map[116] = 'T'.ord.to_u8
+  CDoom.french_key_map[117] = 'U'.ord.to_u8
+  CDoom.french_key_map[118] = 'V'.ord.to_u8
+  CDoom.french_key_map[119] = 'Z'.ord.to_u8
+  CDoom.french_key_map[120] = 'X'.ord.to_u8
+  CDoom.french_key_map[121] = 'Y'.ord.to_u8
+  CDoom.french_key_map[122] = 'W'.ord.to_u8
+  CDoom.french_key_map[123] = '^'.ord.to_u8
+  CDoom.french_key_map[124] = '\\'.ord.to_u8
+  CDoom.french_key_map[125] = '$'.ord.to_u8
+  CDoom.french_key_map[126] = '^'.ord.to_u8
+  CDoom.french_key_map[127] = 127
+
+  #
+  # Builtin map names.
+  # The actual names can be found in DStrings.h.
+  #
+
+  # DOOM shareware/registered/retail (Ultimate) names.
+  CDoom.mapnames[0] = CDoom::HUSTR_E1M1.to_unsafe
+  CDoom.mapnames[1] = CDoom::HUSTR_E1M2.to_unsafe
+  CDoom.mapnames[2] = CDoom::HUSTR_E1M3.to_unsafe
+  CDoom.mapnames[3] = CDoom::HUSTR_E1M4.to_unsafe
+  CDoom.mapnames[4] = CDoom::HUSTR_E1M5.to_unsafe
+  CDoom.mapnames[5] = CDoom::HUSTR_E1M6.to_unsafe
+  CDoom.mapnames[6] = CDoom::HUSTR_E1M7.to_unsafe
+  CDoom.mapnames[7] = CDoom::HUSTR_E1M8.to_unsafe
+  CDoom.mapnames[8] = CDoom::HUSTR_E1M9.to_unsafe
+
+  CDoom.mapnames[9] = CDoom::HUSTR_E2M1.to_unsafe
+  CDoom.mapnames[10] = CDoom::HUSTR_E2M2.to_unsafe
+  CDoom.mapnames[11] = CDoom::HUSTR_E2M3.to_unsafe
+  CDoom.mapnames[12] = CDoom::HUSTR_E2M4.to_unsafe
+  CDoom.mapnames[13] = CDoom::HUSTR_E2M5.to_unsafe
+  CDoom.mapnames[14] = CDoom::HUSTR_E2M6.to_unsafe
+  CDoom.mapnames[15] = CDoom::HUSTR_E2M7.to_unsafe
+  CDoom.mapnames[16] = CDoom::HUSTR_E2M8.to_unsafe
+  CDoom.mapnames[17] = CDoom::HUSTR_E2M9.to_unsafe
+
+  CDoom.mapnames[18] = CDoom::HUSTR_E3M1.to_unsafe
+  CDoom.mapnames[19] = CDoom::HUSTR_E3M2.to_unsafe
+  CDoom.mapnames[20] = CDoom::HUSTR_E3M3.to_unsafe
+  CDoom.mapnames[21] = CDoom::HUSTR_E3M4.to_unsafe
+  CDoom.mapnames[22] = CDoom::HUSTR_E3M5.to_unsafe
+  CDoom.mapnames[23] = CDoom::HUSTR_E3M6.to_unsafe
+  CDoom.mapnames[24] = CDoom::HUSTR_E3M7.to_unsafe
+  CDoom.mapnames[25] = CDoom::HUSTR_E3M8.to_unsafe
+  CDoom.mapnames[26] = CDoom::HUSTR_E3M9.to_unsafe
+
+  CDoom.mapnames[27] = CDoom::HUSTR_E4M1.to_unsafe
+  CDoom.mapnames[28] = CDoom::HUSTR_E4M2.to_unsafe
+  CDoom.mapnames[29] = CDoom::HUSTR_E4M3.to_unsafe
+  CDoom.mapnames[30] = CDoom::HUSTR_E4M4.to_unsafe
+  CDoom.mapnames[31] = CDoom::HUSTR_E4M5.to_unsafe
+  CDoom.mapnames[32] = CDoom::HUSTR_E4M6.to_unsafe
+  CDoom.mapnames[33] = CDoom::HUSTR_E4M7.to_unsafe
+  CDoom.mapnames[34] = CDoom::HUSTR_E4M8.to_unsafe
+  CDoom.mapnames[35] = CDoom::HUSTR_E4M9.to_unsafe
+
+  CDoom.mapnames[36] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[37] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[38] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[39] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[40] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[41] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[42] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[43] = "NEWLEVEL".to_unsafe
+  CDoom.mapnames[44] = "NEWLEVEL".to_unsafe
+
+  # DOOM 2 map names.
+  CDoom.mapnames2[0] = CDoom::HUSTR_1.to_unsafe
+  CDoom.mapnames2[1] = CDoom::HUSTR_2.to_unsafe
+  CDoom.mapnames2[2] = CDoom::HUSTR_3.to_unsafe
+  CDoom.mapnames2[3] = CDoom::HUSTR_4.to_unsafe
+  CDoom.mapnames2[4] = CDoom::HUSTR_5.to_unsafe
+  CDoom.mapnames2[5] = CDoom::HUSTR_6.to_unsafe
+  CDoom.mapnames2[6] = CDoom::HUSTR_7.to_unsafe
+  CDoom.mapnames2[7] = CDoom::HUSTR_8.to_unsafe
+  CDoom.mapnames2[8] = CDoom::HUSTR_9.to_unsafe
+  CDoom.mapnames2[9] = CDoom::HUSTR_10.to_unsafe
+  CDoom.mapnames2[10] = CDoom::HUSTR_11.to_unsafe
+
+  CDoom.mapnames2[11] = CDoom::HUSTR_12.to_unsafe
+  CDoom.mapnames2[12] = CDoom::HUSTR_13.to_unsafe
+  CDoom.mapnames2[13] = CDoom::HUSTR_14.to_unsafe
+  CDoom.mapnames2[14] = CDoom::HUSTR_15.to_unsafe
+  CDoom.mapnames2[15] = CDoom::HUSTR_16.to_unsafe
+  CDoom.mapnames2[16] = CDoom::HUSTR_17.to_unsafe
+  CDoom.mapnames2[17] = CDoom::HUSTR_18.to_unsafe
+  CDoom.mapnames2[18] = CDoom::HUSTR_19.to_unsafe
+  CDoom.mapnames2[19] = CDoom::HUSTR_20.to_unsafe
+
+  CDoom.mapnames2[20] = CDoom::HUSTR_21.to_unsafe
+  CDoom.mapnames2[21] = CDoom::HUSTR_22.to_unsafe
+  CDoom.mapnames2[22] = CDoom::HUSTR_23.to_unsafe
+  CDoom.mapnames2[23] = CDoom::HUSTR_24.to_unsafe
+  CDoom.mapnames2[24] = CDoom::HUSTR_25.to_unsafe
+  CDoom.mapnames2[25] = CDoom::HUSTR_26.to_unsafe
+  CDoom.mapnames2[26] = CDoom::HUSTR_27.to_unsafe
+  CDoom.mapnames2[27] = CDoom::HUSTR_28.to_unsafe
+  CDoom.mapnames2[28] = CDoom::HUSTR_29.to_unsafe
+  CDoom.mapnames2[29] = CDoom::HUSTR_30.to_unsafe
+  CDoom.mapnames2[30] = CDoom::HUSTR_31.to_unsafe
+  CDoom.mapnames2[31] = CDoom::HUSTR_32.to_unsafe
+
+  # Plutonia WAD map names.
+  CDoom.mapnamesp[0] = CDoom::PHUSTR_1.to_unsafe
+  CDoom.mapnamesp[1] = CDoom::PHUSTR_2.to_unsafe
+  CDoom.mapnamesp[2] = CDoom::PHUSTR_3.to_unsafe
+  CDoom.mapnamesp[3] = CDoom::PHUSTR_4.to_unsafe
+  CDoom.mapnamesp[4] = CDoom::PHUSTR_5.to_unsafe
+  CDoom.mapnamesp[5] = CDoom::PHUSTR_6.to_unsafe
+  CDoom.mapnamesp[6] = CDoom::PHUSTR_7.to_unsafe
+  CDoom.mapnamesp[7] = CDoom::PHUSTR_8.to_unsafe
+  CDoom.mapnamesp[8] = CDoom::PHUSTR_9.to_unsafe
+  CDoom.mapnamesp[9] = CDoom::PHUSTR_10.to_unsafe
+  CDoom.mapnamesp[10] = CDoom::PHUSTR_11.to_unsafe
+
+  CDoom.mapnamesp[11] = CDoom::PHUSTR_12.to_unsafe
+  CDoom.mapnamesp[12] = CDoom::PHUSTR_13.to_unsafe
+  CDoom.mapnamesp[13] = CDoom::PHUSTR_14.to_unsafe
+  CDoom.mapnamesp[14] = CDoom::PHUSTR_15.to_unsafe
+  CDoom.mapnamesp[15] = CDoom::PHUSTR_16.to_unsafe
+  CDoom.mapnamesp[16] = CDoom::PHUSTR_17.to_unsafe
+  CDoom.mapnamesp[17] = CDoom::PHUSTR_18.to_unsafe
+  CDoom.mapnamesp[18] = CDoom::PHUSTR_19.to_unsafe
+  CDoom.mapnamesp[19] = CDoom::PHUSTR_20.to_unsafe
+
+  CDoom.mapnamesp[20] = CDoom::PHUSTR_21.to_unsafe
+  CDoom.mapnamesp[21] = CDoom::PHUSTR_22.to_unsafe
+  CDoom.mapnamesp[22] = CDoom::PHUSTR_23.to_unsafe
+  CDoom.mapnamesp[23] = CDoom::PHUSTR_24.to_unsafe
+  CDoom.mapnamesp[24] = CDoom::PHUSTR_25.to_unsafe
+  CDoom.mapnamesp[25] = CDoom::PHUSTR_26.to_unsafe
+  CDoom.mapnamesp[26] = CDoom::PHUSTR_27.to_unsafe
+  CDoom.mapnamesp[27] = CDoom::PHUSTR_28.to_unsafe
+  CDoom.mapnamesp[28] = CDoom::PHUSTR_29.to_unsafe
+  CDoom.mapnamesp[29] = CDoom::PHUSTR_30.to_unsafe
+  CDoom.mapnamesp[30] = CDoom::PHUSTR_31.to_unsafe
+  CDoom.mapnamesp[31] = CDoom::PHUSTR_32.to_unsafe
+
+  # TNT WAD map names.
+  CDoom.mapnamest[0] = CDoom::THUSTR_1.to_unsafe
+  CDoom.mapnamest[1] = CDoom::THUSTR_2.to_unsafe
+  CDoom.mapnamest[2] = CDoom::THUSTR_3.to_unsafe
+  CDoom.mapnamest[3] = CDoom::THUSTR_4.to_unsafe
+  CDoom.mapnamest[4] = CDoom::THUSTR_5.to_unsafe
+  CDoom.mapnamest[5] = CDoom::THUSTR_6.to_unsafe
+  CDoom.mapnamest[6] = CDoom::THUSTR_7.to_unsafe
+  CDoom.mapnamest[7] = CDoom::THUSTR_8.to_unsafe
+  CDoom.mapnamest[8] = CDoom::THUSTR_9.to_unsafe
+  CDoom.mapnamest[9] = CDoom::THUSTR_10.to_unsafe
+  CDoom.mapnamest[10] = CDoom::THUSTR_11.to_unsafe
+
+  CDoom.mapnamest[11] = CDoom::THUSTR_12.to_unsafe
+  CDoom.mapnamest[12] = CDoom::THUSTR_13.to_unsafe
+  CDoom.mapnamest[13] = CDoom::THUSTR_14.to_unsafe
+  CDoom.mapnamest[14] = CDoom::THUSTR_15.to_unsafe
+  CDoom.mapnamest[15] = CDoom::THUSTR_16.to_unsafe
+  CDoom.mapnamest[16] = CDoom::THUSTR_17.to_unsafe
+  CDoom.mapnamest[17] = CDoom::THUSTR_18.to_unsafe
+  CDoom.mapnamest[18] = CDoom::THUSTR_19.to_unsafe
+  CDoom.mapnamest[19] = CDoom::THUSTR_20.to_unsafe
+
+  CDoom.mapnamest[20] = CDoom::THUSTR_21.to_unsafe
+  CDoom.mapnamest[21] = CDoom::THUSTR_22.to_unsafe
+  CDoom.mapnamest[22] = CDoom::THUSTR_23.to_unsafe
+  CDoom.mapnamest[23] = CDoom::THUSTR_24.to_unsafe
+  CDoom.mapnamest[24] = CDoom::THUSTR_25.to_unsafe
+  CDoom.mapnamest[25] = CDoom::THUSTR_26.to_unsafe
+  CDoom.mapnamest[26] = CDoom::THUSTR_27.to_unsafe
+  CDoom.mapnamest[27] = CDoom::THUSTR_28.to_unsafe
+  CDoom.mapnamest[28] = CDoom::THUSTR_29.to_unsafe
+  CDoom.mapnamest[29] = CDoom::THUSTR_30.to_unsafe
+  CDoom.mapnamest[30] = CDoom::THUSTR_31.to_unsafe
+  CDoom.mapnamest[31] = CDoom::THUSTR_32.to_unsafe
+
+  CDoom.flag = 0
+
+  CDoom.mus_data = Pointer(UInt8).null
+  CDoom.mus_offset = 0
+  CDoom.mus_delay = 0
+  CDoom.mus_loop = 0
+  CDoom.mus_playing = 0
+  CDoom.mus_volume = 127
+  CDoom.mus_channel_volumes[0] = 127
+  CDoom.mus_channel_volumes[1] = 127
+  CDoom.mus_channel_volumes[2] = 127
+  CDoom.mus_channel_volumes[3] = 127
+  CDoom.mus_channel_volumes[4] = 127
+  CDoom.mus_channel_volumes[5] = 127
+  CDoom.mus_channel_volumes[6] = 127
+  CDoom.mus_channel_volumes[7] = 127
+  CDoom.mus_channel_volumes[8] = 127
+  CDoom.mus_channel_volumes[9] = 127
+  CDoom.mus_channel_volumes[10] = 127
+  CDoom.mus_channel_volumes[11] = 127
+  CDoom.mus_channel_volumes[12] = 127
+  CDoom.mus_channel_volumes[13] = 127
+  CDoom.mus_channel_volumes[14] = 127
+  CDoom.mus_channel_volumes[15] = 127
+
+  CDoom.looping = 0
+  CDoom.musicdies = -1
+
+  CDoom.queue_midi_head = 0
+  CDoom.queue_midi_tail = 0
+
+  CDoom.mb_used = 6 * (sizeof(Void*) // 4)
+
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -446,7 +1059,7 @@ module LibDoom
   end
 
   def self.doom_exit_impl(code : Int32)
-    exit code
+    exit(code)
   end
 
   def self.doom_getenv_impl(var : UInt8*) : UInt8*
@@ -499,7 +1112,8 @@ module LibDoom
   end
 
   def self.doom_toupper(c : Int32) : Int32
-    return c.chr.upcase.ord
+    return c - 'a'.ord + 'A'.ord if c >= 'a'.ord && c <= 'z'.ord
+    return c
   end
 
   def self.doom_strcasecmp(str1 : UInt8*, str2 : UInt8*) : Int32
@@ -648,6 +1262,25 @@ module LibDoom
     CDoom.last_update_time = now
   end
 
+  def self.doom_draw
+    @@screen_texture.try do |st|
+      Raylib.update_texture(st, CDoom.doom_get_framebuffer(4))
+
+      scalew = Raylib.get_screen_width.to_f / SRES_X.to_f
+      scaleh = Raylib.get_screen_height.to_f / SRES_Y.to_f
+      scale = [scalew, scaleh].min
+
+      Raylib.begin_drawing
+      Raylib.clear_background(Raylib::BLACK)
+      Raylib.draw_texture_pro(st,
+        Raylib::Rectangle.new(x: 0.0_f32, y: 0.0_f32, width: st.width.to_f, height: st.height.to_f),
+        Raylib::Rectangle.new(x: (Raylib.get_screen_width - (SRES_X.to_f * scale)) * 0.5_f32, y: (Raylib.get_screen_height - (SRES_Y.to_f * scale)) * 0.5_f32,
+          width: SRES_X.to_f * scale, height: SRES_Y.to_f * scale),
+        Raylib::Vector2.new, 0, Raylib::WHITE)
+      Raylib.end_drawing
+    end
+  end
+
   def self.doom_force_update
     if CDoom.is_wiping_screen != 0
       CDoom.d_update_wipe
@@ -701,7 +1334,7 @@ module LibDoom
     return Pointer(UInt8).null
   end
 
-  def self.doom_tick_midi : LibC::ULong
+  def self.doom_tick_midi : UInt64
     return CDoom.i_tick_song
   end
 
@@ -922,7 +1555,7 @@ module LibDoom
   end
 
   def self.am_load_pics
-    namebuf = Pointer(UInt8).malloc(9)
+    namebuf = uninitialized StaticArray(UInt8, 9)
 
     10.times do |i|
       CDoom.doom_concat(CDoom.doom_strcpy(namebuf, "AMMNUM"), CDoom.doom_itoa(i, 10))
@@ -1362,7 +1995,7 @@ module LibDoom
     end
   end
 
-  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc(1)
+  @@fl : CDoom::Fline* = Pointer(CDoom::Fline).malloc
 
   #
   # Clip lines, draw visible part sof lines.
@@ -1381,9 +2014,9 @@ module LibDoom
     start = CDoom.m_x
     ml = CDoom::Mline.new
 
-    if (start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
+    if (start - CDoom.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) != 0
       start += (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS) -
-               ((start - CDoom.bmaporgx) % (CDoom::MAPBLOCKUNITS << CDoom::FRACBITS))
+               (start - CDoom.bmaporgx).remainder(CDoom::MAPBLOCKUNITS << CDoom::FRACBITS)
     end
     en = CDoom.m_x + CDoom.m_w
 
@@ -1473,10 +2106,10 @@ module LibDoom
   end
 
   def self.am_draw_line_character(lineguy : CDoom::Mline*,
-                                  lineguylines : LibC::Int,
+                                  lineguylines : Int32,
                                   scale : CDoom::Fixed,
                                   angle : CDoom::Angle,
-                                  color : LibC::Int,
+                                  color : Int32,
                                   x : CDoom::Fixed,
                                   y : CDoom::Fixed)
     l = CDoom::Mline.new
@@ -1561,7 +2194,7 @@ module LibDoom
     end
   end
 
-  def self.am_draw_things(colors : LibC::Int, colorrange : LibC::Int)
+  def self.am_draw_things(colors : Int32, colorrange : Int32)
     CDoom.numsectors.times do |i|
       t = CDoom.sectors[i].thinglist
       until t.null?
@@ -1810,7 +2443,7 @@ module LibDoom
   # Todo: FIXME - version dependend demo numbers?
   #
   def self.d_do_advance_demo
-    CDoom.players[CDoom.consoleplayer].playerstate = CDoom::Playerstate::PST_LIVE # not reborn
+    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.playerstate = CDoom::Playerstate::PST_LIVE # not reborn
     CDoom.advancedemo = 0
     CDoom.usergame = 0 # no save / end game here
     CDoom.paused = 0
@@ -2040,7 +2673,7 @@ module LibDoom
       i += 1
 
       if CDoom.myargv[i][0].chr == '@'
-        moreargs = Pointer(UInt8*).malloc(20)
+        moreargs = uninitialized StaticArray(UInt8*, 20)
 
         # READ THE RESPONSE FILE INTO MEMORY
         handle = CDoom.doom_open.call(CDoom.myargv[i] + 1, "rb".to_unsafe)
@@ -2117,7 +2750,7 @@ module LibDoom
   # d_doom_main
   #
   def self.d_doom_main
-    file = Pointer(UInt8).malloc(256)
+    file = uninitialized StaticArray(UInt8, 256)
 
     CDoom.find_response_file
 
@@ -2461,15 +3094,15 @@ module LibDoom
     CDoom.g_begin_recording if CDoom.demorecording != 0
 
     if CDoom.m_check_parm("-debugfile") != 0
-      filename = Pointer(UInt8).malloc(20)
+      filename = uninitialized StaticArray(UInt8, 20)
       CDoom.doom_strcpy(filename, "debug")
       CDoom.doom_concat(filename, CDoom.doom_itoa(CDoom.consoleplayer, 10))
       CDoom.doom_concat(filename, ".txt")
 
       CDoom.doom_print.call("debug output to: ".to_unsafe)
-      CDoom.doom_print.call(filename)
+      CDoom.doom_print.call(filename.to_unsafe)
       CDoom.doom_print.call("\n".to_unsafe)
-      CDoom.debugfile = CDoom.doom_open.call(filename, "w".to_unsafe)
+      CDoom.debugfile = CDoom.doom_open.call(filename.to_unsafe, "w".to_unsafe)
     end
 
     CDoom.i_init_graphics
@@ -2648,7 +3281,7 @@ module LibDoom
         CDoom.playeringame[netconsole] = 0
         CDoom.doom_strcpy(CDoom.exitmsg, "Player 1 left the game")
         CDoom.exitmsg[7] += netconsole
-        CDoom.players[CDoom.consoleplayer].message = CDoom.exitmsg
+        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom.exitmsg
         CDoom.g_check_demo_status if CDoom.demorecording != 0
         next
       end
@@ -3166,7 +3799,7 @@ module LibDoom
 
     return if CDoom.gamemode == CDoom::GameMode::Commercial
 
-    if CDoom.finalestage == 0 # && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
+    if CDoom.finalestage == 0 && CDoom.finalecount > CDoom.doom_strlen(CDoom.finaletext) * CDoom::TEXTSPEED + CDoom::TEXTWAIT
       CDoom.finalecount = 0
       CDoom.finalestage = 1
       CDoom.wipegamestate = CDoom::Gamestate::Needwipe # force a wipe
@@ -3494,11 +4127,11 @@ module LibDoom
       @@laststage = stage
     end
 
-    name = Pointer(UInt8).malloc(10)
+    name = uninitialized StaticArray(UInt8, 10)
 
-    CDoom.doom_strcpy(name, "END")
-    CDoom.doom_concat(name, CDoom.doom_itoa(stage, 10))
-    CDoom.v_draw_patch((CDoom::SCREENWIDTH - 13 * 8) // 2, (CDoom::SCREENHEIGHT - 8 * 8) // 2, 0, CDoom.w_cache_lump_name(name, CDoom::PU_CACHE).as(CDoom::Patch*))
+    CDoom.doom_strcpy(name.to_unsafe, "END")
+    CDoom.doom_concat(name.to_unsafe, CDoom.doom_itoa(stage, 10))
+    CDoom.v_draw_patch((CDoom::SCREENWIDTH - 13 * 8) // 2, (CDoom::SCREENHEIGHT - 8 * 8) // 2, 0, CDoom.w_cache_lump_name(name.to_unsafe, CDoom::PU_CACHE).as(CDoom::Patch*))
   end
 
   def self.f_drawer
@@ -3894,7 +4527,7 @@ module LibDoom
 
     CDoom::MAXPLAYERS.times do |i|
       if CDoom.playeringame[i] != 0 && CDoom.players[i].playerstate == CDoom::Playerstate::PST_DEAD
-        CDoom.players[i].playerstate = CDoom::Playerstate::PST_REBORN
+        (CDoom.players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN
       end
       CDoom.doom_memset(CDoom.players[i].frags, 0, sizeof(typeof(CDoom.players[i].frags)))
     end
@@ -3921,7 +4554,7 @@ module LibDoom
   def self.g_responder(ev : CDoom::Event*) : CDoom::DoomBool
     # allow spy mode changes even during the demo
     if CDoom.gamestate == CDoom::Gamestate::Level && ev.value.type == CDoom::Evtype::Keydown &&
-      ev.value.data1 == CDoom::KEY_F12 && (CDoom.singledemo != 0 || CDoom.deathmatch == 0)
+       ev.value.data1 == CDoom::KEY_F12 && (CDoom.singledemo != 0 || CDoom.deathmatch == 0)
       # spy mode
       loop do
         CDoom.displayplayer += 1
@@ -3934,10 +4567,10 @@ module LibDoom
 
     # any other key pops up menu if in demos
     if CDoom.gameaction == CDoom::Gameaction::Nothing && CDoom.singledemo == 0 &&
-      (CDoom.demoplayback != 0 || CDoom.gamestate == CDoom::Gamestate::Demoscreen)
+       (CDoom.demoplayback != 0 || CDoom.gamestate == CDoom::Gamestate::Demoscreen)
       if ev.value.type == CDoom::Evtype::Keydown ||
-        (ev.value.type == CDoom::Evtype::Mouse && ev.value.data1 != 0) ||
-        (ev.value.type == CDoom::Evtype::Joystick && ev.value.data1 != 0)
+         (ev.value.type == CDoom::Evtype::Mouse && ev.value.data1 != 0) ||
+         (ev.value.type == CDoom::Evtype::Joystick && ev.value.data1 != 0)
         CDoom.m_start_control_panel
         return 1
       end
@@ -3946,10 +4579,10 @@ module LibDoom
 
     if CDoom.gamestate == CDoom::Gamestate::Level
       {% if false %}
-      if CDoom.devparm != 0 && ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == ';'.ord
-        CDoom.g_deathmatch_spawn_player(0)
-        return 1
-      end
+        if CDoom.devparm != 0 && ev.value.type == CDoom::Evtype::Keydown && ev.value.data1 == ';'.ord
+          CDoom.g_deathmatch_spawn_player(0)
+          return 1
+        end
       {% end %}
       return 1 if CDoom.hu_responder(ev) != 0 # chat ate the event
       return 1 if CDoom.st_responder(ev) != 0 # status window ate it
@@ -3992,6 +4625,7 @@ module LibDoom
   end
 
   @@turbomessage = uninitialized StaticArray(UInt8, 80)
+
   #
   # g_ticker
   # Make ticcmds for the players.
@@ -4014,17 +4648,17 @@ module LibDoom
         CDoom.g_do_save_game
       when CDoom::Gameaction::Playdemo
         CDoom.g_do_play_demo
-        when CDoom::Gameaction::Completed
+      when CDoom::Gameaction::Completed
         CDoom.g_do_completed
-        when CDoom::Gameaction::Victory
+      when CDoom::Gameaction::Victory
         CDoom.f_start_finale
-        when CDoom::Gameaction::Worlddone
+      when CDoom::Gameaction::Worlddone
         CDoom.g_do_world_done
-        when CDoom::Gameaction::Screenshot
+      when CDoom::Gameaction::Screenshot
         CDoom.m_screenshot
         CDoom.gameaction = CDoom::Gameaction::Nothing
-        when CDoom::Gameaction::Nothing
-        end
+      when CDoom::Gameaction::Nothing
+      end
     end
 
     # get commands, check consistancy,
@@ -4042,15 +4676,15 @@ module LibDoom
 
         # check for turbo cheats
         if cmd.value.forwardmove > CDoom::TURBOTHRESHOLD &&
-          (CDoom.gametic & 31) == 0 && (CDoom.gametic >> 5) & 3 == i
+           (CDoom.gametic & 31) == 0 && (CDoom.gametic >> 5) & 3 == i
           CDoom.doom_strcpy(@@turbomessage, CDoom.player_names[i])
           CDoom.doom_concat(@@turbomessage, " is turbo!")
-          CDoom.players[CDoom.consoleplayer].message = @@turbomessage
+          (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = @@turbomessage
         end
 
         if CDoom.netgame != 0 && CDoom.netdemo == 0 && (CDoom.gametic % CDoom.ticdup) == 0
           if CDoom.gametic > CDoom::BACKUPTICS &&
-            CDoom.consistancy[i][buf] != cmd.value.consistancy
+             CDoom.consistancy[i][buf] != cmd.value.consistancy
             CDoom.doom_strcpy(CDoom.error_buf, "Error: consistency failure (")
             CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(cmd.value.consistancy, 10))
             CDoom.doom_concat(CDoom.error_buf, " should be ")
@@ -4069,7 +4703,8 @@ module LibDoom
 
     # check for special buttons
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i] !+ 0
+      if CDoom.playeringame[i]
+        !+0
         if CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
           case CDoom::Buttoncode.new(CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
           when CDoom::Buttoncode::BTS_PAUSE
@@ -4081,8 +4716,8 @@ module LibDoom
             end
           when CDoom::Buttoncode::BTS_SAVEGAME
             CDoom.doom_strcpy(CDoom.savedescription, "NET GAME") if CDoom.savedescription[0] == '\0'.ord
-            CDoom.savegameslot = 
-            (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
+            CDoom.savegameslot =
+              (CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BTS_SAVEMASK.value) >> CDoom::Buttoncode::BTS_SAVESHIFT.value
             CDoom.gameaction = CDoom::Gameaction::Savegame
           end
         end
@@ -4106,10 +4741,10 @@ module LibDoom
   end
 
   #
-# g_init_player 
-# Called at the start.
-# Called by the game initialization functions.
-#
+  # g_init_player
+  # Called at the start.
+  # Called by the game initialization functions.
+  #
   def self.g_init_player(player : Int32)
     # set up the saved info
     p = CDoom.players.to_unsafe + player
@@ -4119,26 +4754,26 @@ module LibDoom
   end
 
   #
-# g_player_finish_level
-# Can when a player completes a level.
-#
+  # g_player_finish_level
+  # Can when a player completes a level.
+  #
   def self.g_player_finish_level(player : Int32)
     p = CDoom.players.to_unsafe + player
 
     CDoom.doom_memset(p.value.powers.to_unsafe, 0, sizeof(typeof(p.value.powers)))
     CDoom.doom_memset(p.value.cards.to_unsafe, 0, sizeof(typeof(p.value.cards)))
     p.value.mo.value.flags = p.value.mo.value.flags & ~CDoom::Mobjflag::MF_SHADOW.value # cancel invisibility
-    p.value.extralight = 0 # cancel gun flashes
-    p.value.fixedcolormap = 0 # cancel ir gogles
-    p.value.damagecount = 0 # no palette changes
+    p.value.extralight = 0                                                              # cancel gun flashes
+    p.value.fixedcolormap = 0                                                           # cancel ir gogles
+    p.value.damagecount = 0                                                             # no palette changes
     p.value.bonuscount = 0
   end
 
   #
-# g_player_reborn
-# Called after a player dies 
-# almost everything is cleared and initialized 
-#
+  # g_player_reborn
+  # Called after a player dies
+  # almost everything is cleared and initialized
+  #
   def self.g_player_reborn(player : Int32)
     frags = uninitialized StaticArray(Int32, CDoom::MAXPLAYERS)
 
@@ -4150,10 +4785,10 @@ module LibDoom
     p = CDoom.players.to_unsafe + player
     CDoom.doom_memset(p, 0, sizeof(typeof(p.value)))
 
-    CDoom.doom_memcpy(CDoom.players[player].frags.to_unsafe, frags.to_unsafe, sizeof(typeof(CDoom.players[player].frags)))
-    CDoom.players[player].killcount = killcount
-    CDoom.players[player].itemcount = itemcount
-    CDoom.players[player].secretcount = secretcount
+    CDoom.doom_memcpy(p.value.frags.to_unsafe, frags.to_unsafe, sizeof(typeof(CDoom.players[player].frags)))
+    (CDoom.players.to_unsafe + player).value.killcount = killcount
+    (CDoom.players.to_unsafe + player).value.itemcount = itemcount
+    (CDoom.players.to_unsafe + player).value.secretcount = secretcount
 
     p.value.usedown = 0 # don't do anything immediately
     p.value.attackdown = 0
@@ -4175,9 +4810,9 @@ module LibDoom
       # first spawn of level, before corpses
       playernum.times do |i|
         return 0 if (CDoom.players[i].mo.value.x == mthing.value.x << CDoom::FRACBITS &&
-        CDoom.players[i].mo.value.y == mthing.value.y << CDoom::FRACBITS)
-        return 1
+                    CDoom.players[i].mo.value.y == mthing.value.y << CDoom::FRACBITS)
       end
+      return 1
     end
 
     x = mthing.value.x << CDoom::FRACBITS
@@ -4197,12 +4832,1985 @@ module LibDoom
     an = (CDoom::ANG45 * (mthing.value.angle // 45)) >> CDoom::ANGLETOFINESHIFT
 
     mo = CDoom.p_spawn_mobj(x + 20 * CDoom.finecosine[an], y + 20 * CDoom.finesine[an],
-    ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
+      ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
 
     CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept) if CDoom.players[CDoom.consoleplayer].viewz != 1 # don't start sound on first frame
 
     return 1
   end
 
-  
+  def self.g_deathmatch_spawn_player(playernum : Int32)
+    selections = (CDoom.deathmatch_p - CDoom.deathmatchstarts.to_unsafe).to_i32!
+    if selections < 4
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: Only ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(selections, 10))
+      CDoom.doom_concat(CDoom.error_buf, " deathmatch spots, 4 required")
+      CDoom.i_error(CDoom.error_buf)
+    end
+
+    20.times do |j|
+      i = CDoom.p_random % selections
+      if CDoom.g_check_spot(playernum, CDoom.deathmatchstarts.to_unsafe + i) != 0
+        (CDoom.deathmatchstarts.to_unsafe + i).value.type = playernum + 1
+        CDoom.p_spawn_player(CDoom.deathmatchstarts.to_unsafe + i)
+        return
+      end
+    end
+
+    # no good spot, so the player will probably get stuck
+    CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+  end
+
+  #
+  # g_do_reborn
+  #
+  def self.g_do_reborn(playernum : Int32)
+    if CDoom.netgame == 0
+      # reload the level from scatch
+      CDoom.gameaction = CDoom::Gameaction::Loadlevel
+    else
+      # respawn at the start
+
+      # first dissasociate the corpse
+      CDoom.players[playernum].mo.value.player = Pointer(CDoom::Player).null
+
+      # spawn at random spot if in death match
+      if CDoom.deathmatch != 0
+        CDoom.g_deathmatch_spawn_player(playernum)
+        return
+      end
+
+      if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + playernum) != 0
+        CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+        return
+      end
+
+      # try to spawn at one of the other players spots
+      CDoom::MAXPLAYERS.times do |i|
+        if CDoom.g_check_spot(playernum, CDoom.playerstarts.to_unsafe + i) != 0
+          (CDoom.playerstarts.to_unsafe + i).value.type = playernum + 1 # fake as other player
+          CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + i)        # restore
+          return
+        end
+        # he's going to be inside something. Too bad.
+      end
+      CDoom.p_spawn_player(CDoom.playerstarts.to_unsafe + playernum)
+    end
+  end
+
+  def self.g_screenshot
+    CDoom.gameaction = CDoom::Gameaction::Screenshot
+  end
+
+  def self.g_exit_level
+    CDoom.secretexit = 0
+    CDoom.gameaction = CDoom::Gameaction::Completed
+  end
+
+  # Here's for the german edition. Literally 1984
+  def self.g_secret_exit_level
+    # IF NO WOLF3D LEVELS, NO SECRET EXIT!
+    if CDoom.gamemode == CDoom::GameMode::Commercial &&
+       CDoom.w_check_num_for_name("map31") < 0
+      CDoom.secretexit = 0
+    else
+      CDoom.secretexit = 1
+    end
+    CDoom.gameaction = CDoom::Gameaction::Completed
+  end
+
+  def self.g_do_completed
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.g_player_finish_level(i) if CDoom.playeringame[i] != 0 # take away cards and stuff
+    end
+
+    CDoom.am_stop if CDoom.automapactive != 0
+
+    if CDoom.gamemode != CDoom::GameMode::Commercial
+      case CDoom.gamemap
+      when 8
+        # victory
+        CDoom.gameaction = CDoom::Gameaction::Victory
+      when 9
+        # exit secret level
+        CDoom::MAXPLAYERS.times do |i|
+          (CDoom.players.to_unsafe + i).value.didsecret = 1
+        end
+      end
+    end
+
+    CDoom.wminfo.didsecret = (CDoom.players.to_unsafe + CDoom.consoleplayer).value.didsecret
+    CDoom.wminfo.epsd = CDoom.gameepisode - 1
+    CDoom.wminfo.last = CDoom.gamemap - 1
+
+    # wminfo.next is 0 biased, unlike gamemap
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      if CDoom.secretexit != 0
+        case CDoom.gamemap
+        when 15
+          CDoom.wminfo.next = 30
+        when 31
+          CDoom.wminfo.next = 31
+        end
+      else
+        case CDoom.gamemap
+        when 31, 32
+          CDoom.wminfo.next = 15
+        else CDoom.wminfo.next = CDoom.gamemap
+        end
+      end
+    else
+      if CDoom.secretexit != 0
+        CDoom.wminfo.next = 8 # go to secret level
+      elsif CDoom.gamemap == 9
+        # returning from secret level
+        case CDoom.gameepisode
+        when 1
+          CDoom.wminfo.next = 3
+        when 2
+          CDoom.wminfo.next = 5
+        when 3
+          CDoom.wminfo.next = 6
+        when 4
+          CDoom.wminfo.next = 2
+        end
+      else
+        CDoom.wminfo.next = CDoom.gamemap # go to next level
+      end
+    end
+
+    CDoom.wminfo.maxkills = CDoom.totalkills
+    CDoom.wminfo.maxitems = CDoom.totalitems
+    CDoom.wminfo.maxsecret = CDoom.totalsecret
+    CDoom.wminfo.maxfrags = 0
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      CDoom.wminfo.partime = 35 * CDoom.cpars[CDoom.gamemap - 1]
+    else
+      CDoom.wminfo.partime = 35 * CDoom.pars[CDoom.gameepisode][CDoom.gamemap]
+    end
+    CDoom.wminfo.pnum = CDoom.consoleplayer
+
+    CDoom::MAXPLAYERS.times do |i|
+      (CDoom.wminfo.plyr.to_unsafe + i).value.in = CDoom.playeringame[i]
+      (CDoom.wminfo.plyr.to_unsafe + i).value.skills = CDoom.players[i].killcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.sitems = CDoom.players[i].itemcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.ssecret = CDoom.players[i].secretcount
+      (CDoom.wminfo.plyr.to_unsafe + i).value.stime = CDoom.leveltime
+      CDoom.doom_memcpy(CDoom.wminfo.plyr[i].frags, CDoom.players[i].frags,
+        sizeof(typeof(CDoom.wminfo.plyr[i].frags)))
+    end
+
+    CDoom.gamestate = CDoom::Gamestate::Intermission
+    CDoom.viewactive = 0
+    CDoom.automapactive = 0
+
+    if !CDoom.statcopy.null?
+      CDoom.doom_memcpy(CDoom.statcopy, pointerof(CDoom.wminfo), sizeof(typeof(CDoom.wminfo)))
+    end
+
+    CDoom.wi_start(pointerof(CDoom.wminfo))
+  end
+
+  #
+  # g_world_done
+  #
+  def self.g_world_done
+    CDoom.gameaction = CDoom::Gameaction::Worlddone
+
+    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.didsecret = 1 if CDoom.secretexit != 0
+
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      case CDoom.gamemap
+      when 15, 31
+        CDoom.f_start_finale if CDoom.secretexit == 0
+      when 6, 11, 20, 30
+        CDoom.f_start_finale
+      end
+    end
+  end
+
+  #
+  # g_do_world_done
+  #
+  def self.g_do_world_done
+    CDoom.gamestate = CDoom::Gamestate::Level
+    CDoom.gamemap = CDoom.wminfo.next + 1
+    CDoom.g_do_load_level
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.viewactive = 1
+  end
+
+  #
+  # g_load_game
+  # Can be called by the startup code or the menu task.
+  #
+  def self.g_load_game(name : UInt8*)
+    CDoom.doom_strcpy(CDoom.savename, name)
+    CDoom.gameaction = CDoom::Gameaction::Loadgame
+  end
+
+  def self.g_do_load_game
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+
+    length = CDoom.m_read_file(CDoom.savename, pointerof(CDoom.savebuffer))
+    CDoom.save_p = CDoom.savebuffer + CDoom::SAVESTRINGSIZE
+
+    vcheck = uninitialized StaticArray(UInt8, CDoom::VERSIONSIZE)
+
+    # skip the description field
+    CDoom.doom_memset(vcheck.to_unsafe, 0, sizeof(typeof(vcheck)))
+    CDoom.doom_strcpy(vcheck.to_unsafe, "version ")
+    CDoom.doom_concat(vcheck.to_unsafe, CDoom.doom_itoa(CDoom::VERSION, 10))
+    return if CDoom.doom_strcmp(CDoom.save_p.as(UInt8*), vcheck.to_unsafe) != 0 # bad version
+    CDoom.save_p += CDoom::VERSIONSIZE
+
+    CDoom.gameskill = CDoom::Skill.new(CDoom.save_p.value)
+    CDoom.save_p += 1
+    CDoom.gameepisode = CDoom.save_p.value
+    CDoom.save_p += 1
+    CDoom.gamemap = CDoom.save_p.value
+    CDoom.save_p += 1
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.playeringame[i] = CDoom.save_p.value
+      CDoom.save_p += 1
+    end
+
+    # load a base level
+    CDoom.g_init_new(CDoom.gameskill, CDoom.gameepisode, CDoom.gamemap)
+
+    # get the times
+    a = CDoom.save_p.value
+    CDoom.save_p += 1
+    b = CDoom.save_p.value
+    CDoom.save_p += 1
+    c = CDoom.save_p.value
+    CDoom.save_p += 1
+    CDoom.leveltime = (a << 16) + (b << 8) + c
+
+    # dearchive all the modifications
+    CDoom.p_unarchive_players
+    CDoom.p_unarchive_world
+    CDoom.p_unarchive_thinkers
+    CDoom.p_unarchive_specials
+
+    CDoom.i_error("Error: Bad savegame") if CDoom.save_p.value != 0x1d
+
+    # done
+    CDoom.z_free(CDoom.savebuffer)
+
+    CDoom.r_execute_set_view_size if CDoom.setsizeneeded != 0
+
+    # draw the pattern into the back screen
+    CDoom.r_fill_back_screen
+  end
+
+  #
+  # g_save_game
+  # Called by the menu task.
+  # Description is a 24 byte text string
+  #
+  def self.g_save_game(slot : Int32, description : UInt8*)
+    CDoom.savegameslot = slot
+    CDoom.doom_strcpy(CDoom.savedescription, description)
+    CDoom.sendsave = 1
+  end
+
+  def self.g_do_save_game
+    name = uninitialized StaticArray(UInt8, 100)
+    name2 = uninitialized StaticArray(UInt8, CDoom::VERSIONSIZE)
+
+    CDoom.doom_strcpy(name, CDoom::SAVEGAMENAME)
+    CDoom.doom_concat(name, CDoom.doom_itoa(CDoom.savegameslot, 10))
+    CDoom.doom_concat(name, ".dsg")
+    description = CDoom.savedescription
+
+    CDoom.save_p = CDoom.screens[1] + 0x4000
+    CDoom.savebuffer = CDoom.save_p
+
+    CDoom.doom_memcpy(CDoom.save_p, description, CDoom::SAVESTRINGSIZE)
+    CDoom.save_p += CDoom::SAVESTRINGSIZE
+    CDoom.doom_memset(name2, 0, sizeof(typeof(name2)))
+    CDoom.doom_strcpy(name2, "version ")
+    CDoom.doom_concat(name2, CDoom.doom_itoa(CDoom::VERSION, 10))
+    CDoom.doom_memcpy(CDoom.save_p, name2, CDoom::VERSIONSIZE)
+    CDoom.save_p += CDoom::VERSIONSIZE
+
+    CDoom.save_p.value = CDoom.gameskill.value.to_u8!
+    CDoom.save_p += 1
+    CDoom.save_p.value = CDoom.gameepisode.to_u8!
+    CDoom.save_p += 1
+    CDoom.save_p.value = CDoom.gamemap.to_u8!
+    CDoom.save_p += 1
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.save_p.value = CDoom.playeringame[i].to_u8!
+      CDoom.save_p += 1
+    end
+    CDoom.save_p.value = (CDoom.leveltime >> 16).to_u8!
+    CDoom.save_p += 1
+    CDoom.save_p.value = (CDoom.leveltime >> 8).to_u8!
+    CDoom.save_p += 1
+    CDoom.save_p.value = (CDoom.leveltime).to_u8!
+    CDoom.save_p += 1
+
+    CDoom.p_archive_players
+    CDoom.p_archive_world
+    CDoom.p_archive_thinkers
+    CDoom.p_archive_specials
+
+    CDoom.save_p.value = 0x1d # consistancy marker
+    CDoom.save_p += 1
+
+    length = (CDoom.save_p - CDoom.savebuffer).to_i32!
+    CDoom.i_error("Error: Savegame buffer overrun") if length > CDoom::SAVEGAMESIZE
+    CDoom.m_write_file(name, CDoom.savebuffer, length)
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.savedescription[0] = 0
+
+    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::GGSAVED
+
+    # draw the pattern into the back screen
+    CDoom.r_fill_back_screen
+  end
+
+  #
+  # g_init_new
+  # Can be called by the startup code or the menu task,
+  # consoleplayer, displayplayer, playeringame[] should be set.
+  #
+  def self.g_defered_init_new(skill : CDoom::Skill, episode : Int32, map : Int32)
+    CDoom.d_skill = skill
+    CDoom.d_episode = episode
+    CDoom.d_map = map
+    CDoom.gameaction = CDoom::Gameaction::Newgame
+  end
+
+  def self.g_do_new_game
+    CDoom.demoplayback = 0
+    CDoom.netdemo = 0
+    CDoom.netgame = 0
+    CDoom.deathmatch = 0
+    CDoom.playeringame[1] = 0
+    CDoom.playeringame[2] = 0
+    CDoom.playeringame[3] = 0
+    CDoom.respawnparm = 0
+    CDoom.fastparm = 0
+    CDoom.nomonsters = 0
+    CDoom.consoleplayer = 0
+    CDoom.g_init_new(CDoom.d_skill, CDoom.d_episode, CDoom.d_map)
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+  end
+
+  def self.g_init_new(skill : CDoom::Skill, episode : Int32, map : Int32)
+    if CDoom.paused != 0
+      CDoom.paused = 0
+      CDoom.s_resume_sound
+    end
+
+    skill = CDoom::Skill::Nightmare if skill > CDoom::Skill::Nightmare
+
+    # This was quite messy with SPECIAL and commented parts.
+    # Supposedly hacks to make the latest edition work.
+    # It might not work properly.
+    episode = 1 if episode < 1
+
+    if CDoom.gamemode == CDoom::GameMode::Retail
+      episode = 4 if episode > 4
+    elsif CDoom.gamemode == CDoom::GameMode::Shareware
+      episode = 1 if episode > 1 # only start episode 1 on shareware
+    else
+      episode = 3 if episode > 3
+    end
+
+    map = 1 if map < 1
+
+    map = 9 if map > 9 && CDoom.gamemode != CDoom::GameMode::Commercial
+
+    CDoom.m_clear_random
+
+    if skill == CDoom::Skill::Nightmare || CDoom.respawnparm != 0
+      CDoom.respawnmonsters = 1
+    else
+      CDoom.respawnmonsters = 0
+    end
+
+    if CDoom.fastparm != 0 || (skill == CDoom::Skill::Nightmare && CDoom.gameskill != CDoom::Skill::Nightmare)
+      i = CDoom::Statenum::S_SARG_RUN1.value
+      while i <= CDoom::Statenum::S_SARG_PAIN2.value
+        CDoom.states[i].tics = CDoom.states[i].tics >> 1
+        i += 1
+      end
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_BRUISERSHOT.value].speed = 20 * CDoom::FRACUNIT
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_HEADSHOT.value].speed = 20 * CDoom::FRACUNIT
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_TROOPSHOT.value].speed = 20 * CDoom::FRACUNIT
+    elsif skill != CDoom::Skill::Nightmare && CDoom.gameskill == CDoom::Skill::Nightmare
+      i = CDoom::Statenum::S_SARG_RUN1.value
+      while i <= CDoom::Statenum::S_SARG_PAIN2.value
+        CDoom.states[i].tics = CDoom.states[i].tics << 1
+        i += 1
+      end
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_BRUISERSHOT.value].speed = 15 * CDoom::FRACUNIT
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_HEADSHOT.value].speed = 10 * CDoom::FRACUNIT
+      CDoom.mobjinfo[CDoom::Mobjtype::MT_TROOPSHOT.value].speed = 10 * CDoom::FRACUNIT
+    end
+
+    # force players to be initialized upon first level load
+    CDoom::MAXPLAYERS.times { |i| (CDoom.players.to_unsafe + i).value.playerstate = CDoom::Playerstate::PST_REBORN }
+
+    CDoom.usergame = 1 # will be set false if a demo
+    CDoom.paused = 0
+    CDoom.demoplayback = 0
+    CDoom.automapactive = 0
+    CDoom.viewactive = 1
+    CDoom.gameepisode = episode
+    CDoom.gamemap = map
+    CDoom.gameskill = skill
+
+    # set the sky map for the episode
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
+      if CDoom.gamemap < 12
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
+      elsif CDoom.gamemap < 21
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
+      end
+    else
+      case episode
+      when 1
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY1")
+      when 2
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY2")
+      when 3
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY3")
+      when 4 # Special Edition sky
+        CDoom.skytexture = CDoom.r_texture_num_for_name("SKY4")
+      end
+    end
+
+    CDoom.g_do_load_level
+  end
+
+  #
+  # DEMO RECORDING
+  #
+  def self.g_read_demo_ticcmd(cmd : CDoom::Ticcmd*)
+    if CDoom.demo_p.value == CDoom::DEMOMARKER
+      # end of demo data stream
+      CDoom.g_check_demo_status
+      return
+    end
+    cmd.value.forwardmove = CDoom.demo_p.value.to_i8!
+    CDoom.demo_p += 1
+    cmd.value.sidemove = CDoom.demo_p.value.to_i8!
+    CDoom.demo_p += 1
+    cmd.value.angleturn = (CDoom.demo_p.value.to_u8!).to_i32 << 8
+    CDoom.demo_p += 1
+    cmd.value.buttons = CDoom.demo_p.value.to_u8!
+    CDoom.demo_p += 1
+  end
+
+  def self.g_write_demo_ticcmd(cmd : CDoom::Ticcmd*)
+    CDoom.g_check_demo_status if CDoom.gamekeydown['q'.ord] != 0 # press q to end demo recording
+    CDoom.demo_p.value = cmd.value.forwardmove.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = cmd.value.sidemove.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = ((cmd.value.angleturn.to_i32 + 128) >> 8).to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = cmd.value.buttons.to_u8!
+    CDoom.demo_p += 1
+    CDoom.demo_p -= 4
+    if CDoom.demo_p > CDoom.demoend - 16
+      # no more space
+      CDoom.g_check_demo_status
+      return
+    end
+
+    CDoom.g_read_demo_ticcmd(cmd) # make SURE it is exactly the same
+  end
+
+  #
+  # g_record_demo
+  #
+  def self.g_record_demo(name : UInt8*)
+    CDoom.usergame = 0
+    CDoom.doom_strcpy(CDoom.demoname, name)
+    CDoom.doom_concat(CDoom.demoname, ".lmp")
+    maxsize = 0x20000
+    i = CDoom.m_check_parm("-maxdemo")
+    maxsize = CDoom.doom_atoi(CDoom.myargv[i + 1]) * 1024 if i != 0 && i < CDoom.myargc - 1
+    CDoom.demobuffer = CDoom.z_malloc(maxsize, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
+    CDoom.demoend = CDoom.demobuffer + maxsize
+
+    CDoom.demorecording = 1
+  end
+
+  def self.g_begin_recording
+    CDoom.demo_p = CDoom.demobuffer
+
+    CDoom.demo_p.value = CDoom::VERSION.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gameskill.value.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gameepisode.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.gamemap.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.deathmatch.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.respawnparm.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.fastparm.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.nomonsters.to_u8
+    CDoom.demo_p += 1
+    CDoom.demo_p.value = CDoom.consoleplayer.to_u8
+    CDoom.demo_p += 1
+
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.demo_p.value = CDoom.playeringame[i].to_u8
+      CDoom.demo_p += 1
+    end
+  end
+
+  #
+  # g_play_demo
+  #
+
+  def self.g_defered_play_demo(name : UInt8*)
+    CDoom.defdemoname = name
+    CDoom.gameaction = CDoom::Gameaction::Playdemo
+  end
+
+  def self.g_do_play_demo
+    CDoom.gameaction = CDoom::Gameaction::Nothing
+    CDoom.demobuffer = CDoom.w_cache_lump_name(CDoom.defdemoname, CDoom::PU_STATIC).as(UInt8*)
+    CDoom.demo_p = CDoom.demobuffer
+    demo_version = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    if demo_version != CDoom::VERSION && demo_version != 109 # Demos seem to run fine with version 109
+      CDoom.doom_print.call("Demo is from a different game version! Demo Verson = ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(demo_version, 10))
+      CDoom.doom_print.call(", this version = ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(CDoom::VERSION, 10))
+      CDoom.doom_print.call("\n".to_unsafe)
+      CDoom.gameaction = CDoom::Gameaction::Nothing
+      return
+    end
+
+    skill = CDoom::Skill.new(CDoom.demo_p.value)
+    CDoom.demo_p += 1
+    episode = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    map = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.deathmatch = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.respawnparm = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.fastparm = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.nomonsters = CDoom.demo_p.value
+    CDoom.demo_p += 1
+    CDoom.consoleplayer = CDoom.demo_p.value
+    CDoom.demo_p += 1
+
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.playeringame[i] = CDoom.demo_p.value
+      CDoom.demo_p += 1
+    end
+    if CDoom.playeringame[1] != 0
+      CDoom.netgame = 1
+      CDoom.netdemo = 1
+    end
+
+    # don't spend a lot of time in loadlevel
+    CDoom.precache = 0
+    CDoom.g_init_new(skill, episode, map)
+    CDoom.precache = 1
+
+    CDoom.usergame = 0
+    CDoom.demoplayback = 1
+  end
+
+  #
+  # g_time_demo
+  #
+  def self.g_time_demo(name : UInt8*)
+    CDoom.nodrawers = CDoom.m_check_parm("-nodraw")
+    CDoom.noblit = CDoom.m_check_parm("-noblit")
+    CDoom.timingdemo = 1
+    CDoom.singletics = 1
+
+    CDoom.defdemoname = name
+    CDoom.gameaction = CDoom::Gameaction::Playdemo
+  end
+
+  # ===================
+  # =
+  # = g_check_demo_status
+  # =
+  # = Called after a death or level completion to allow demos to be cleaned up
+  # = Returns true if a new demo loop action will take place
+  # ===================
+  def self.g_check_demo_status : CDoom::DoomBool
+    if CDoom.timingdemo != 0
+      endtime = CDoom.i_get_time
+
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: timed ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.gametic, 10))
+      CDoom.doom_concat(CDoom.error_buf, " gametics in ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(endtime - CDoom.starttime, 10))
+      CDoom.doom_concat(CDoom.error_buf, " realtics")
+      CDoom.i_error(CDoom.error_buf)
+    end
+
+    if CDoom.demoplayback != 0
+      CDoom.i_quit if CDoom.singledemo != 0
+
+      z_change_tag(CDoom.demobuffer, CDoom::PU_CACHE)
+      CDoom.demoplayback = 0
+      CDoom.netdemo = 0
+      CDoom.netgame = 0
+      CDoom.deathmatch = 0
+      CDoom.playeringame[1] = 0
+      CDoom.playeringame[2] = 0
+      CDoom.playeringame[3] = 0
+      CDoom.respawnparm = 0
+      CDoom.fastparm = 0
+      CDoom.nomonsters = 0
+      CDoom.consoleplayer = 0
+      CDoom.d_advance_demo
+      return 1
+    end
+
+    if CDoom.demorecording != 0
+      CDoom.demo_p.value = CDoom::DEMOMARKER.to_u8
+      CDoom.demo_p += 1
+      CDoom.m_write_file(CDoom.demoname, CDoom.demobuffer, (CDoom.demo_p - CDoom.demobuffer).to_i32!)
+      CDoom.z_free(CDoom.demobuffer)
+      CDoom.demorecording = 0
+
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: Demo ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.demoname)
+      CDoom.doom_concat(CDoom.error_buf, " recorded")
+      CDoom.i_error(CDoom.error_buf)
+    end
+
+    return 0
+  end
+
+  def self.hulib_clear_text_line(t : CDoom::HU_Textline*)
+    t.value.len = 0
+    t.value.l[0] = 0
+    t.value.needsupdate = true
+  end
+
+  def self.hulib_init_text_line(t : CDoom::HU_Textline*, x : Int32, y : Int32, f : CDoom::Patch**, sc : Int32)
+    t.value.x = x
+    t.value.y = y
+    t.value.f = f
+    t.value.sc = sc
+    CDoom.hulib_clear_text_line(t)
+  end
+
+  def self.hulib_add_char_to_text_line(t : CDoom::HU_Textline*, ch : UInt8) : CDoom::DoomBool
+    if t.value.len == CDoom::HU_MAXLINELENGTH
+      return 0
+    else
+      t.value.l[t.value.len] = ch
+      t.value.len = t.value.len + 1
+      t.value.l[t.value.len] = 0
+      t.value.needsupdate = 4
+      return 1
+    end
+  end
+
+  def self.hulib_del_char_from_text_line(t : CDoom::HU_Textline*) : CDoom::DoomBool
+    if t.value.len == 0
+      return 0
+    else
+      t.value.len = t.value.len - 1
+      t.value.l[t.value.len] = 0
+      t.value.needsupdate = 4
+      return 1
+    end
+  end
+
+  def self.hulib_draw_text_line(l : CDoom::HU_Textline*, drawcursor : CDoom::DoomBool)
+    # draw the new stuff
+    x = l.value.x
+    l.value.len.times do |i|
+      c = CDoom.doom_toupper(l.value.l[i])
+      if c != ' '.ord &&
+         c >= l.value.sc &&
+         c <= '_'.ord
+        w = l.value.f[c - l.value.sc].value.width.to_i16!
+        break if x + w > CDoom::SCREENWIDTH
+        CDoom.v_draw_patch_direct(x, l.value.y, CDoom::FG, l.value.f[c - l.value.sc])
+        x += w
+      else
+        x += 4
+        break if x >= CDoom::SCREENWIDTH
+      end
+    end
+
+    # draw the cursor if requested
+    if drawcursor != 0 && x + l.value.f['_'.ord - l.value.sc].value.width.to_i16! <= CDoom::SCREENWIDTH
+      CDoom.v_draw_patch_direct(x, l.value.y, CDoom::FG, l.value.f['_'.ord - l.value.sc])
+    end
+  end
+
+  @@lastautomapactive = 1
+
+  # sorta called by hu_erase and just better darn get things straight
+  def self.hulib_erase_text_line(l : CDoom::HU_Textline*)
+    # Only erases when NOT in automap and the screen is reduced,
+    # and the text must either need updating or refreshing
+    # (because of a recent change back from the automap)
+
+    if CDoom.automapactive == 0 && CDoom.viewwindowx != 0 && l.value.needsupdate != 0
+      lh = l.value.f[0].value.height.to_i16! + 1
+      y = l.value.y
+      yoffset = y * CDoom::SCREENWIDTH
+      while y < l.value.y + lh
+        if y < CDoom.viewwindowy || y >= CDoom.viewwindowy + CDoom.viewheight
+          CDoom.r_video_erase(yoffset, CDoom::SCREENWIDTH) # erase entire line
+        else
+          CDoom.r_video_erase(yoffset, CDoom.viewwindowx)                                       # erase left border
+          CDoom.r_video_erase(yoffset + CDoom.viewwindowx + CDoom.viewwidth, CDoom.viewwindowx) # erase right border
+        end
+
+        y += 1
+        yoffset += CDoom::SCREENWIDTH
+      end
+    end
+
+    @@lastautomapactive = CDoom.automapactive
+    l.value.needsupdate = l.value.needsupdate - 1 if l.value.needsupdate != 0
+  end
+
+  def self.hulib_init_s_text(s : CDoom::HU_Stext*,
+                             x : Int32,
+                             y : Int32,
+                             h : Int32,
+                             font : CDoom::Patch**,
+                             startchar : Int32,
+                             on : CDoom::DoomBool*)
+    s.value.h = h
+    s.value.on = on
+    s.value.laston = 1
+    s.value.cl = 0
+    h.times do |i|
+      CDoom.hulib_init_text_line(s.value.l.to_unsafe + i,
+        x, y - i * (font[0].value.height.to_i16! + 1),
+        font, startchar)
+    end
+  end
+
+  def self.hulib_add_line_to_s_text(s : CDoom::HU_Stext*)
+    # add a clear line
+    s.value.cl = s.value.cl + 1
+    s.value.cl = 0 if s.value.cl == s.value.h
+    CDoom.hulib_clear_text_line(s.value.l.to_unsafe + s.value.cl)
+
+    # everything needs updating
+    s.value.h.times do |i|
+      (s.value.l.to_unsafe + i).value.needsupdate = 4
+    end
+  end
+
+  def self.hulib_add_message_to_s_text(s : CDoom::HU_Stext*, prefix : UInt8*, msg : UInt8*)
+    CDoom.hulib_add_line_to_s_text(s)
+    if !prefix.null?
+      while prefix.value != 0
+        CDoom.hulib_add_char_to_text_line(s.value.l.to_unsafe + s.value.cl, prefix.value)
+        prefix += 1
+      end
+    end
+
+    while msg.value != 0
+      CDoom.hulib_add_char_to_text_line(s.value.l.to_unsafe + s.value.cl, msg.value)
+      msg += 1
+    end
+  end
+
+  def self.hulib_draw_s_text(s : CDoom::HU_Stext*)
+    return if s.value.on.value == 0 # if not on, don't draw
+
+    # draw everything
+    s.value.h.times do |i|
+      idx = s.value.cl - i
+      idx += s.value.h if idx < 0 # handle queue of lines
+      l = s.value.l.to_unsafe + idx
+
+      # need a decision made here on whether to skip the draw
+      CDoom.hulib_draw_text_line(l, 0) # no cursor, please
+    end
+  end
+
+  def self.hulib_erase_s_text(s : CDoom::HU_Stext*)
+    s.value.h.times do |i|
+      if s.value.laston != 0 && s.value.on.value == 0
+        (s.value.l.to_unsafe + i).value.needsupdate = 4
+      end
+      CDoom.hulib_erase_text_line(s.value.l.to_unsafe + i)
+    end
+    s.value.laston = s.value.on.value
+  end
+
+  def self.hulib_init_i_text(it : CDoom::HU_Itext*,
+                             x : Int32,
+                             y : Int32,
+                             font : CDoom::Patch**,
+                             startchar : Int32,
+                             on : CDoom::DoomBool*)
+    it.value.lm = 0 # default left margin is start of text
+    it.value.on = on
+    it.value.laston = 1
+    CDoom.hulib_init_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), x, y, font, startchar)
+  end
+
+  # The following deletion routines adhere to the left margin restriction
+  def self.hulib_del_char_from_i_text(it : CDoom::HU_Itext*)
+    CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)) if it.value.l.len != it.value.lm
+  end
+
+  def self.hulib_erase_line_from_i_text(it : CDoom::HU_Itext*)
+    while it.value.lm != it.value.l.len
+      CDoom.hulib_del_char_from_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    end
+  end
+
+  # Resets left margin as well
+  def self.hulib_reset_i_text(it : CDoom::HU_Itext*)
+    it.value.lm = 0
+    CDoom.hulib_clear_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+  end
+
+  def self.hulib_add_prefix_to_i_text(it : CDoom::HU_Itext*, str : UInt8*)
+    while str.value != 0
+      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), str.value)
+      str += 1
+    end
+    it.value.lm = it.value.l.len
+  end
+
+  # wrapper function for handling general keyed input.
+  # returns true if it ate the key
+  def self.hulib_key_in_i_text(it : CDoom::HU_Itext*, ch : UInt8) : CDoom::DoomBool
+    if ch >= ' '.ord && ch <= '_'.ord
+      CDoom.hulib_add_char_to_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*), ch.to_i8!)
+    else
+      if ch == CDoom::KEY_BACKSPACE
+        CDoom.hulib_del_char_from_i_text(it)
+      elsif ch != CDoom::KEY_ENTER
+        return 0 # did not eat key
+      end
+    end
+
+    return 1 # ate the key
+  end
+
+  def self.hulib_draw_i_text(it : CDoom::HU_Itext*)
+    l = (it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*)
+
+    return if it.value.on.value == 0
+    CDoom.hulib_draw_text_line(l, 1) # draw the line w/ cursor
+  end
+
+  def self.hulib_erase_i_text(it : CDoom::HU_Itext*)
+    if it.value.laston != 0 && it.value.on.value == 0
+      it.value.l.needsupdate = 4
+    end
+
+    CDoom.hulib_erase_text_line((it + offsetof(CDoom::HU_Itext, @l)).as(CDoom::HU_Textline*))
+    it.value.laston = it.value.on.value
+  end
+
+  def self.foreign_translation(ch : UInt8) : UInt8
+    return ch < 128 ? CDoom.french_key_map[ch] : ch
+  end
+
+  def self.hu_init
+    buffer = uninitialized StaticArray(UInt8, 9)
+
+    if CDoom.language == CDoom::Language::French
+      CDoom.shiftxform = CDoom.french_shiftxform
+    else
+      CDoom.shiftxform = CDoom.english_shiftxform
+    end
+
+    # load the heads-up font
+    j = CDoom::HU_FONTSTART
+    CDoom::HU_FONTSIZE.times do |i|
+      CDoom.doom_strcpy(buffer, "STCFN")
+      CDoom.doom_concat(buffer, "0") if j < 100
+      CDoom.doom_concat(buffer, "0") if j < 10
+      CDoom.doom_concat(buffer, CDoom.doom_itoa(j, 10))
+      j += 1
+      CDoom.hu_font[i] = CDoom.w_cache_lump_name(buffer, CDoom::PU_STATIC).as(CDoom::Patch*)
+    end
+  end
+
+  def self.hu_stop
+    CDoom.headsupactive = 0
+  end
+
+  def self.hu_start
+    CDoom.hu_stop if CDoom.headsupactive != 0
+
+    CDoom.plr = CDoom.players.to_unsafe + CDoom.consoleplayer
+    CDoom.message_on = 0
+    CDoom.message_dontfuckwithme = 0
+    CDoom.message_nottobefuckedwith = 0
+    CDoom.chat_on = 0
+
+    # create the message widget
+    CDoom.hulib_init_s_text(pointerof(CDoom.w_message),
+      CDoom::HU_MSGX, CDoom::HU_MSGY, CDoom::HU_MSGHEIGHT,
+      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(CDoom.message_on))
+
+    # # create the map title widget
+    CDoom.hulib_init_text_line(pointerof(CDoom.w_title),
+      0, 167 - CDoom.hu_font[0].value.height.to_i16!,
+      CDoom.hu_font, CDoom::HU_FONTSTART)
+
+    s = CDoom::HU_TITLE2
+    case CDoom.gamemode
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
+      s = CDoom::HU_TITLE
+    when CDoom::GameMode::Commercial
+    end
+
+    while s.value != 0
+      CDoom.hulib_add_char_to_text_line(pointerof(CDoom.w_title), s.value)
+      s += 1
+    end
+
+    # create the chat widget
+    CDoom.hulib_init_i_text(pointerof(CDoom.w_chat), CDoom::HU_MSGX, CDoom::HU_MSGY + CDoom::HU_MSGHEIGHT*(CDoom.hu_font[0].value.height.to_i16! + 1),
+      CDoom.hu_font, CDoom::HU_FONTSTART, pointerof(CDoom.chat_on))
+
+    # create the inputbuffer widgets
+    CDoom::MAXPLAYERS.times do |i|
+      CDoom.hulib_init_i_text(CDoom.w_inputbuffer.to_unsafe + i, 0, 0, Pointer(Pointer(CDoom::Patch)).null, 0, pointerof(CDoom.always_off))
+    end
+
+    CDoom.headsupactive = 1
+  end
+
+  def self.hu_drawer
+    CDoom.hulib_draw_s_text(pointerof(CDoom.w_message))
+    CDoom.hulib_draw_i_text(pointerof(CDoom.w_chat))
+    CDoom.hulib_draw_text_line(pointerof(CDoom.w_title), 0) if CDoom.automapactive != 0
+  end
+
+  def self.hu_erase
+    CDoom.hulib_erase_s_text(pointerof(CDoom.w_message))
+    CDoom.hulib_erase_i_text(pointerof(CDoom.w_chat))
+    CDoom.hulib_erase_text_line(pointerof(CDoom.w_title))
+  end
+
+  def self.hu_ticker
+    # tick down message counter if message is up
+    if CDoom.message_counter != 0 && (CDoom.message_counter -= 1) == 0
+      CDoom.message_on = 0
+      CDoom.message_nottobefuckedwith = 0
+    end
+
+    if CDoom.show_messages != 0 || CDoom.message_dontfuckwithme != 0
+      # display message if necessary
+      if (!CDoom.plr.value.message.null? && CDoom.message_nottobefuckedwith == 0) ||
+         (!CDoom.plr.value.message.null? && CDoom.message_dontfuckwithme != 0)
+        CDoom.hulib_add_message_to_s_text(pointerof(CDoom.w_message), Pointer(UInt8).null, CDoom.plr.value.message)
+        CDoom.plr.value.message = Pointer(UInt8).null
+        CDoom.message_on = 1
+        CDoom.message_counter = CDoom::HU_MSGTIMEOUT
+        CDoom.message_nottobefuckedwith = CDoom.message_dontfuckwithme
+        CDoom.message_dontfuckwithme = 0
+      end
+    end
+
+    # check for incoming chat characters
+    if CDoom.netgame != 0
+      CDoom::MAXPLAYERS.times do |i|
+        next if CDoom.playeringame[i] == 0
+        if i != CDoom.consoleplayer && (c = CDoom.players[i].cmd.chatchar) != 0
+          if c <= CDoom::HU_BROADCAST
+            CDoom.chat_dest[i] = c
+          else
+            if c >= 'a'.ord && c <= 'z'.ord
+              c = CDoom.shiftxform[c]
+            end
+            rc = CDoom.hulib_key_in_i_text(CDoom.w_inputbuffer.to_unsafe + i, c)
+            if rc != 0 && c == CDoom::KEY_ENTER
+              if CDoom.w_inputbuffer[i].l.len != 0 &&
+                 (CDoom.chat_dest[i] == CDoom.consoleplayer + 1 ||
+                 CDoom.chat_dest[i] == CDoom::HU_BROADCAST)
+                CDoom.hulib_add_message_to_s_text(pointerof(CDoom.w_message),
+                  CDoom.player_names[i],
+                  CDoom.w_inputbuffer[i].l.l)
+
+                CDoom.message_nottobefuckedwith = 1
+                CDoom.message_on = 1
+                CDoom.message_counter = CDoom::HU_MSGTIMEOUT
+                if CDoom.gamemode == CDoom::GameMode::Commercial
+                  CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_radio)
+                else
+                  CDoom.s_start_sound(Pointer(CDoom::Mobj).null, CDoom::Sfxenum::SFX_tink)
+                end
+              end
+              CDoom.hulib_reset_i_text(CDoom.w_inputbuffer.to_unsafe + i)
+            end
+          end
+          ((CDoom.players.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*).value.chatchar = 0
+        end
+      end
+    end
+  end
+
+  def self.hu_queue_chat_char(c : UInt8)
+    if ((CDoom.head + 1) & (CDoom::QUEUESIZE - 1)) == CDoom.tail
+      CDoom.plr.value.message = CDoom::HUSTR_MSGU
+    else
+      CDoom.chatchars[CDoom.head] = c
+      CDoom.head = (CDoom.head + 1) & (CDoom::QUEUESIZE - 1)
+    end
+  end
+
+  def self.hu_dequeue_chat_char : UInt8
+    c = 0_u8
+    if CDoom.head != CDoom.tail
+      c = CDoom.chatchars[CDoom.tail]
+      CDoom.tail = (CDoom.tail + 1) & (CDoom::QUEUESIZE - 1)
+    end
+
+    return c
+  end
+
+  LASTMESSAGE_SIZE = CDoom::HU_MAXLINELENGTH + 1
+  @@lastmessage = uninitialized StaticArray(UInt8, LASTMESSAGE_SIZE)
+  @@shiftdown = 0
+  @@altdown = 0
+  @@destination_keys : StaticArray(UInt8, CDoom::MAXPLAYERS) = StaticArray[
+    CDoom::HUSTR_KEYGREEN.ord.to_u8,
+    CDoom::HUSTR_KEYINDIGO.ord.to_u8,
+    CDoom::HUSTR_KEYBROWN.ord.to_u8,
+    CDoom::HUSTR_KEYRED.ord.to_u8,
+  ]
+  @@num_nobrainers = 0
+
+  def self.hu_responder(ev : CDoom::Event*) : CDoom::DoomBool
+    eatkey = 0
+    numplayers = 0
+    CDoom::MAXPLAYERS.times { |i| numplayers += CDoom.playeringame[i] }
+
+    if ev.value.data1 == CDoom::KEY_RSHIFT
+      @@shiftdown = (ev.value.type == CDoom::Evtype::Keydown).to_unsafe
+      return 0
+    elsif ev.value.data1 == CDoom::KEY_RALT || ev.value.data1 == CDoom::KEY_LALT
+      @@altdown = (ev.value.type == CDoom::Evtype::Keydown).to_unsafe
+      return 0
+    end
+
+    return 0 if ev.value.type != CDoom::Evtype::Keydown
+
+    if CDoom.chat_on == 0
+      if ev.value.data1 == CDoom::HU_MSGREFRESH
+        CDoom.message_on = 1
+        CDoom.message_counter = CDoom::HU_MSGTIMEOUT
+        eatkey = 1
+      elsif CDoom.netgame != 0 && ev.value.data1 == CDoom::HU_INPUTTOGGLE
+        eatkey = 1
+        CDoom.chat_on = 1
+        CDoom.hulib_reset_i_text(pointerof(CDoom.w_chat))
+        CDoom.hu_queue_chat_char(CDoom::HU_BROADCAST)
+      elsif CDoom.netgame != 0 && numplayers > 2
+        CDoom::MAXPLAYERS.times do |i|
+          if ev.value.data1 == @@destination_keys[i]
+            if CDoom.playeringame[i] != 0 && i != CDoom.consoleplayer
+              eatkey = 1
+              CDoom.chat_on = 1
+              CDoom.hulib_reset_i_text(pointerof(CDoom.w_chat))
+              CDoom.hu_queue_chat_char(i + 1)
+              break
+            elsif i == CDoom.consoleplayer
+              @@num_nobrainers += 1
+              if @@num_nobrainers < 3
+                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF1
+              elsif @@num_nobrainers < 6
+                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF2
+              elsif @@num_nobrainers < 9
+                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF3
+              elsif @@num_nobrainers < 32
+                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF4
+              else
+                CDoom.plr.value.message = CDoom::HUSTR_TALKTOSELF5
+              end
+            end
+          end
+        end
+      end
+    else
+      c = ev.value.data1
+      # send a macro
+      if @@altdown != 0
+        return 0 if c < '0'.ord || c > '9'.ord
+        c = c - '0'.ord
+        macromessage = CDoom.chat_macros[c]
+
+        # kill last message with a '\n'
+        CDoom.hu_queue_chat_char(CDoom::KEY_ENTER) # DEBUG!!!
+
+        # send the macro message
+        while macromessage.value != 0
+          CDoom.hu_queue_chat_char(macromessage.value)
+          macromessage += 1
+        end
+        CDoom.hu_queue_chat_char(CDoom::KEY_ENTER)
+
+        # leave chat mode and notify that it was sent
+        CDoom.chat_on = 0
+        CDoom.doom_strcpy(@@lastmessage, CDoom.chat_macros[c])
+        CDoom.plr.value.message = @@lastmessage
+        eatkey = 1
+      else
+        c = CDoom.foreign_translation(c) if CDoom.language == CDoom::Language::French
+        c = CDoom.shiftxform[c] if @@shiftdown != 0 || (c >= 'a'.ord && c <= 'z'.ord)
+        eatkey = CDoom.hulib_key_in_i_text(pointerof(CDoom.w_chat), c)
+        CDoom.hu_queue_chat_char(c) if eatkey != 0
+        if c == CDoom::KEY_ENTER
+          CDoom.chat_on = 0
+          if CDoom.w_chat.l.len != 0
+            CDoom.doom_strcpy(@@lastmessage, CDoom.w_chat.l.l)
+            CDoom.plr.value.message = @@lastmessage
+          end
+        elsif c == CDoom::KEY_ESCAPE
+          CDoom.chat_on = 0
+        end
+      end
+    end
+
+    return eatkey
+  end
+
+  def self.i_init_network
+    CDoom.doomcom = CDoom.doom_malloc.call(sizeof(typeof(CDoom.doomcom.value))).as(Pointer(CDoom::Doomcom))
+    CDoom.doom_memset(CDoom.doomcom, 0, sizeof(typeof(CDoom.doomcom.value)))
+
+    # set up for network
+    i = CDoom.m_check_parm("-dup")
+    if i != 0 && i < CDoom.myargc - 1
+      CDoom.doomcom.value.ticdup = CDoom.myargv[i + 1][0] - '0'.ord
+      CDoom.doomcom.value.ticdup = 1 if CDoom.doomcom.value.ticdup < 1
+      CDoom.doomcom.value.ticdup = 9 if CDoom.doomcom.value.ticdup > 9
+    else
+      CDoom.doomcom.value.ticdup = 1
+    end
+
+    if CDoom.m_check_parm("-extratic")
+      CDoom.doomcom.value.extratics = 1
+    else
+      CDoom.doomcom.value.extratics = 0
+    end
+
+    p = CDoom.m_check_parm("-port")
+    if p != 0 && p < CDoom.myargc - 1
+      @@doomport = CDoom.doom_atoi(CDoom.myargv[p + 1])
+      CDoom.doom_print.call("using alternate port ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(@@doomport, 10))
+      CDoom.doom_print.call("\n".to_unsafe)
+    end
+
+    p = CDoom.m_check_parm("-port")
+    if p != 0 && p < CDoom.myargc - 1
+      @@doomport_send = CDoom.doom_atoi(CDoom.myargv[p + 1])
+      CDoom.doom_print.call("using alternate send port ".to_unsafe)
+      CDoom.doom_print.call(CDoom.doom_itoa(@@doomport_send, 10))
+      CDoom.doom_print.call("\n".to_unsafe)
+    end
+
+    # parse network game options,
+    #  -net <consoleplayer> <host> <host> ...
+    i = CDoom.m_check_parm("-net")
+    if i == 0
+      # single player game
+      CDoom.netgame = 0
+      CDoom.doomcom.value.id = CDoom::DOOMCOM_ID
+      CDoom.doomcom.value.numplayers = 1
+      CDoom.doomcom.value.numnodes = 1
+      CDoom.deathmatch = 0
+      CDoom.consoleplayer = 0
+      return
+    end
+  end
+
+  def self.i_net_cmd
+  end
+
+  #
+  # This function loads the sound data from the WAD lump,
+  #  for single sound.
+  #
+  def self.getsfx(sfxname : UInt8*, len : Int32*) : Void*
+    name = uninitialized StaticArray(UInt8, 20)
+
+    # Get the sound data from the WAD, allocate lump
+    #  in zone memory.
+    CDoom.doom_strcpy(name, "ds")
+    CDoom.doom_concat(name, sfxname)
+
+    # Now, there is a severe problem with the
+    #  sound handling, in it is not (yet/anymore)
+    #  gamemode aware. That means, sounds from
+    #  DOOM II will be requested even with DOOM
+    #  shareware.
+    # The sound list is wired into sounds.c,
+    #  which sets the external variable.
+    # I do not do runtime patches to that
+    #  variable. Instead, we will use a
+    #  default sound for replacement.
+    sfxlump = 0
+    if CDoom.w_check_num_for_name(name) == -1
+      sfxlump = CDoom.w_get_num_for_name("dspistol")
+    else
+      sfxlump = CDoom.w_get_num_for_name(name)
+    end
+
+    size = CDoom.w_lump_length(sfxlump)
+
+    sfx = CDoom.w_cache_lump_num(sfxlump, CDoom::PU_STATIC).as(UInt8*)
+
+    # Pads the sound effect out to the mixing buffer size.
+    # The original realloc would interfere with zone memory.
+    paddedsize = ((size - 8 + (CDoom::SAMPLECOUNT - 1)) // CDoom::SAMPLECOUNT) * CDoom::SAMPLECOUNT
+
+    # Allocate from zone memory.
+    paddedsfx = CDoom.z_malloc(paddedsize + 8, CDoom::PU_STATIC, Pointer(Void).null).as(UInt8*)
+    # ddt: (unsigned char *) realloc(sfx, paddedsize+8);
+    # This should interfere with zone memory handling,
+    #  which does not kick in in the soundserver.
+
+    # Now copy and pad.
+    CDoom.doom_memcpy(paddedsfx, sfx, size)
+    i = size
+    while i < paddedsize + 8
+      paddedsfx[i] = 128
+      i += 1
+    end
+
+    # Remove the cached lump.
+    CDoom.z_free(sfx)
+
+    # Preserve padded length.
+    len.value = paddedsize
+
+    # Return allocated padded data
+    return (paddedsfx + 8).as(Void*)
+  end
+
+  @@handlenums : UInt16 = 0
+
+  #
+  # This function adds a sound to the
+  #  list of currently active sounds,
+  #  which is maintained as a given number
+  #  (eight, usually) of internal channels.
+  # Returns a handle.
+  #
+  def self.addsfx(sfxid : Int32, volume : Int32, step : Int32, seperation : Int32) : Int32
+    rc = -1
+    oldest = CDoom.gametic
+    oldestnum = 0
+
+    # Chainsaw troubles.
+    # Play these sound effects only one at a time.
+    if sfxid == CDoom::Sfxenum::SFX_sawup.value ||
+       sfxid == CDoom::Sfxenum::SFX_sawidl.value ||
+       sfxid == CDoom::Sfxenum::SFX_sawful.value ||
+       sfxid == CDoom::Sfxenum::SFX_sawhit.value ||
+       sfxid == CDoom::Sfxenum::SFX_stnmov.value ||
+       sfxid == CDoom::Sfxenum::SFX_pistol.value
+      # Loop all channels, check.
+      CDoom::NUM_CHANNELS.times do |i|
+        # Active, and using the same SFX?
+        if !CDoom.channels[i].null? && CDoom.channelids[i] == sfxid
+          # Reset.
+          CDoom.channels[i] = Pointer(UInt8).null
+          # We are sure that iff,
+          #  there will only be one
+          break
+        end
+      end
+    end
+
+    i = 0
+    # Loop all channels to find oldest SFX.
+    while i < CDoom::NUM_CHANNELS && !CDoom.channels[i].null?
+      if CDoom.channelstart[i] < oldest
+        oldestnum = i
+        oldest = CDoom.channelstart[i]
+      end
+      i += 1
+    end
+
+    # Tales from the cryptic.
+    # If we found a channel, fine.
+    # If not, we simply overwrite the first one, 0.
+    # Probably only happens at startup.
+    slot = i
+    slot = oldestnum if i == CDoom::NUM_CHANNELS
+
+    # Okay, in the less recent channel,
+    #  we will handle the new SFX.
+    # Set pointer to raw data.
+    CDoom.channels[slot] = (CDoom.s_sfx.to_unsafe + sfxid).value.data.as(UInt8*)
+    # Set pointer to end of raw data.
+    CDoom.channelsend[slot] = CDoom.channels[slot] + CDoom.lengths[sfxid]
+
+    # Reset current handle number, limited to 0..100.
+    @@handlenums = 100 if @@handlenums == 0
+
+    # Assign current handle number.
+    # Preserved so sounds could be stopped (unused).
+    CDoom.channelhandles[slot] = @@handlenums
+    rc = @@handlenums
+    @@handlenums += 1
+
+    # Set stepping???
+    # Kinda getting the impression this is never used.
+    CDoom.channelstep[slot] = step.to_u32
+    # ???
+    CDoom.channelstepremainder[slot] = 0
+    # Should be gametic, I presume.
+    CDoom.channelstart[slot] = CDoom.gametic
+
+    # Seperation, that is, orientation/stereo.
+    #  range is: 1 - 256
+    seperation += 1
+
+    # Per left/right channel.
+    #  x^2 seperation,
+    #  adjust volume properly.
+    leftvol = volume - ((volume * seperation * seperation) >> 16)
+    seperation = seperation - 257
+    rightvol = volume - ((volume * seperation * seperation) >> 16)
+
+    # Sanity check, clamp volume.
+    CDoom.i_error("Error: rightvol out of bounds") if rightvol < 0 || rightvol > 127
+    CDoom.i_error("Error: leftvol out of bounds") if leftvol < 0 || leftvol > 127
+
+    # Get the proper lookup table piece
+    #  for this volume level???
+    CDoom.channelleftvol_lookup[slot] = CDoom.vol_lookup.to_unsafe + leftvol*256
+    CDoom.channelrightvol_lookup[slot] = CDoom.vol_lookup.to_unsafe + rightvol*256
+
+    # Preserve sound SFX id,
+    #  e.g. for avoiding duplicates of chainsaw.
+    CDoom.channelids[slot] = sfxid
+
+    # You tell me.
+    return rc.to_i32
+  end
+
+  def self.i_set_channels
+    # Init internal lookups (raw data, mixing buffer, channels).
+    # This function sets up internal lookups used during
+    #  the mixing process.
+    steptablemid = CDoom.steptable.to_unsafe + 128
+
+    # This table provides step widths for pitch parameters.
+    # I fail to see that this is currently used.
+    i = -128
+    while i < 128
+      steptablemid[i] = ((2**(i / 64.0)) * 65536).floor.to_i32!
+      i += 1
+    end
+
+    # Generates volume lookup tables
+    #  which also turn the unsigned samples
+    #  into signed samples.
+    128.times do |i|
+      256.times do |j|
+        CDoom.vol_lookup[i * 256 + j] = (i * (j - 128) * 256) // 127
+      end
+    end
+  end
+
+  def self.i_set_sfx_volume(volume : Int32)
+    # Identical to DOS.
+    # Basically, this should propagate
+    #  the menu/config file setting
+    #  to the state variable used in
+    #  the mixing.
+    CDoom.snd_sfx_volume = volume
+  end
+
+  # MUSIC API - dummy. Some code from DOS version.
+  def self.i_set_music_volume(volume : Int32)
+    CDoom.snd_music_volume = volume
+    CDoom.mus_volume = CDoom.snd_music_volume * 8
+
+    16.times do |i|
+      CDoom.queued_midi_msgs[CDoom.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = (0x000000B0_u32 | i | 0x0700_u32 | (((CDoom.mus_channel_volumes[i] * CDoom.mus_volume) // 127) << 16))
+      CDoom.queue_midi_tail += 1
+    end
+  end
+
+  def self.i_get_sfx_lump_num(sfx : CDoom::Sfxinfo*) : Int32
+    namebuf = uninitialized StaticArray(UInt8, 9)
+
+    CDoom.doom_strcpy(namebuf, "ds")
+    CDoom.doom_concat(namebuf, sfx.value.name)
+    return CDoom.w_get_num_for_name(namebuf)
+  end
+
+  #
+  # Starting a sound means adding it
+  #  to the current list of active sounds
+  #  in the internal channels.
+  # As the SFX info struct contains
+  #  e.g. a pointer to the raw data,
+  #  it is ignored.
+  # As our sound handling does not handle
+  #  priority, it is ignored.
+  # Pitching (that is, increased speed of playback)
+  #  is set, but currently not used by mixing.
+  #
+  def self.i_start_sound(id : Int32, vol : Int32, sep : Int32, pitch : Int32, priority : Int32) : Int32
+    # Returns a handle (not used).
+    id = CDoom.addsfx(id, vol, CDoom.steptable[pitch], sep)
+    return id
+  end
+
+  def self.i_stop_sound(handle : Int32)
+    # You need the handle returned by StartSound.
+    # Would be looping all channels,
+    #  tracking down the handle,
+    #  an setting the channel to zero.
+  end
+
+  def self.i_sound_is_playing(handle : Int32) : Int32
+    # Ouch
+    return (CDoom.gametic < handle).to_unsafe
+  end
+
+  #
+  # This function loops all active (internal) sound
+  #  channels, retrieves a given number of samples
+  #  from the raw sound data, modifies it according
+  #  to the current (internal) channel parameters,
+  #  mixes the per channel samples into the global
+  #  mixbuffer, clamping it to the allowed range,
+  #  and sets up everything for transferring the
+  #  contents of the mixbuffer to the (two)
+  #  hardware channels (left and right, that is).
+  #
+  # This function currently supports only 16bit.
+  #
+  def self.i_update_sound
+    # Left and right channel
+    #  are in global mixbuffer, alternating.
+    leftout = CDoom.mixbuffer.to_unsafe
+    rightout = CDoom.mixbuffer.to_unsafe + 1
+    step = 2
+
+    # Determine end, for left channel only
+    #  (right channel is implicit).
+    leftend = CDoom.mixbuffer.to_unsafe + CDoom::SAMPLECOUNT * step
+
+    # Mix sounds into the mixing buffer.
+    # Loop over step*SAMPLECOUNT,
+    #  that is 512 values for two channels.
+    while leftout != leftend
+      # Reset left/right value.
+
+      dl = 0
+      dr = 0
+
+      # Love thy L2 chache - made this a loop.
+      # Now more channels could be set at compile time
+      #  as well. Thus loop those  channels.
+      CDoom::NUM_CHANNELS.times do |chan|
+        # Check channel, if active.
+        if !CDoom.channels[chan].null?
+          # Get the raw data from the channel.
+          sample = CDoom.channels[chan].value
+          # Add left and right part
+          #  for this channel (sound)
+          #  to the current data.
+          # Adjust volume accordingly.
+          dl += CDoom.channelleftvol_lookup[chan][sample]
+          dr += CDoom.channelrightvol_lookup[chan][sample]
+          # Increment index ???
+          CDoom.channelstepremainder[chan] = CDoom.channelstepremainder[chan] + CDoom.channelstep[chan]
+          # MSB is next sample???
+          CDoom.channels[chan] = CDoom.channels[chan] + (CDoom.channelstepremainder[chan] >> 16)
+          # Limit to LSB???
+          CDoom.channelstepremainder[chan] = CDoom.channelstepremainder[chan] & (65536 - 1)
+          # Check whether we are done.
+          CDoom.channels[chan] = Pointer(UInt8).null if CDoom.channels[chan] >= CDoom.channelsend[chan]
+        end
+      end
+
+      # Clamp to range. Left hardware channel.
+      # Has been char instead of short.
+      # if (dl > 127) *leftout = 127;
+      # else if (dl < -128) *leftout = -128;
+      # else *leftout = dl;
+
+      if dl > 0x7fff
+        leftout.value = 0x7fff
+      elsif dl < -0x8000
+        leftout.value = -0x8000
+      else
+        leftout.value = dl.to_i16!
+      end
+
+      # Same for right hardware channel.
+      if dr > 0x7fff
+        rightout.value = 0x7fff
+      elsif dr < -0x8000
+        rightout.value = -0x8000
+      else
+        rightout.value = dr.to_i16!
+      end
+
+      # Increment current pointers in mixbuffer.
+      leftout += step
+      rightout += step
+    end
+  end
+
+  def self.i_submit_sound
+  end
+
+  def self.i_update_sound_params(handle : LibC::Int, vol : LibC::Int, sep : LibC::Int, pitch : LibC::Int)
+    # I fail too see that this is used.
+    # Would be using the handle to identify
+    #  on which channel the sound might be active,
+    #  and resetting the channel parameters.
+  end
+
+  def self.i_shutdown_sound
+    # Wait till all pending sounds are finished.
+    done = 0
+
+    # FIXME (below).
+    CDoom.doom_print.call("i_shutdown_sound: NOT finishing pending sounds\n".to_unsafe)
+
+    while done == 0
+      8.times do |i|
+        break unless !CDoom.channels[i].null?
+      end
+
+      done = 1
+    end
+
+    @@audio_stream.try { |a| RAudio.unload_audio_stream(a) }
+
+    # Done.
+    return
+  end
+
+  def self.begin_audio_fiber
+    spawn do
+      loop do
+        now = Raylib.get_time
+        @@midi_tick_accumulator += now - @@last_time
+        @@last_time = now
+
+        while @@midi_tick_accumulator >= MIDI_TICK_TIME
+          while (msg = CDoom.doom_tick_midi) != 0
+            status = (msg & 0xFF).to_u8
+            data1 = ((msg >> 8) & 0xFF).to_u8
+            data2 = ((msg >> 16) & 0xFF).to_u8
+            command = status & 0xF0
+            channel = status & 0x0F
+
+            @@adl_player.try do |ap|
+              case command
+              when 0x80
+                ADLMIDI.adl_rt_noteOff(ap, channel, data1)
+              when 0x90
+                if data2 == 0
+                  ADLMIDI.adl_rt_noteOff(ap, channel, data1) # vel 0 == note off
+                else
+                  ADLMIDI.adl_rt_noteOn(ap, channel, data1, data2)
+                end
+              when 0xA0
+                ADLMIDI.adl_rt_noteAfterTouch(ap, channel, data1, data2)
+              when 0xB0
+                ADLMIDI.adl_rt_controllerChange(ap, channel, data1, data2)
+              when 0xC0
+                ADLMIDI.adl_rt_patchChange(ap, channel, data1)
+              when 0xD0
+                ADLMIDI.adl_rt_channelAfterTouch(ap, channel, data1)
+              when 0xE0
+                ADLMIDI.adl_rt_pitchBendML(ap, channel, data2, data1) # wire order: LSB, MSB
+              end
+            end
+          end
+          @@midi_tick_accumulator -= MIDI_TICK_TIME
+        end
+
+        @@music_stream.try do |m|
+          @@adl_player.try do |ap|
+            if RAudio.audio_stream_processed?(m)
+              generated = ADLMIDI.adl_generate(ap, MIDI_BUFFER_SIZE, @@music_buffer)
+              RAudio.update_audio_stream(m, @@music_buffer, MIDI_BUFFER_SIZE // 2)
+            end
+          end
+        end
+
+        @@audio_stream.try do |a|
+          if RAudio.audio_stream_processed?(a)
+            RAudio.update_audio_stream(a, CDoom.doom_get_sound_buffer, 512)
+          end
+        end
+        break if @@closing
+      end
+    end
+  end
+
+  def self.i_init_sound
+    # Initialize external data (all sounds) at start, keep static.
+    CDoom.doom_print.call("i_init_sound: ".to_unsafe)
+
+    i = 1
+    while i < CDoom::Sfxenum::NUMSFX.value
+      # Alias? Example is the chaingun sound linked to pistol.
+      if (CDoom.s_sfx.to_unsafe + i).value.link.null?
+        # Load data from WAD file.
+        (CDoom.s_sfx.to_unsafe + i).value.data = CDoom.getsfx((CDoom.s_sfx.to_unsafe + i).value.name, CDoom.lengths.to_unsafe + i)
+      else
+        # Previously loaded already?
+        (CDoom.s_sfx.to_unsafe + i).value.data = (CDoom.s_sfx.to_unsafe + i).value.link.value.data
+        CDoom.lengths[i] = CDoom.lengths[((CDoom.s_sfx.to_unsafe + i).value.link - CDoom.s_sfx.to_unsafe) // sizeof(CDoom::Sfxinfo)]
+      end
+
+      i += 1
+    end
+
+    CDoom.doom_print.call(" pre-cached all sound data\n".to_unsafe)
+
+    # Now initialize mixbuffer with zero.
+    CDoom::MIXBUFFERSIZE.times { |i| CDoom.mixbuffer[i] = 0 }
+
+    RAudio.init_audio_device
+    RAudio.set_master_volume(10.0)
+    RAudio.set_audio_stream_buffer_size_default(512)
+    @@audio_stream = RAudio.load_audio_stream(CDoom::DOOM_SAMPLERATE, 16, 2)
+    RAudio.set_audio_stream_volume(@@audio_stream.not_nil!, 1.0)
+    RAudio.play_audio_stream(@@audio_stream.not_nil!)
+
+    # Finished initialization.
+    CDoom.doom_print.call("i_init_sound: sound module ready\n".to_unsafe)
+  end
+
+  #
+  # MUSIC API.
+  #
+  def self.i_init_music
+    @@adl_player = ADLMIDI.adl_init(44100)
+    ADLMIDI.adl_setNumChips(@@adl_player.not_nil!, 4)
+    ADLMIDI.adl_setBank(@@adl_player.not_nil!, MIDI_BANK)
+    RAudio.set_audio_stream_buffer_size_default(MIDI_BUFFER_SIZE // 2)
+    @@music_stream = RAudio.load_audio_stream(MIDI_SAMPLE_RATE, 16, 2)
+    RAudio.set_audio_stream_volume(@@music_stream.not_nil!, 1.0)
+    RAudio.play_audio_stream(@@music_stream.not_nil!)
+    @@music_buffer = Pointer(Int16).malloc(2048)
+    @@midi_tick_accumulator = 0.0
+
+    @@last_time = Raylib.get_time
+  end
+
+  def self.i_shutdown_music
+    @@music_stream.try { |m| RAudio.unload_audio_stream(m) }
+    @@adl_player.try { |ap| ADLMIDI.adl_close(ap) }
+  end
+
+  def self.i_play_song(handle : Int32, looping : Int32)
+    CDoom.musicdies = CDoom.gametic + CDoom::TICRATE * 30
+
+    CDoom.mus_loop = looping != 0 ? 1 : 0
+    CDoom.mus_playing = 1
+  end
+
+  def self.i_pause_song(handle : Int32)
+    CDoom.mus_playing = 0
+  end
+
+  def self.i_resume_song(handle : Int32)
+    CDoom.mus_playing = 1 if !CDoom.mus_data.null?
+  end
+
+  def self.reset_all_channels
+    16.times do |i|
+      CDoom.queued_midi_msgs[CDoom.queue_midi_tail % CDoom::MAX_QUEUED_MIDI_MSGS] = 0b10110000_u32 | i | (123_u32 << 8)
+      CDoom.queue_midi_tail += 1
+    end
+  end
+
+  def self.i_stop_song(handle : LibC::Int)
+    CDoom.mus_data = Pointer(UInt8).null
+    CDoom.mus_delay = 0
+    CDoom.mus_offset = 0
+    CDoom.mus_playing = 0
+
+    CDoom.reset_all_channels
+  end
+
+  def self.i_unregister_song(handle : LibC::Int)
+    CDoom.i_stop_song(handle)
+  end
+
+  def self.i_register_song(data : Void*) : LibC::Int
+    CDoom.doom_memcpy(pointerof(CDoom.mus_header), data, sizeof(CDoom::MusHeader))
+    return 0 if (CDoom.doom_strncmp(CDoom.mus_header.id, "MUS", 3) != 0 || CDoom.mus_header.id[3] != 0x1A)
+
+    CDoom.mus_data = data.as(UInt8*)
+    CDoom.mus_delay = 0
+    CDoom.mus_offset = CDoom.mus_header.score_start
+    CDoom.mus_playing = 0
+
+    return 1
+  end
+
+  # Is the song playing?
+  def self.i_qry_song_playing(handle : LibC::Int) : LibC::Int
+    return CDoom.mus_playing
+  end
+
+  # Is the song playing?
+  def self.i_tick_song : LibC::ULong
+    midi_event : UInt64 | UInt32 = 0
+
+    # Dequeue MIDI events
+    if CDoom.queue_midi_head != CDoom.queue_midi_tail
+      CDoom.queue_midi_head += 1
+      r = CDoom.queued_midi_msgs[(CDoom.queue_midi_head - 1).remainder(CDoom::MAX_QUEUED_MIDI_MSGS)]
+      {% if sizeof(LibC::ULong) == 8 %}
+        return r.to_u64!
+      {% else %}
+        return r.to_u32!
+      {% end %}
+    end
+
+    if CDoom.mus_playing == 0 || CDoom.mus_data.null?
+      r = 0
+      {% if sizeof(LibC::ULong) == 8 %}
+        return r.to_u64!
+      {% else %}
+        return r.to_u32!
+      {% end %}
+    end
+
+    if CDoom.mus_delay <= 0
+      event = CDoom.mus_data[CDoom.mus_offset].to_i32
+      CDoom.mus_offset += 1
+      type = (event & 0b01110000) >> 4
+      channel = event & 0b00001111
+
+      if channel == 15
+        channel = 9 # Percussion is 9 on GM
+      elsif channel == 9
+        channel = 15
+      end
+
+      case type
+      when CDoom::EVENT_RELEASE_NOTE
+        note = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+        CDoom.mus_offset += 1
+        midi_event = (0x00000080_u32 | channel | (note << 8))
+      when CDoom::EVENT_PLAY_NOTE
+        note_bytes = CDoom.mus_data[CDoom.mus_offset].to_i32
+        CDoom.mus_offset += 1
+        note = note_bytes & 0b01111111
+        vol = 127
+        if note_bytes & 0b10000000 != 0
+          vol = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+          CDoom.mus_offset += 1
+        end
+        midi_event = (0x00000090_u32 | channel | (note << 8) | (vol << 16))
+      when CDoom::EVENT_PITCH_BEND
+        bend_amount = CDoom.mus_data[CDoom.mus_offset].to_i32 * 64
+        CDoom.mus_offset += 1
+        l = bend_amount & 0b01111111
+        m = (bend_amount & 0b1111111110000000) >> 7
+        midi_event = (0x000000E0_u32 | channel | (l << 8) | (m << 16))
+      when CDoom::EVENT_SYSTEM_EVENT
+        controller = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+        CDoom.mus_offset += 1
+        case controller
+        when CDoom::CONTROLLER_EVENT_ALL_SOUNDS_OFF
+          midi_event = (0x000000B0_u32 | channel | (120 << 8))
+        when CDoom::CONTROLLER_EVENT_ALL_NOTES_OFF
+          midi_event = (0x000000B0_u32 | channel | (123 << 8))
+        when CDoom::CONTROLLER_EVENT_MONO
+          midi_event = (0x000000B0_u32 | channel | (126 << 8))
+        when CDoom::CONTROLLER_EVENT_POLY
+          midi_event = (0x000000B0_u32 | channel | (127 << 8))
+        when CDoom::CONTROLLER_EVENT_RESET_ALL_CONTROLLERS
+          midi_event = (0x000000B0_u32 | channel | (121 << 8))
+        when CDoom::CONTROLLER_EVENT_EVENT # Doom never implemented
+        end
+      when CDoom::EVENT_CONTROLLER
+        controller = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+        CDoom.mus_offset += 1
+        value = CDoom.mus_data[CDoom.mus_offset].to_i32 & 0b01111111
+        CDoom.mus_offset += 1
+        case controller
+        when CDoom::CONTROLLER_CHANGE_INSTRUMENT
+          midi_event = (0x000000C0_u32 | channel | (value << 8))
+        when CDoom::CONTROLLER_BANK_SELECT
+          midi_event = (0x000000B0_u32 | channel | 0x2000 | (value << 16))
+        when CDoom::CONTROLLER_MODULATION
+          midi_event = (0x000000B0_u32 | channel | 0x0100 | (value << 16))
+        when CDoom::CONTROLLER_VOLUME
+          CDoom.mus_channel_volumes[channel] = value
+          midi_event = (0x000000B0_u32 | channel | 0x0700 | (((CDoom.mus_channel_volumes[channel] * CDoom.mus_volume) // 127) << 16))
+        when CDoom::CONTROLLER_PAN
+          midi_event = (0x000000B0_u32 | channel | 0x0A00 | (value << 16))
+        when CDoom::CONTROLLER_EXPRESSION
+          midi_event = (0x000000B0_u32 | channel | 0x0B00 | (value << 16))
+        when CDoom::CONTROLLER_REVERB
+          midi_event = (0x000000B0_u32 | channel | 0x5B00 | (value << 16))
+        when CDoom::CONTROLLER_CHORUS
+          midi_event = (0x000000B0_u32 | channel | 0x5D00 | (value << 16))
+        when CDoom::CONTROLLER_SUSTAIN
+          midi_event = (0x000000B0_u32 | channel | 0x4000 | (value << 16))
+        when CDoom::CONTROLLER_SOFT
+          midi_event = (0x000000B0_u32 | channel | 0x4300 | (value << 16))
+        end
+      when CDoom::EVENT_END_OF_MEASURE
+      when CDoom::EVENT_FINISH
+        # Loop
+        if CDoom.mus_loop != 0
+          CDoom.mus_delay = 0
+          CDoom.mus_offset = CDoom.mus_header.score_start
+        else
+          CDoom.mus_playing = 0
+          r = 0
+          {% if sizeof(LibC::ULong) == 8 %}
+            return r.to_u64!
+          {% else %}
+            return r.to_u32!
+          {% end %}
+        end
+      when CDoom::EVENT_UNUSED
+        dummy = CDoom.mus_data[CDoom.mus_offset].to_i32
+        CDoom.mus_offset += 1
+      end
+
+      if event & 0b10000000 != 0 # Followed by delay
+        CDoom.mus_delay = 0
+        delay_byte = 0
+        loop do
+          delay_byte = CDoom.mus_data[CDoom.mus_offset]
+          CDoom.mus_offset += 1
+          CDoom.mus_delay = CDoom.mus_delay * 128 + (delay_byte & 0b01111111)
+
+          break unless delay_byte & 0b10000000 != 0
+        end
+
+        r = midi_event
+        {% if sizeof(LibC::ULong) == 8 %}
+          return r.to_u64!
+        {% else %}
+          return r.to_u32!
+        {% end %}
+      end
+    end
+
+    CDoom.mus_delay -= 1
+
+    r = midi_event
+    {% if sizeof(LibC::ULong) == 8 %}
+      return r.to_u64!
+    {% else %}
+      return r.to_u32!
+    {% end %}
+  end
+
+  def self.i_tactile(on : LibC::Int, off : LibC::Int, total : LibC::Int)
+  end
+
+  def self.i_base_ticcmd : CDoom::Ticcmd*
+    return pointerof(CDoom.emptycmd)
+  end
+
+  def self.i_get_heap_size : LibC::Int
+    return CDoom.mb_used * 1024 * 1024
+  end
+
+  def self.i_zone_base(size : LibC::Int*) : CDoom::Byte*
+    size.value = CDoom.mb_used * 1024 * 1024
+    return CDoom.doom_malloc.call(size.value).as(CDoom::Byte*)
+  end
+
+  @@basetime = 0
+
+  #
+  # i_get_time
+  # returns time in 1/70th second tics
+  #
+  def self.i_get_time : LibC::Int
+    sec = 0
+    usec = 0
+    CDoom.doom_gettime.call(pointerof(sec), pointerof(usec))
+    @@basetime = sec if @@basetime == 0
+    newtics = (sec - @@basetime) * CDoom::TICRATE + usec * CDoom::TICRATE // 1000000
+    return newtics
+  end
+
+  #
+  # i_init
+  #
+  def self.i_init
+    CDoom.i_init_sound
+    CDoom.i_init_music
+    begin_audio_fiber() # start audio fiber for multicore audio handling
+  end
+
+  #
+  # i_quit
+  #
+  def self.i_quit
+    @@closing = true
+    CDoom.d_quit_net_game
+    CDoom.i_shutdown_sound
+    CDoom.i_shutdown_music
+    RAudio.close_audio_device
+    CDoom.m_save_defaults
+    CDoom.i_shutdown_graphics
+    CDoom.doom_exit.call(0)
+  end
+
+  def self.i_wait_vbl(count : LibC::Int)
+    sleep(Time::Span.new(nanoseconds: (count * (1000000 // 70)) * 1000))
+  end
+
+  def self.i_shutdown_graphics
+    @@screen_texture.try { |st| Raylib.unload_texture(st) }
+    Raylib.close_window
+  end
+
+  def self.i_init_graphics
+    CDoom.screens[0] = CDoom.doom_malloc.call(CDoom::SCREENWIDTH * CDoom::SCREENHEIGHT).as(UInt8*)
+
+    Raylib.set_config_flags(Raylib::ConfigFlags::WindowResizable | Raylib::ConfigFlags::VSyncHint)
+    Raylib.init_window(1024, 768, "LibDoom")
+    Raylib.set_exit_key(Raylib::KeyboardKey::Null)
+    Raylib.disable_cursor
+    # Raylib.toggle_fullscreen
+    # Raylib.set_target_fps(60)
+
+    image = Raylib.gen_image_color(320, 200, Raylib::BLACK)
+    @@screen_texture = Raylib.load_texture_from_image(image)
+    Raylib.unload_image(image)
+    Raylib.set_texture_filter(@@screen_texture.not_nil!, Raylib::TextureFilter::Point)
+  end
 end
