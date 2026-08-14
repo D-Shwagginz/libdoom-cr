@@ -237,35 +237,24 @@ module LibDoom
   # Set if homebrew PWAD stuff has been added.
   CDoom.modifiedgame
   # DOOM1
-  CDoom.endmsg[0] = CDoom::QUITMSG.to_unsafe
-  CDoom.endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
-  CDoom.endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
-  CDoom.endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
-  CDoom.endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
-  CDoom.endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
-  CDoom.endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
-  CDoom.endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
+  CDoom.doom1_endmsg[0] = CDoom::QUITMSG.to_unsafe
+  CDoom.doom1_endmsg[1] = "please don't leave, there's more\ndemons to toast!".to_unsafe
+  CDoom.doom1_endmsg[2] = "let's beat it -- this is turning\ninto a bloodbath!".to_unsafe
+  CDoom.doom1_endmsg[3] = "i wouldn't leave if i were you.\ndos is much worse.".to_unsafe
+  CDoom.doom1_endmsg[4] = "you're trying to say you like dos\nbetter than me, right?".to_unsafe
+  CDoom.doom1_endmsg[5] = "don't leave yet -- there's a\ndemon around that corner!".to_unsafe
+  CDoom.doom1_endmsg[6] = "ya know, next time you come in here\ni'm gonna toast ya.".to_unsafe
+  CDoom.doom1_endmsg[7] = "go ahead and leave. see if i care.".to_unsafe
 
   # QuitDOOM II messages
-  CDoom.endmsg[8] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
-  CDoom.endmsg[9] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
-  CDoom.endmsg[10] = "get outta here and go back\nto your boring programs.".to_unsafe
-  CDoom.endmsg[11] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
-  CDoom.endmsg[12] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
-  CDoom.endmsg[13] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
-  CDoom.endmsg[14] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
-
-  # FinalDOOM?
-  CDoom.endmsg[15] = "fuck you, pussy!\nget the fuck out!".to_unsafe
-  CDoom.endmsg[16] = "you quit and i'll jizz\nin your cystholes!".to_unsafe
-  CDoom.endmsg[17] = "if you leave, i'll make\nthe lord drink my jizz.".to_unsafe
-  CDoom.endmsg[18] = "hey, ron! can we say\n'fuck' in the game?".to_unsafe
-  CDoom.endmsg[19] = "i'd leave: this is just\nmore monsters and levels.\nwhat a load.".to_unsafe
-  CDoom.endmsg[20] = "suck it down, asshole!\nyou're a fucking wimp!".to_unsafe
-  CDoom.endmsg[21] = "don't quit now! we're \nstill spending your money!".to_unsafe
-
-  # Internal debug. Different style, too.
-  CDoom.endmsg[22] = "THIS IS NO MESSAGE!\nPage intentionally left blank.".to_unsafe
+  CDoom.doom2_endmsg[0] = CDoom::QUITMSG.to_unsafe
+  CDoom.doom2_endmsg[1] = "you want to quit?\nthen, thou hast lost an eighth!".to_unsafe
+  CDoom.doom2_endmsg[2] = "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!".to_unsafe
+  CDoom.doom2_endmsg[3] = "get outta here and go back\nto your boring programs.".to_unsafe
+  CDoom.doom2_endmsg[4] = "if i were your boss, i'd \n deathmatch ya in a minute!".to_unsafe
+  CDoom.doom2_endmsg[5] = "look, bud. you leave now\nand you forfeit your body count!".to_unsafe
+  CDoom.doom2_endmsg[6] = "just leave. when you come\nback, i'll be waiting with a bat.".to_unsafe
+  CDoom.doom2_endmsg[7] = "you're lucky i don't smack\nyou for thinking about leaving.".to_unsafe
 
   # Stage of animation:
   #  0 = text, 1 = art screen, 2 = character cast
@@ -1264,7 +1253,9 @@ module LibDoom
 
   def self.doom_draw
     @@screen_texture.try do |st|
-      Raylib.update_texture(st, CDoom.doom_get_framebuffer(4))
+      fb = CDoom.doom_get_framebuffer(4)
+      break if fb.null?
+      Raylib.update_texture(st, fb)
 
       scalew = Raylib.get_screen_width.to_f / SRES_X.to_f
       scaleh = Raylib.get_screen_height.to_f / SRES_Y.to_f
@@ -2578,6 +2569,7 @@ module LibDoom
 
     if CDoom.m_check_parm("-shdev") != 0
       CDoom.gamemode = CDoom::GameMode::Shareware
+      CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.devparm = 1
       CDoom.d_add_file(CDoom::DEVDATA + "doom1.wad")
       CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
@@ -2588,6 +2580,7 @@ module LibDoom
 
     if CDoom.m_check_parm("-regdev") != 0
       CDoom.gamemode = CDoom::GameMode::Registered
+      CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.devparm = 1
       CDoom.d_add_file(CDoom::DEVDATA + "doom.wad")
       CDoom.d_add_file(CDoom::DEVMAPS + "data_se/texture1.lmp")
@@ -2599,6 +2592,7 @@ module LibDoom
 
     if CDoom.m_check_parm("-comdev") != 0
       CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.gamemission = CDoom::GameMission::Doom2
       CDoom.devparm = 1
       CDoom.d_add_file(CDoom::DEVDATA + "doom2.wad")
 
@@ -2611,6 +2605,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(doom2fwad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.gamemission = CDoom::GameMission::Doom2
       # C'est ridicule!
       # Let's handle languages in config files, okay?
       CDoom.language = CDoom::Language::French
@@ -2622,6 +2617,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(doom2wad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.gamemission = CDoom::GameMission::Doom2
       CDoom.d_add_file(doom2wad)
       return
     end
@@ -2629,6 +2625,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(plutoniawad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.gamemission = CDoom::GameMission::PackPlut
       CDoom.d_add_file(plutoniawad)
       return
     end
@@ -2636,6 +2633,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(tntwad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Commercial
+      CDoom.gamemission = CDoom::GameMission::PackTnt
       CDoom.d_add_file(tntwad)
       return
     end
@@ -2643,6 +2641,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(doomuwad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Retail
+      CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.d_add_file(doomuwad)
       return
     end
@@ -2650,6 +2649,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(doomwad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Registered
+      CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.d_add_file(doomwad)
       return
     end
@@ -2657,6 +2657,7 @@ module LibDoom
     if !(f = CDoom.doom_open.call(doom1wad, "rb".to_unsafe)).null?
       CDoom.doom_close.call(f)
       CDoom.gamemode = CDoom::GameMode::Shareware
+      CDoom.gamemission = CDoom::GameMission::Doom
       CDoom.d_add_file(doom1wad)
       return
     end
@@ -3356,6 +3357,8 @@ module LibDoom
   # sends out a packet
   #
   def self.net_update
+    return if CDoom.singletics != 0 # singletic update is syncronous
+
     # check time
     nowtime = CDoom.i_get_time // CDoom.ticdup
     newtics = nowtime - CDoom.gametime
@@ -3382,8 +3385,6 @@ module LibDoom
         CDoom.g_build_ticcmd(CDoom.localcmds.to_unsafe + CDoom.maketic % CDoom::BACKUPTICS)
         CDoom.maketic += 1
       end
-
-      return if CDoom.singletics != 0 # singletic update is syncronous
 
       # send the packet to the other nodes
       CDoom.numnodes.times do |i|
@@ -6286,15 +6287,20 @@ module LibDoom
   end
 
   def self.i_stop_sound(handle : Int32)
-    # You need the handle returned by StartSound.
-    # Would be looping all channels,
-    #  tracking down the handle,
-    #  an setting the channel to zero.
+    CDoom::NUM_CHANNELS.times do |chan|
+      if CDoom.channelhandles[chan] == handle && !CDoom.channels[chan].null?
+        CDoom.channels[chan] = Pointer(UInt8).null
+        break
+      end
+    end
   end
 
   def self.i_sound_is_playing(handle : Int32) : Int32
-    # Ouch
-    return (CDoom.gametic < handle).to_unsafe
+    CDoom::NUM_CHANNELS.times do |chan|
+      return (!CDoom.channels[chan].null?).to_unsafe if CDoom.channelhandles[chan] == handle
+    end
+
+    return 0
   end
 
   #
@@ -6392,6 +6398,28 @@ module LibDoom
     # Would be using the handle to identify
     #  on which channel the sound might be active,
     #  and resetting the channel parameters.
+    CDoom::NUM_CHANNELS.times do |chan|
+      # Found channel
+      if CDoom.channelhandles[chan] == handle
+        step = CDoom.steptable[pitch]
+        CDoom.channelstep[chan] = step.to_u32
+        CDoom.channelstart[chan] = CDoom.gametic
+
+        sep += 1
+
+        leftvol = vol - ((vol * sep * sep) >> 16)
+        sep = sep - 257
+        rightvol = vol - ((vol * sep * sep) >> 16)
+
+        CDoom.i_error("Error: rightvol out of bounds") if rightvol < 0 || rightvol > 127
+        CDoom.i_error("Error: leftvol out of bounds") if leftvol < 0 || leftvol > 127
+
+        CDoom.channelleftvol_lookup[chan] = CDoom.vol_lookup.to_unsafe + leftvol*256
+        CDoom.channelrightvol_lookup[chan] = CDoom.vol_lookup.to_unsafe + rightvol*256
+
+        break
+      end
+    end
   end
 
   def self.i_shutdown_sound
@@ -6430,6 +6458,7 @@ module LibDoom
             command = status & 0xF0
             channel = status & 0x0F
 
+            break if @@closing
             @@adl_player.try do |ap|
               case command
               when 0x80
@@ -6456,6 +6485,7 @@ module LibDoom
           @@midi_tick_accumulator -= MIDI_TICK_TIME
         end
 
+        break if @@closing
         @@music_stream.try do |m|
           @@adl_player.try do |ap|
             if RAudio.audio_stream_processed?(m)
@@ -6465,12 +6495,12 @@ module LibDoom
           end
         end
 
+        break if @@closing
         @@audio_stream.try do |a|
           if RAudio.audio_stream_processed?(a)
             RAudio.update_audio_stream(a, CDoom.doom_get_sound_buffer, 512)
           end
         end
-        break if @@closing
       end
     end
   end

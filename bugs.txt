@@ -17,8 +17,11 @@ add plutonia tnt pack detection for version printing and stuff
   mus_delay = mus_delay * 128 + (delay_byte & 0b01111111);
 -- Fixed using strcpy instead of concat for M_QuickSave tempstring
 -- Fixed quitting not playing sound - This fix does require at least a dual core cpu
+-- Reworked some of the i_(sound) stuff to make positional sound actually track and sounds stop when they should (like DOS doom)
+-- Moved return if singletics in net_update to the start to avoid input delay (linuxdoom is so scuffed compared to dos lmao)
+-- Fixed init_switch_list not caring about Ultimate Doom switches
+-- Fixed i_set_palette to go through gammatable for color values
+-- Fixed quit messages to be per game
+
 
 cast not checking if button is down as well as key (so you can shoot with mouse)
-quit messages dont map to the correct game
-add accurate "UploadNewPalette" from doom source into i_set_palette to make colormaps work
-messages not showing when screensize is less than full

@@ -1489,7 +1489,8 @@ lib CDoom
   # QuitDOOM messages
   NUM_QUITMESSAGES = 22
 
-  $endmsg : LibC::Char**
+  $doom1_endmsg : LibC::Char*[8]
+  $doom2_endmsg : LibC::Char*[8]
 
   # __F_FINALE__
 
@@ -6445,8 +6446,6 @@ lib CDoom
   $language : Language
 
   $modifiedgame : DoomBool
-  ENDMSG_SIZE = NUM_QUITMESSAGES + 1
-  $endmsg : LibC::Char*[ENDMSG_SIZE]
 
   TEXTSPEED =   3
   TEXTWAIT  = 250
