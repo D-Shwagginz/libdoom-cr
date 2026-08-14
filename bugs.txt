@@ -16,7 +16,7 @@ add plutonia tnt pack detection for version printing and stuff
   Fixes into
   mus_delay = mus_delay * 128 + (delay_byte & 0b01111111);
 -- Fixed using strcpy instead of concat for M_QuickSave tempstring
--- Fixed quitting not playing sound - This fix does require at least a dual core cpu
+-- Fixed quitting not playing sound (i_wait_vbl)
 -- Reworked some of the i_(sound) stuff to make positional sound actually track and sounds stop when they should (like DOS doom)
 -- Moved return if singletics in net_update to the start to avoid input delay (linuxdoom is so scuffed compared to dos lmao)
 -- Fixed init_switch_list not caring about Ultimate Doom switches

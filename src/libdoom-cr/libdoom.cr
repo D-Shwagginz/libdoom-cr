@@ -1240,6 +1240,8 @@ module LibDoom
     now = CDoom.i_get_time
     delta_time = now - CDoom.last_update_time
 
+    update_audio
+
     delta_time.times do |i|
       if CDoom.is_wiping_screen != 0
         CDoom.d_update_wipe
@@ -2789,11 +2791,26 @@ module LibDoom
       CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
       CDoom.doom_concat(CDoom.title, "                           ")
     when CDoom::GameMode::Commercial
-      CDoom.doom_strcpy(CDoom.title, "                         " + "DOOM 2: Hell on Earth v")
-      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
-      CDoom.doom_concat(CDoom.title, ".")
-      CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
-      CDoom.doom_concat(CDoom.title, "                           ")
+      case CDoom.gamemission
+      when CDoom::GameMission::PackPlut
+        CDoom.doom_strcpy(CDoom.title, "                         " + "Final Doom: The Plutonia Experiment v")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+        CDoom.doom_concat(CDoom.title, ".")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+        CDoom.doom_concat(CDoom.title, "                           ")
+      when CDoom::GameMission::PackTnt
+        CDoom.doom_strcpy(CDoom.title, "                         " + "Final Doom: TNT: Evilution v")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+        CDoom.doom_concat(CDoom.title, ".")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+        CDoom.doom_concat(CDoom.title, "                           ")
+      else
+        CDoom.doom_strcpy(CDoom.title, "                         " + "DOOM 2: Hell on Earth v")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
+        CDoom.doom_concat(CDoom.title, ".")
+        CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION % 100, 10))
+        CDoom.doom_concat(CDoom.title, "                           ")
+      end
     else
       CDoom.doom_strcpy(CDoom.title, "                         " + "Public DOOM - v")
       CDoom.doom_concat(CDoom.title, CDoom.doom_itoa(CDoom::VERSION // 100, 10))
@@ -6443,63 +6460,61 @@ module LibDoom
     return
   end
 
-  def self.begin_audio_fiber
-    spawn do
-      loop do
-        now = Raylib.get_time
-        @@midi_tick_accumulator += now - @@last_time
-        @@last_time = now
+  def self.update_audio
+    1.times do |i|
+      now = Raylib.get_time
+      @@midi_tick_accumulator += now - @@last_time
+      @@last_time = now
 
-        while @@midi_tick_accumulator >= MIDI_TICK_TIME
-          while (msg = CDoom.doom_tick_midi) != 0
-            status = (msg & 0xFF).to_u8
-            data1 = ((msg >> 8) & 0xFF).to_u8
-            data2 = ((msg >> 16) & 0xFF).to_u8
-            command = status & 0xF0
-            channel = status & 0x0F
+      while @@midi_tick_accumulator >= MIDI_TICK_TIME
+        while (msg = CDoom.doom_tick_midi) != 0
+          status = (msg & 0xFF).to_u8
+          data1 = ((msg >> 8) & 0xFF).to_u8
+          data2 = ((msg >> 16) & 0xFF).to_u8
+          command = status & 0xF0
+          channel = status & 0x0F
 
-            break if @@closing
-            @@adl_player.try do |ap|
-              case command
-              when 0x80
-                ADLMIDI.adl_rt_noteOff(ap, channel, data1)
-              when 0x90
-                if data2 == 0
-                  ADLMIDI.adl_rt_noteOff(ap, channel, data1) # vel 0 == note off
-                else
-                  ADLMIDI.adl_rt_noteOn(ap, channel, data1, data2)
-                end
-              when 0xA0
-                ADLMIDI.adl_rt_noteAfterTouch(ap, channel, data1, data2)
-              when 0xB0
-                ADLMIDI.adl_rt_controllerChange(ap, channel, data1, data2)
-              when 0xC0
-                ADLMIDI.adl_rt_patchChange(ap, channel, data1)
-              when 0xD0
-                ADLMIDI.adl_rt_channelAfterTouch(ap, channel, data1)
-              when 0xE0
-                ADLMIDI.adl_rt_pitchBendML(ap, channel, data2, data1) # wire order: LSB, MSB
-              end
-            end
-          end
-          @@midi_tick_accumulator -= MIDI_TICK_TIME
-        end
-
-        break if @@closing
-        @@music_stream.try do |m|
+          break if @@closing
           @@adl_player.try do |ap|
-            if RAudio.audio_stream_processed?(m)
-              generated = ADLMIDI.adl_generate(ap, MIDI_BUFFER_SIZE, @@music_buffer)
-              RAudio.update_audio_stream(m, @@music_buffer, MIDI_BUFFER_SIZE // 2)
+            case command
+            when 0x80
+              ADLMIDI.adl_rt_noteOff(ap, channel, data1)
+            when 0x90
+              if data2 == 0
+                ADLMIDI.adl_rt_noteOff(ap, channel, data1) # vel 0 == note off
+              else
+                ADLMIDI.adl_rt_noteOn(ap, channel, data1, data2)
+              end
+            when 0xA0
+              ADLMIDI.adl_rt_noteAfterTouch(ap, channel, data1, data2)
+            when 0xB0
+              ADLMIDI.adl_rt_controllerChange(ap, channel, data1, data2)
+            when 0xC0
+              ADLMIDI.adl_rt_patchChange(ap, channel, data1)
+            when 0xD0
+              ADLMIDI.adl_rt_channelAfterTouch(ap, channel, data1)
+            when 0xE0
+              ADLMIDI.adl_rt_pitchBendML(ap, channel, data2, data1) # wire order: LSB, MSB
             end
           end
         end
+        @@midi_tick_accumulator -= MIDI_TICK_TIME
+      end
 
-        break if @@closing
-        @@audio_stream.try do |a|
-          if RAudio.audio_stream_processed?(a)
-            RAudio.update_audio_stream(a, CDoom.doom_get_sound_buffer, 512)
+      break if @@closing
+      @@music_stream.try do |m|
+        @@adl_player.try do |ap|
+          if RAudio.audio_stream_processed?(m)
+            generated = ADLMIDI.adl_generate(ap, MIDI_BUFFER_SIZE, @@music_buffer)
+            RAudio.update_audio_stream(m, @@music_buffer, MIDI_BUFFER_SIZE // 2)
           end
+        end
+      end
+
+      break if @@closing
+      @@audio_stream.try do |a|
+        if RAudio.audio_stream_processed?(a)
+          RAudio.update_audio_stream(a, CDoom.doom_get_sound_buffer, 512)
         end
       end
     end
@@ -6802,7 +6817,6 @@ module LibDoom
   def self.i_init
     CDoom.i_init_sound
     CDoom.i_init_music
-    begin_audio_fiber() # start audio fiber for multicore audio handling
   end
 
   #
@@ -6820,7 +6834,35 @@ module LibDoom
   end
 
   def self.i_wait_vbl(count : LibC::Int)
-    sleep(Time::Span.new(nanoseconds: (count * (1000000 // 70)) * 1000))
+    now = Time.instant
+    till = now + Time::Span.new(nanoseconds: (count * (1000000 // 70)) * 1000)
+    while now < till
+      now = Time.instant
+      update_audio
+    end
+  end
+
+  def self.i_alloc_low(length : LibC::Int) : CDoom::Byte*
+    mem = CDoom.doom_malloc.call(length).as(CDoom::Byte*)
+    CDoom.doom_memset(mem, 0, length)
+    return mem
+  end
+
+  #
+  # i_error
+  #
+  def self.i_error(error : LibC::Char*)
+    # Message first.
+    CDoom.doom_print.call(error) if !error.null?
+    CDoom.doom_print.call("\n".to_unsafe)
+
+    # Shutdown. Here might be other errors.
+    CDoom.g_check_demo_status if CDoom.demorecording != 0
+
+    CDoom.d_quit_net_game
+    CDoom.i_shutdown_graphics
+
+    CDoom.doom_exit.call(-1)
   end
 
   def self.i_shutdown_graphics
@@ -6842,5 +6884,37 @@ module LibDoom
     @@screen_texture = Raylib.load_texture_from_image(image)
     Raylib.unload_image(image)
     Raylib.set_texture_filter(@@screen_texture.not_nil!, Raylib::TextureFilter::Point)
+  end
+
+  def self.i_start_frame
+  end
+
+  def self.i_start_tic
+  end
+
+  def self.i_update_no_blit
+    # what is this?
+  end
+
+  @@lasttic = 0
+
+  def self.i_finish_update
+    # draws little dots on the bottom of the screen
+    if CDoom.devparm != 0
+      i = CDoom.i_get_time
+      tics = i - @@lasttic
+      @@lasttic = i
+      tics = 20 if tics > 20
+
+      i = 0
+      while i < tics * 2
+        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0xff
+        i += 2
+      end
+      while i < 20 * 2
+        CDoom.screens[0][(CDoom::SCREENHEIGHT - 1) * CDoom::SCREENWIDTH + i] = 0x0
+        i += 2
+      end
+    end
   end
 end

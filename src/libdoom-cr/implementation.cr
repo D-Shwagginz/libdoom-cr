@@ -956,3 +956,31 @@ end
 fun i_init_graphics = I_InitGraphics
   LibDoom.i_init_graphics
 end
+
+fun i_alloc_low = I_AllocLow(length : LibC::Int) : CDoom::Byte*
+  LibDoom.i_alloc_low(length)
+end
+
+fun i_error = I_Error(error : LibC::Char*)
+  LibDoom.i_error(error)
+end
+
+fun i_shutdown_graphics = I_ShutdownGraphics
+  LibDoom.i_shutdown_graphics
+end
+
+fun i_start_frame = I_StartFrame
+  LibDoom.i_start_frame
+end
+
+fun i_start_tic = I_StartTic
+  LibDoom.i_start_tic
+end
+
+fun i_update_no_blit = I_UpdateNoBlit
+  LibDoom.i_update_no_blit
+end
+
+fun i_finish_update = I_FinishUpdate
+  LibDoom.i_finish_update
+end
