@@ -984,3 +984,15 @@ end
 fun i_finish_update = I_FinishUpdate
   LibDoom.i_finish_update
 end
+
+  fun i_read_screen = I_ReadScreen(scr : CDoom::Byte*)
+LibDoom.i_read_screen(scr)
+  end
+
+  fun i_set_palette = I_SetPalette(palette : CDoom::Byte*)
+LibDoom.i_set_palette(palette)
+  end
+
+  fun i_init_graphics = I_InitGraphics
+LibDoom.i_init_graphics
+  end

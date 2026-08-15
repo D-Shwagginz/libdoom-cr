@@ -42,6 +42,19 @@ macro cymtof(y)
   (CDoom.f_y + (CDoom.f_h - mtof({{y}}-CDoom.m_y)))
 end
 
+macro c_array(array, *objs)
+  {% for elm, i in objs %}
+    {{array}}[{{i}}] = {{elm}}
+  {% end %}
+end
+
+macro c_array_strings(array, *objs)
+  {% for elm, i in objs %}
+    {{array}}[{{i}}] = {{elm}}.to_unsafe
+  {% end %}
+end
+
+
 @[Link(ldflags: "-L#{__DIR__}/../.. -lpuredoom")]
 lib CDoom
   # Sample rate of sound samples from doom
@@ -2805,9 +2818,9 @@ lib CDoom
     misc2 : LibC::Long
   end
 
-  $states : State[Statenum::NUMSTATES]
+  $states : State*
   NUMSPRITES_PLUS_1 = Spritenum::NUMSPRITES + 1 # Weird Crystal moment
-  $sprnames : LibC::Char*[NUMSPRITES_PLUS_1]
+  $sprnames : LibC::Char**
 
   enum Mobjtype
     MT_PLAYER
@@ -6903,4 +6916,84 @@ lib CDoom
   $emptycmd : Ticcmd
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
+
+    SPRNAMES_SIZE = Spritenum::NUMSPRITES + 1
+    $sprnames : LibC::Char**
+
+    fun a_light0 = A_Light0(Void*, Void*)
+fun a_weapon_ready = A_WeaponReady(Void*, Void*)
+fun a_lower= A_Lower(Void*, Void*)
+fun a_raise =A_Raise(Void*, Void*)
+fun a_punch= A_Punch(Void*, Void*)
+fun a_refire= A_ReFire(Void*, Void*)
+fun a_fire_pistol=A_FirePistol(Void*, Void*)
+fun a_light1=A_Light1(Void*, Void*)
+fun a_fire_shotgun=A_FireShotgun(Void*, Void*)
+fun a_light2=A_Light2(Void*, Void*)
+fun a_fire_shotgun2=A_FireShotgun2(Void*, Void*)
+fun a_check_reload=A_CheckReload(Void*, Void*)
+fun a_open_shotgun2=A_OpenShotgun2(Void*, Void*)
+fun a_load_shotgun2=A_LoadShotgun2(Void*, Void*)
+fun a_close_shotgun2=A_CloseShotgun2(Void*, Void*)
+fun a_fire_cgun=A_FireCGun(Void*, Void*)
+fun a_gun_flash=A_GunFlash(Void*, Void*)
+fun a_fire_missile=A_FireMissile(Void*, Void*)
+fun a_saw=A_Saw(Void*, Void*)
+fun a_fire_plasma=A_FirePlasma(Void*, Void*)
+fun a_bfg_sound=A_BFGsound(Void*, Void*)
+fun a_fire_bfg=A_FireBFG(Void*, Void*)
+fun a_bfg_spray=A_BFGSpray(Void*, Void*)
+fun a_explode=A_Explode(Void*, Void*)
+fun a_pain=A_Pain(Void*, Void*)
+fun a_player_scream=A_PlayerScream(Void*, Void*)
+fun a_fall=A_Fall(Void*, Void*)
+fun a_xscream=A_XScream(Void*, Void*)
+fun a_look=A_Look(Void*, Void*)
+fun a_chase=A_Chase(Void*, Void*)
+fun a_face_target=A_FaceTarget(Void*, Void*)
+fun a_pos_attack=A_PosAttack(Void*, Void*)
+fun a_scream=A_Scream(Void*, Void*)
+fun a_spos_attack=A_SPosAttack(Void*, Void*)
+fun a_vile_chase=A_VileChase(Void*, Void*)
+fun a_vile_start=A_VileStart(Void*, Void*)
+fun a_vile_target=A_VileTarget(Void*, Void*)
+fun a_vile_attack=A_VileAttack(Void*, Void*)
+fun a_start_fire=A_StartFire(Void*, Void*)
+fun a_fire=A_Fire(Void*, Void*)
+fun a_fire_crackle=A_FireCrackle(Void*, Void*)
+fun a_tracer=A_Tracer(Void*, Void*)
+fun a_skel_whoosh=A_SkelWhoosh(Void*, Void*)
+fun a_skel_fist=A_SkelFist(Void*, Void*)
+fun a_skel_missile=A_SkelMissile(Void*, Void*)
+fun a_fat_raise=A_FatRaise(Void*, Void*)
+fun a_fat_attack1=A_FatAttack1(Void*, Void*)
+fun a_fat_attack2=A_FatAttack2(Void*, Void*)
+fun a_fat_attack3=A_FatAttack3(Void*, Void*)
+fun a_boss_death=A_BossDeath(Void*, Void*)
+fun a_cpos_attack=A_CPosAttack(Void*, Void*)
+fun a_cpos_refire=A_CPosRefire(Void*, Void*)
+fun a_troop_attack=A_TroopAttack(Void*, Void*)
+fun a_sarg_attack=A_SargAttack(Void*, Void*)
+fun a_head_attack=A_HeadAttack(Void*, Void*)
+fun a_bruis_attack=A_BruisAttack(Void*, Void*)
+fun a_skull_attack=A_SkullAttack(Void*, Void*)
+fun a_metal=A_Metal(Void*, Void*)
+fun a_spid_refire=A_SpidRefire(Void*, Void*)
+fun a_baby_metal=A_BabyMetal(Void*, Void*)
+fun a_bspi_attack=A_BspiAttack(Void*, Void*)
+fun a_hoof=A_Hoof(Void*, Void*)
+fun a_cyber_attack=A_CyberAttack(Void*, Void*)
+fun a_pain_attack=A_PainAttack(Void*, Void*)
+fun a_pain_die=A_PainDie(Void*, Void*)
+fun a_keen_die=A_KeenDie(Void*, Void*)
+fun a_brain_pain=A_BrainPain(Void*, Void*)
+fun a_brain_scream=A_BrainScream(Void*, Void*)
+fun a_brain_die=A_BrainDie(Void*, Void*)
+fun a_brain_awake=A_BrainAwake(Void*, Void*)
+fun a_brain_spit=A_BrainSpit(Void*, Void*)
+fun a_spawn_sound=A_SpawnSound(Void*, Void*)
+fun a_spawn_fly=A_SpawnFly(Void*, Void*)
+fun a_brain_explode=A_BrainExplode(Void*, Void*)
+
+  $states : State[Statenum::NUMSTATES]
 end
