@@ -1,5 +1,5 @@
 module LibDoom
-  NULL_PROC = Proc(Nil).new(Pointer(Void).null, Pointer(Void).null)
+  NULL_PROC   = Proc(Nil).new(Pointer(Void).null, Pointer(Void).null)
   NULL_PROCP1 = Proc(Int32, Nil).new(Pointer(Void).null, Pointer(Void).null)
 
   @@st_notify : CDoom::Event = CDoom::Event.new
@@ -9749,9 +9749,9 @@ module LibDoom
     when -1
       # DOWN
       res = CDoom.t_move_plane(ceiling.value.sector,
-      ceiling.value.speed,
-      ceiling.value.bottomheight,
-      ceiling.value.crush, 1, ceiling.value.direction)
+        ceiling.value.speed,
+        ceiling.value.bottomheight,
+        ceiling.value.crush, 1, ceiling.value.direction)
 
       if (CDoom.leveltime & 7) == 0
         case ceiling.value.type
@@ -9784,7 +9784,6 @@ module LibDoom
       end
     end
   end
-
 
   #
   # Move a ceiling up/down and all around!
@@ -9875,8 +9874,8 @@ module LibDoom
   def self.p_activate_in_stasis_ceiling(line : CDoom::Line*)
     CDoom::MAXCEILINGS.times do |i|
       if !CDoom.activeceilings[i].null? &&
-        (CDoom.activeceilings[i].value.tag == line.value.tag) &&
-        (CDoom.activeceilings[i].value.direction == 0)
+         (CDoom.activeceilings[i].value.tag == line.value.tag) &&
+         (CDoom.activeceilings[i].value.direction == 0)
         CDoom.activeceilings[i].value.direction = CDoom.activeceilings[i].value.olddirection
         (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_move_ceiling(p.as(CDoom::Ceiling*)) }
       end
@@ -9890,8 +9889,8 @@ module LibDoom
     rtn = 0
     CDoom::MAXCEILINGS.times do |i|
       if !CDoom.activeceilings[i].null? &&
-        CDoom.activeceilings[i].value.tag == line.value.tag &&
-        CDoom.activeceilings[i].value.direction != 0
+         CDoom.activeceilings[i].value.tag == line.value.tag &&
+         CDoom.activeceilings[i].value.direction != 0
         CDoom.activeceilings[i].value.olddirection = CDoom.activeceilings[i].value.direction
         (CDoom.activeceilings[i].as(UInt8*) + offsetof(CDoom::Ceiling, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acv = NULL_PROC
         CDoom.activeceilings[i].value.direction = 0 # in-stasis
@@ -9900,6 +9899,320 @@ module LibDoom
     end
 
     return rtn
+  end
+
+  #
+  # Move a locked door up/down
+  #
+  def self.t_vertical_door(door : CDoom::Vldoor*)
+    case door.value.direction
+    when 0
+      # WAITING
+      door.value.topcountdown = door.value.topcountdown - 1
+      if door.value.topcountdown == 0
+        case door.value.type
+        when CDoom::Vldoorenum::BlazeRaise
+          door.value.direction = -1 # time to go back down
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_bdcls)
+        when CDoom::Vldoorenum::DoorNormal
+          door.value.direction = -1 # time to go back down
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_dorcls)
+        when CDoom::Vldoorenum::Close30ThenOpen
+          door.value.direction = 1
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_doropn)
+        end
+      end
+    when 2
+      # INITIAL WAIT
+      door.value.topcountdown = door.value.topcountdown - 1
+      if door.value.topcountdown == 0
+        case door.value.type
+        when CDoom::Vldoorenum::RaiseIn5Mins
+          door.value.direction = 1
+          door.value.type = CDoom::Vldoorenum::DoorNormal
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_doropn)
+        end
+      end
+    when -1
+      # DOWN
+      res = CDoom.t_move_plane(door.value.sector,
+        door.value.speed,
+        door.value.sector.value.floorheight,
+        0, 1, door.value.direction)
+      if res == CDoom::Result::Pastdest
+        case door.value.type
+        when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeClose
+          door.value.sector.value.specialdata = Pointer(Void).null
+          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_bdcls)
+        when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorClose
+          door.value.sector.value.specialdata = Pointer(Void).null
+          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+        when CDoom::Vldoorenum::Close30ThenOpen
+          door.value.direction = 0
+          door.value.topcountdown = 35 * 30
+        end
+      elsif res == CDoom::Result::Crushed
+        case door.value.type
+        when CDoom::Vldoorenum::BlazeClose, CDoom::Vldoorenum::DoorClose
+          # DO NOT GO BACK UP!
+        else
+          door.value.direction = 1
+          CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_doropn)
+        end
+      end
+    when 1
+      # UP
+      res = CDoom.t_move_plane(door.value.sector,
+        door.value.speed,
+        door.value.topheight,
+        0, 1, door.value.direction)
+
+      if res == CDoom::Result::Pastdest
+        case door.value.type
+        when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::DoorNormal
+          door.value.direction = 0 # wait at top
+          door.value.topcountdown = door.value.topwait
+        when CDoom::Vldoorenum::Close30ThenOpen, CDoom::Vldoorenum::BlazeOpen, CDoom::Vldoorenum::DoorOpen
+          door.value.sector.value.specialdata = Pointer(Void).null
+          CDoom.p_remove_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*)) # unlink and free
+        end
+      end
+    end
+  end
+
+  def self.ev_do_locked_door(line : CDoom::Line*, type : CDoom::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
+    p = thing.value.player
+
+    return 0 if p.null?
+
+    case line.value.special
+    when 99, 133 # Blue Lock
+      if p.value.cards[CDoom::Card::Bluecard.value] == 0 && p.value.cards[CDoom::Card::Blueskull.value] == 0
+        p.value.message = CDoom::PD_BLUEO
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return 0
+      end
+    when 134, 135 # Red Lock
+      if p.value.cards[CDoom::Card::Redcard.value] == 0 && p.value.cards[CDoom::Card::Redskull.value] == 0
+        p.value.message = CDoom::PD_REDO
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return 0
+      end
+    when 136, 137 # Yellow Lock
+      if p.value.cards[CDoom::Card::Yellowcard.value] == 0 && p.value.cards[CDoom::Card::Yellowskull.value] == 0
+        p.value.message = CDoom::PD_YELLOWO
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return 0
+      end
+    end
+
+    return CDoom.ev_do_door(line, type)
+  end
+
+  #
+  # open a door manually, no tag value
+  #
+  def self.ev_do_door(line : CDoom::Line*, type : CDoom::Vldoorenum) : LibC::Int
+    secnum = -1
+    rtn = 0
+
+    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+      sec = CDoom.sectors + secnum
+      next unless sec.value.specialdata.null?
+
+      # new door thinker
+      rtn = 1
+      door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
+      CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+      sec.value.specialdata = door
+
+      (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_vertical_door(p.as(CDoom::Vldoor*)) }
+      door.value.sector = sec
+      door.value.type = type
+      door.value.topwait = CDoom::VDOORWAIT
+      door.value.speed = CDoom::VDOORSPEED
+
+      case type
+      when CDoom::Vldoorenum::BlazeClose
+        door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+        door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+        door.value.direction = -1
+        door.value.speed = CDoom::VDOORSPEED * 4
+        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_bdcls)
+      when CDoom::Vldoorenum::DoorClose
+        door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+        door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+        door.value.direction = -1
+        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_dorcls)
+      when CDoom::Vldoorenum::Close30ThenOpen
+        door.value.topheight = sec.value.ceilingheight
+        door.value.direction = -1
+        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_dorcls)
+      when CDoom::Vldoorenum::BlazeRaise, CDoom::Vldoorenum::BlazeOpen
+        door.value.direction = 1
+        door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+        door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+        door.value.speed = CDoom::VDOORSPEED * 4
+        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_bdopn) if door.value.topheight != sec.value.ceilingheight
+      when CDoom::Vldoorenum::DoorNormal, CDoom::Vldoorenum::DoorOpen
+        door.value.direction = 1
+        door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+        door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+        CDoom.s_start_sound((door.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_doropn) if door.value.topheight != sec.value.ceilingheight
+      end
+    end
+
+    return rtn
+  end
+
+
+  def self.ev_vertical_door(line : CDoom::Line*, thing : CDoom::Mobj*)
+    side = 0 # only front sides can be used
+
+    # Check for locks
+    player = thing.value.player
+
+    case line.value.special
+    when 26, 32 # Blue Lock
+      return if player.null?
+
+      if player.value.cards[CDoom::Card::Bluecard.value] == 0 && player.value.cards[CDoom::Card::Blueskull.value] == 0
+        player.value.message = CDoom::PD_BLUEK
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return
+      end
+    when 27, 34 # Yellow Lock
+      return if player.null?
+
+      if player.value.cards[CDoom::Card::Yellowcard.value] == 0 && player.value.cards[CDoom::Card::Yellowskull.value] == 0
+        player.value.message = CDoom::PD_YELLOWK
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return
+      end
+    when 28, 33 # Red Lock
+      return if player.null?
+
+      if player.value.cards[CDoom::Card::Redcard.value] == 0 && player.value.cards[CDoom::Card::Redskull.value] == 0
+        player.value.message = CDoom::PD_REDK
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+        return
+      end
+    end
+
+    # if the sector has an active thinker, use it
+    sec = CDoom.sides[line.value.sidenum[side ^ 1]].sector
+    secnum = (sec - CDoom.sectors).to_i32!
+
+    unless sec.value.specialdata.null?
+      door = sec.value.specialdata.as(CDoom::Vldoor*)
+      case line.value.special
+      when 1, 26, 27, 28, 117 # ONLY FOR "RAISE" DOORS, NOT "OPEN"s
+        if door.value.direction == -1
+          door.value.direction = 1 # go back up
+        else
+          return if thing.value.player.null? # JDC: bad guys never close doors
+
+          door.value.direction = -1 # start going down immediately
+        end
+        return
+      end
+    end
+
+    # for proper sound
+    case line.value.special
+    when 117, 118 # BLAZING DOOR RAISE, OPEN
+      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_bdopn)
+    when 1, 31 # NORMAL DOOR SOUND
+      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_doropn)
+    else # LOCKED DOOR SOUND
+      CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+          CDoom::Sfxenum::SFX_doropn)
+    end
+
+
+    # new door thinker
+    door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
+    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    sec.value.specialdata = door
+    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_vertical_door(p.as(CDoom::Vldoor*)) }
+    door.value.sector = sec
+    door.value.direction = 1
+    door.value.speed = CDoom::VDOORSPEED
+    door.value.topwait = CDoom::VDOORWAIT
+
+    case line.value.special
+    when 1, 26, 27, 28
+      door.value.type = CDoom::Vldoorenum::DoorNormal
+    when 31, 32, 33, 34
+      door.value.type = CDoom::Vldoorenum::DoorOpen
+      line.value.special = 0
+    when 117 # blazing door raise
+      door.value.type = CDoom::Vldoorenum::BlazeRaise
+      door.value.speed = CDoom::VDOORSPEED * 4
+    when 118 # blazing door open
+      door.value.type = CDoom::Vldoorenum::BlazeOpen
+      line.value.special = 0
+      door.value.speed = CDoom::VDOORSPEED * 4
+    end
+
+    # find the top and bottom of the movement range
+    door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+    door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+  end
+
+  #
+  # Spawn a door that closes after 30 seconds
+  #
+  def self.p_spawn_door_close_in_30(sec : CDoom::Sector*)
+    door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
+
+    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+    
+    sec.value.specialdata = door
+    sec.value.special = 0
+
+    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_vertical_door(p.as(CDoom::Vldoor*)) }
+    door.value.sector = sec
+    door.value.direction = 0
+    door.value.type = CDoom::Vldoorenum::DoorNormal
+    door.value.speed = CDoom::VDOORSPEED
+    door.value.topcountdown = 30 * 35
+  end
+
+  #
+  # Spawn a door that opens after 5 minutes
+  #
+  def self.p_spawn_door_raise_in_5_mins(sec : CDoom::Sector*, secnum : LibC::Int)
+    door = CDoom.z_malloc(sizeof(CDoom::Vldoor), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Vldoor*)
+    
+    CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
+
+    sec.value.specialdata = door
+    sec.value.special = 0
+
+    (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_vertical_door(p.as(CDoom::Vldoor*)) }
+    door.value.sector = sec
+    door.value.direction = 2
+    door.value.type = CDoom::Vldoorenum::RaiseIn5Mins
+    door.value.speed = CDoom::VDOORSPEED
+    door.value.topheight = CDoom.p_find_lowest_ceiling_surrounding(sec)
+    door.value.topheight = door.value.topheight - 4 * CDoom::FRACUNIT
+    door.value.topwait = CDoom::VDOORWAIT
+    door.value.topcountdown = 5 * 60 * 35
   end
 
 

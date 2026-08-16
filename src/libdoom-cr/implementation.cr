@@ -1309,22 +1309,46 @@ fun t_move_ceiling = T_MoveCeiling(ceiling : CDoom::Ceiling*)
   LibDoom.t_move_ceiling(ceiling)
 end
 
-  fun ev_do_ceiling = EV_DoCeiling(line : CDoom::Line*, type : CDoom::Ceilingenum) : LibC::Int
-LibDoom.ev_do_ceiling(line, type)
+fun ev_do_ceiling = EV_DoCeiling(line : CDoom::Line*, type : CDoom::Ceilingenum) : LibC::Int
+  LibDoom.ev_do_ceiling(line, type)
+end
+
+fun p_add_active_ceiling = P_AddActiveCeiling(c : CDoom::Ceiling*)
+  LibDoom.p_add_active_ceiling(c)
+end
+
+fun p_remove_active_ceiling = P_RemoveActiveCeiling(c : CDoom::Ceiling*)
+  LibDoom.p_remove_active_ceiling(c)
+end
+
+fun p_activate_in_stasis_ceiling = P_ActivateInStasisCeiling(line : CDoom::Line*)
+  LibDoom.p_activate_in_stasis_ceiling(line)
+end
+
+fun ev_ceiling_crush_stop = EV_CeilingCrushStop(line : CDoom::Line*) : LibC::Int
+  LibDoom.ev_ceiling_crush_stop(line)
+end
+
+fun t_vertical_door = T_VerticalDoor(door : CDoom::Vldoor*)
+  LibDoom.t_vertical_door(door)
+end
+
+fun ev_do_locked_door = EV_DoLockedDoor(line : CDoom::Line*, type : CDoom::Vldoorenum, thing : CDoom::Mobj*) : LibC::Int
+  LibDoom.ev_do_locked_door(line, type, thing)
+end
+
+fun ev_do_door = EV_DoDoor(line : CDoom::Line*, type : CDoom::Vldoorenum) : LibC::Int
+  LibDoom.ev_do_door(line, type)
+end
+
+  fun ev_vertical_door = EV_VerticalDoor(line : CDoom::Line*, thing : CDoom::Mobj*)
+LibDoom.ev_vertical_door(line, thing)
   end
 
-  fun p_add_active_ceiling = P_AddActiveCeiling(c : CDoom::Ceiling*)
-LibDoom.p_add_active_ceiling(c)
+  fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : CDoom::Sector*)
+LibDoom.p_spawn_door_close_in_30(sec)
   end
 
-  fun p_remove_active_ceiling = P_RemoveActiveCeiling(c : CDoom::Ceiling*)
-LibDoom.p_remove_active_ceiling(c)
-  end
-
-  fun p_activate_in_stasis_ceiling = P_ActivateInStasisCeiling(line : CDoom::Line*)
-LibDoom.p_activate_in_stasis_ceiling(line)
-  end
-
-  fun ev_ceiling_crush_stop = EV_CeilingCrushStop(line : CDoom::Line*) : LibC::Int
-    LibDoom.ev_ceiling_crush_stop(line)
+  fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : CDoom::Sector*, secnum : LibC::Int)
+LibDoom.p_spawn_door_raise_in_5_mins(sec, secnum)
   end

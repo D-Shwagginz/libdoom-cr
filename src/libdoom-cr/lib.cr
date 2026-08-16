@@ -5028,7 +5028,7 @@ lib CDoom
   fun ev_vertical_door = EV_VerticalDoor(line : Line*, thing : Mobj*)
   fun ev_do_door = EV_DoDoor(line : Line*, type : Vldoorenum) : LibC::Int
   fun ev_do_locked_door = EV_DoLockedDoor(line : Line*, type : Vldoorenum, thing : Mobj*) : LibC::Int
-  fun t_vertical_door = T_VerticalDoor(door : Vldoor)
+  fun t_vertical_door = T_VerticalDoor(door : Vldoor*)
   fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : Sector*)
   fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : Sector*, secnum : LibC::Int)
 

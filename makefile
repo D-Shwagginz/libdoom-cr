@@ -7,7 +7,7 @@ all: libpuredoom.dylib
 	install_name_tool -change "@rpath/libADLMIDI.1.dylib" "./libADLMIDI.dylib" ./bin/libdoom
 
 	cd ./bin && \
-	./libdoom -warp 2 2 -nomonsters
+	./libdoom
 
 libpuredoom.dylib:
 	cc -shared -fPIC -x c \
