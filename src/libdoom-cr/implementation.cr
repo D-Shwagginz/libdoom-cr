@@ -985,14 +985,282 @@ fun i_finish_update = I_FinishUpdate
   LibDoom.i_finish_update
 end
 
-  fun i_read_screen = I_ReadScreen(scr : CDoom::Byte*)
-LibDoom.i_read_screen(scr)
+fun i_read_screen = I_ReadScreen(scr : CDoom::Byte*)
+  LibDoom.i_read_screen(scr)
+end
+
+fun i_set_palette = I_SetPalette(palette : CDoom::Byte*)
+  LibDoom.i_set_palette(palette)
+end
+
+fun i_init_graphics = I_InitGraphics
+  LibDoom.i_init_graphics
+end
+
+fun m_check_parm = M_CheckParm(check : LibC::Char*) : LibC::Int
+  LibDoom.m_check_parm(check)
+end
+
+fun m_clear_box = M_ClearBox(box : CDoom::Fixed*)
+  LibDoom.m_clear_box(box)
+end
+
+fun m_add_to_box = M_AddToBox(box : CDoom::Fixed*, x : CDoom::Fixed, y : CDoom::Fixed)
+  LibDoom.m_add_to_box(box, x, y)
+end
+
+fun cht_check_cheat = cht_CheckCheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
+  LibDoom.cht_check_cheat(cht, key)
+end
+
+fun cht_get_param = cht_GetParam(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
+  LibDoom.cht_get_param(cht, buffer)
+end
+
+fun fixed_mul = FixedMul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+  LibDoom.fixed_mul(a, b)
+end
+
+fun fixed_div = FixedDiv(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+  LibDoom.fixed_div(a, b)
+end
+
+fun fixed_div2 = FixedDiv2(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+  LibDoom.fixed_div2(a, b)
+end
+
+fun m_draw_custom_menu_text = M_DrawCustomMenuText(name : LibC::Char*, x : LibC::Int, y : LibC::Int)
+  LibDoom.m_draw_custom_menu_text(name, x, y)
+end
+
+fun m_read_save_strings = M_ReadSaveStrings
+  LibDoom.m_read_save_strings
+end
+
+  fun m_draw_load = M_DrawLoad
+LibDoom.m_draw_load
   end
 
-  fun i_set_palette = I_SetPalette(palette : CDoom::Byte*)
-LibDoom.i_set_palette(palette)
+  fun m_draw_save_load_border = M_DrawSaveLoadBorder(x : LibC::Int, y : LibC::Int)
+LibDoom.m_draw_save_load_border(x, y)
   end
 
-  fun i_init_graphics = I_InitGraphics
-LibDoom.i_init_graphics
+  fun m_load_select = M_LoadSelect(choice : LibC::Int)
+LibDoom.m_load_select(choice)
+  end
+
+  fun m_load_game = M_LoadGame(choice : LibC::Int)
+LibDoom.m_load_game(choice)
+  end
+
+  fun m_draw_save = M_DrawSave
+LibDoom.m_draw_save
+  end
+
+  fun m_do_save = M_DoSave(slot : LibC::Int)
+LibDoom.m_do_save(slot)
+  end
+
+  fun m_save_select = M_SaveSelect(choice : LibC::Int)
+LibDoom.m_save_select(choice)
+  end
+
+  fun m_save_game = M_SaveGame(choice : LibC::Int)
+LibDoom.m_save_game(choice)
+  end
+
+      fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
+LibDoom.m_quicksave_response(ch)
+      end
+
+      fun m_quicksave = M_QuickSave
+        LibDoom.m_quicksave
+      end
+
+    fun m_quickload_response = M_QuickLoadResponse(ch : LibC::Int)
+LibDoom.m_quickload_response(ch)
+    end
+
+    fun m_quickload = M_QuickLoad
+      LibDoom.m_quickload
+    end
+
+  fun m_draw_readthis1 = M_DrawReadThis1
+LibDoom.m_draw_readthis1
+  end
+
+  fun m_draw_readthis2 = M_DrawReadThis2
+LibDoom.m_draw_readthis2
+  end
+
+  fun m_draw_sound = M_DrawSound
+LibDoom.m_draw_sound
+  end
+
+  fun m_sound = M_Sound(choice : LibC::Int)
+LibDoom.m_sound(choice)
+  end
+
+  fun m_mouse_options = M_MouseOptions(choice : LibC::Int)
+LibDoom.m_mouse_options(choice)
+  end
+
+  fun m_sfxvol = M_SfxVol(choice : LibC::Int)
+LibDoom.m_sfxvol(choice)
+  end
+
+  fun m_musicvol = M_MusicVol(choice : LibC::Int)
+LibDoom.m_musicvol(choice)
+  end
+
+  fun m_draw_mainmenu = M_DrawMainMenu
+LibDoom.m_draw_mainmenu
+  end
+
+  fun m_draw_newgame = M_DrawNewGame
+LibDoom.m_draw_newgame
+  end
+
+  fun m_new_game = M_NewGame(choice : LibC::Int)
+LibDoom.m_new_game(choice)
+  end
+
+  fun m_draw_episode = M_DrawEpisode
+LibDoom.m_draw_episode
+  end
+
+      fun m_verify_nightmare = M_VerifyNightmare(ch : LibC::Int)
+LibDoom.m_verify_nightmare(ch)
+      end
+
+  fun m_choose_skill = M_ChooseSkill(choice : LibC::Int)
+LibDoom.m_choose_skill(choice)
+  end
+
+  fun m_episode = M_Episode(choice : LibC::Int)
+LibDoom.m_episode(choice)
+  end
+
+  fun m_draw_options = M_DrawOptions
+LibDoom.m_draw_options
+  end
+
+  fun m_draw_mouse_options = M_DrawMouseOptions
+LibDoom.m_draw_mouse_options
+  end
+
+  fun m_options = M_Options(choice : LibC::Int)
+LibDoom.m_options(choice)
+  end
+
+  fun m_change_messages = M_ChangeMessages(choice : LibC::Int)
+LibDoom.m_change_messages(choice)
+  end
+
+  fun m_change_crosshair = M_ChangeCrosshair(choice : LibC::Int)
+LibDoom.m_change_crosshair(choice)
+  end
+
+  fun m_change_alwaysrun = M_ChangeAlwaysRun(choice : LibC::Int)
+LibDoom.m_change_alwaysrun(choice)
+  end
+
+        fun m_endgame_response = M_EndGameResponse(ch : Int32)
+LibDoom.m_endgame_response(ch)
+        end
+
+  fun m_endgame = M_EndGame(choice : LibC::Int)
+LibDoom.m_endgame(choice)
+  end
+
+  fun m_readthis = M_ReadThis(choice : LibC::Int)
+LibDoom.m_readthis(choice)
+  end
+
+  fun m_readthis2 = M_ReadThis2(choice : LibC::Int)
+LibDoom.m_readthis2(choice)
+  end
+
+  fun m_finish_readthis = M_FinishReadThis(choice : LibC::Int)
+LibDoom.m_finish_readthis(choice)
+  end
+
+          fun m_quit_response = M_QuitResponse(ch : LibC::Int)
+LibDoom.m_quit_response(ch)
+          end
+
+  fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
+LibDoom.m_quitdoom(choice)
+  end
+
+  fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
+LibDoom.m_change_sensitivity(choice)
+  end
+
+  fun m_mouse_move = M_MouseMove(choice : LibC::Int)
+LibDoom.m_mouse_move(choice)
+  end
+
+  fun m_size_display = M_SizeDisplay(choice : LibC::Int)
+LibDoom.m_size_display(choice)
+  end
+
+  fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
+LibDoom.m_draw_thermo(x, y, therm_width, therm_dot)
+  end
+
+  fun m_draw_empty_cell = M_DrawEmptyCell(menu : CDoom::Menu*, item : LibC::Int)
+LibDoom.m_draw_empty_cell(menu, item)
+  end
+
+  fun m_draw_selcell = M_DrawSelCell(menu : CDoom::Menu*, item : LibC::Int)
+LibDoom.m_draw_selcell(menu, item)
+  end
+
+  fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
+LibDoom.m_start_message(string, routine, input)
+  end
+
+  fun m_stop_message = M_StopMessage
+LibDoom.m_stop_message
+  end
+
+  fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
+LibDoom.m_string_width(string)
+  end
+
+  fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
+LibDoom.m_string_height(string)
+  end
+
+  fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
+LibDoom.m_write_text(x, y, string)
+  end
+
+            fun m_responder = M_Responder(ev : CDoom::Event*) : CDoom::DoomBool
+LibDoom.m_responder(ev)
+            end
+
+  fun m_start_control_panel = M_StartControlPanel
+LibDoom.m_start_control_panel
+  end
+
+  fun m_drawer = M_Drawer
+LibDoom.m_drawer
+  end
+
+  fun m_clear_menus = M_ClearMenus
+LibDoom.m_clear_menus
+  end
+
+  fun m_setup_next_menu = M_SetupNextMenu(menudef : CDoom::Menu*)
+LibDoom.m_setup_next_menu(menudef)
+  end
+
+  fun m_ticker = M_Ticker
+LibDoom.m_ticker
+  end
+
+  fun m_init = M_Init
+LibDoom.m_init
   end

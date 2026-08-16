@@ -1,4 +1,6 @@
 module LibDoom
+  NULL_PROC = Proc(Int32, Nil).new(Pointer(Void).null, Pointer(Void).null)
+
   @@st_notify : CDoom::Event = CDoom::Event.new
   @@lastlevel = -1
   @@lastepisode = -1
@@ -964,7 +966,7 @@ module LibDoom
   CDoom.mus_playing = 0
   CDoom.mus_volume = 127
   c_array(CDoom.mus_channel_volumes, 127, 127, 127, 127,
-  127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127)
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127)
 
   CDoom.looping = 0
   CDoom.musicdies = -1
@@ -974,24 +976,22 @@ module LibDoom
 
   CDoom.mb_used = 6 * (sizeof(Void*) // 4)
 
-  @@sprnames = ["TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
-    "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
-    "PLSS","PLSE","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
-    "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
-    "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
-    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
-    "BON1","BON2","BKEY","RKEY","YKEY","BSKU","RSKU","YSKU","STIM","MEDI",
-    "SOUL","PINV","PSTR","PINS","MEGA","SUIT","PMAP","PVIS","CLIP","AMMO",
-    "ROCK","BROK","CELL","CELP","SHEL","SBOX","BPAK","BFUG","MGUN","CSAW",
-    "LAUN","PLAS","SHOT","SGN2","COLU","SMT2","GOR1","POL2","POL5","POL4",
-    "POL3","POL1","POL6","GOR2","GOR3","GOR4","GOR5","SMIT","COL1","COL2",
-    "COL3","COL4","CAND","CBRA","COL6","TRE1","TRE2","ELEC","CEYE","FSKU",
-    "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
-    "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2","\0"]
+  @@sprnames = ["TROO".to_unsafe, "SHTG".to_unsafe, "PUNG".to_unsafe, "PISG".to_unsafe, "PISF".to_unsafe, "SHTF".to_unsafe, "SHT2".to_unsafe, "CHGG".to_unsafe, "CHGF".to_unsafe, "MISG".to_unsafe,
+                "MISF".to_unsafe, "SAWG".to_unsafe, "PLSG".to_unsafe, "PLSF".to_unsafe, "BFGG".to_unsafe, "BFGF".to_unsafe, "BLUD".to_unsafe, "PUFF".to_unsafe, "BAL1".to_unsafe, "BAL2".to_unsafe,
+                "PLSS".to_unsafe, "PLSE".to_unsafe, "MISL".to_unsafe, "BFS1".to_unsafe, "BFE1".to_unsafe, "BFE2".to_unsafe, "TFOG".to_unsafe, "IFOG".to_unsafe, "PLAY".to_unsafe, "POSS".to_unsafe,
+                "SPOS".to_unsafe, "VILE".to_unsafe, "FIRE".to_unsafe, "FATB".to_unsafe, "FBXP".to_unsafe, "SKEL".to_unsafe, "MANF".to_unsafe, "FATT".to_unsafe, "CPOS".to_unsafe, "SARG".to_unsafe,
+                "HEAD".to_unsafe, "BAL7".to_unsafe, "BOSS".to_unsafe, "BOS2".to_unsafe, "SKUL".to_unsafe, "SPID".to_unsafe, "BSPI".to_unsafe, "APLS".to_unsafe, "APBX".to_unsafe, "CYBR".to_unsafe,
+                "PAIN".to_unsafe, "SSWV".to_unsafe, "KEEN".to_unsafe, "BBRN".to_unsafe, "BOSF".to_unsafe, "ARM1".to_unsafe, "ARM2".to_unsafe, "BAR1".to_unsafe, "BEXP".to_unsafe, "FCAN".to_unsafe,
+                "BON1".to_unsafe, "BON2".to_unsafe, "BKEY".to_unsafe, "RKEY".to_unsafe, "YKEY".to_unsafe, "BSKU".to_unsafe, "RSKU".to_unsafe, "YSKU".to_unsafe, "STIM".to_unsafe, "MEDI".to_unsafe,
+                "SOUL".to_unsafe, "PINV".to_unsafe, "PSTR".to_unsafe, "PINS".to_unsafe, "MEGA".to_unsafe, "SUIT".to_unsafe, "PMAP".to_unsafe, "PVIS".to_unsafe, "CLIP".to_unsafe, "AMMO".to_unsafe,
+                "ROCK".to_unsafe, "BROK".to_unsafe, "CELL".to_unsafe, "CELP".to_unsafe, "SHEL".to_unsafe, "SBOX".to_unsafe, "BPAK".to_unsafe, "BFUG".to_unsafe, "MGUN".to_unsafe, "CSAW".to_unsafe,
+                "LAUN".to_unsafe, "PLAS".to_unsafe, "SHOT".to_unsafe, "SGN2".to_unsafe, "COLU".to_unsafe, "SMT2".to_unsafe, "GOR1".to_unsafe, "POL2".to_unsafe, "POL5".to_unsafe, "POL4".to_unsafe,
+                "POL3".to_unsafe, "POL1".to_unsafe, "POL6".to_unsafe, "GOR2".to_unsafe, "GOR3".to_unsafe, "GOR4".to_unsafe, "GOR5".to_unsafe, "SMIT".to_unsafe, "COL1".to_unsafe, "COL2".to_unsafe,
+                "COL3".to_unsafe, "COL4".to_unsafe, "CAND".to_unsafe, "CBRA".to_unsafe, "COL6".to_unsafe, "TRE1".to_unsafe, "TRE2".to_unsafe, "ELEC".to_unsafe, "CEYE".to_unsafe, "FSKU".to_unsafe,
+                "COL5".to_unsafe, "TBLU".to_unsafe, "TGRN".to_unsafe, "TRED".to_unsafe, "SMBT".to_unsafe, "SMGT".to_unsafe, "SMRT".to_unsafe, "HDB1".to_unsafe, "HDB2".to_unsafe, "HDB3".to_unsafe,
+                "HDB4".to_unsafe, "HDB5".to_unsafe, "HDB6".to_unsafe, "POB1".to_unsafe, "POB2".to_unsafe, "BRS1".to_unsafe, "TLMP".to_unsafe, "TLP2".to_unsafe, "\0".to_unsafe]
 
-  CDoom.sprnames = @@sprnames.to_unsafe.as(UInt8**)
-
-
+  CDoom.sprnames = @@sprnames.to_unsafe
 
   def self.set_action(state : Pointer(CDoom::State), action : CDoom::ActionfP2)
     state.value.action.acp2 = action
@@ -1002,976 +1002,976 @@ module LibDoom
   end
 
   @@statedata : Array(Tuple(CDoom::Spritenum, Int32, Int32, CDoom::ActionfV | CDoom::ActionfP2, CDoom::Statenum, Int32, Int32)) = [
-    {CDoom::Spritenum::SPR_TROO,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_NULL
-    {CDoom::Spritenum::SPR_SHTG,4,0,->CDoom.a_light0(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_LIGHTDONE
-    {CDoom::Spritenum::SPR_PUNG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_PUNCH,0,0}, # S_PUNCH
-    {CDoom::Spritenum::SPR_PUNG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_PUNCHDOWN,0,0}, # S_PUNCHDOWN
-    {CDoom::Spritenum::SPR_PUNG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_PUNCHUP,0,0}, # S_PUNCHUP
-    {CDoom::Spritenum::SPR_PUNG,1,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUNCH2,0,0}, # S_PUNCH1
-    {CDoom::Spritenum::SPR_PUNG,2,4,->CDoom.a_punch(Void*, Void*),CDoom::Statenum::S_PUNCH3,0,0}, # S_PUNCH2
-    {CDoom::Spritenum::SPR_PUNG,3,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUNCH4,0,0}, # S_PUNCH3
-    {CDoom::Spritenum::SPR_PUNG,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUNCH5,0,0}, # S_PUNCH4
-    {CDoom::Spritenum::SPR_PUNG,1,5,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_PUNCH,0,0}, # S_PUNCH5
-    {CDoom::Spritenum::SPR_PISG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_PISTOL,0,0},# S_PISTOL
-    {CDoom::Spritenum::SPR_PISG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_PISTOLDOWN,0,0}, # S_PISTOLDOWN
-    {CDoom::Spritenum::SPR_PISG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_PISTOLUP,0,0}, # S_PISTOLUP
-    {CDoom::Spritenum::SPR_PISG,0,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PISTOL2,0,0}, # S_PISTOL1
-    {CDoom::Spritenum::SPR_PISG,1,6,->CDoom.a_fire_pistol(Void*, Void*),CDoom::Statenum::S_PISTOL3,0,0},# S_PISTOL2
-    {CDoom::Spritenum::SPR_PISG,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PISTOL4,0,0}, # S_PISTOL3
-    {CDoom::Spritenum::SPR_PISG,1,5,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_PISTOL,0,0}, # S_PISTOL4
-    {CDoom::Spritenum::SPR_PISF,32768,7,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_PISTOLFLASH
-    {CDoom::Spritenum::SPR_SHTG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_SGUN,0,0}, # S_SGUN
-    {CDoom::Spritenum::SPR_SHTG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_SGUNDOWN,0,0}, # S_SGUNDOWN
-    {CDoom::Spritenum::SPR_SHTG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_SGUNUP,0,0}, # S_SGUNUP
-    {CDoom::Spritenum::SPR_SHTG,0,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN2,0,0}, # S_SGUN1
-    {CDoom::Spritenum::SPR_SHTG,0,7,->CDoom.a_fire_shotgun(Void*, Void*),CDoom::Statenum::S_SGUN3,0,0}, # S_SGUN2
-    {CDoom::Spritenum::SPR_SHTG,1,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN4,0,0}, # S_SGUN3
-    {CDoom::Spritenum::SPR_SHTG,2,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN5,0,0}, # S_SGUN4
-    {CDoom::Spritenum::SPR_SHTG,3,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN6,0,0}, # S_SGUN5
-    {CDoom::Spritenum::SPR_SHTG,2,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN7,0,0}, # S_SGUN6
-    {CDoom::Spritenum::SPR_SHTG,1,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN8,0,0}, # S_SGUN7
-    {CDoom::Spritenum::SPR_SHTG,0,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SGUN9,0,0}, # S_SGUN8
-    {CDoom::Spritenum::SPR_SHTG,0,7,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_SGUN,0,0}, # S_SGUN9
-    {CDoom::Spritenum::SPR_SHTF,32768,4,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_SGUNFLASH2,0,0}, # S_SGUNFLASH1
-    {CDoom::Spritenum::SPR_SHTF,32769,3,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_SGUNFLASH2
-    {CDoom::Spritenum::SPR_SHT2,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_DSGUN,0,0}, # S_DSGUN
-    {CDoom::Spritenum::SPR_SHT2,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_DSGUNDOWN,0,0}, # S_DSGUNDOWN
-    {CDoom::Spritenum::SPR_SHT2,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_DSGUNUP,0,0}, # S_DSGUNUP
-    {CDoom::Spritenum::SPR_SHT2,0,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSGUN2,0,0}, # S_DSGUN1
-    {CDoom::Spritenum::SPR_SHT2,0,7,->CDoom.a_fire_shotgun2(Void*, Void*),CDoom::Statenum::S_DSGUN3,0,0}, # S_DSGUN2
-    {CDoom::Spritenum::SPR_SHT2,1,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSGUN4,0,0}, # S_DSGUN3
-    {CDoom::Spritenum::SPR_SHT2,2,7,->CDoom.a_check_reload(Void*, Void*),CDoom::Statenum::S_DSGUN5,0,0}, # S_DSGUN4
-    {CDoom::Spritenum::SPR_SHT2,3,7,->CDoom.a_open_shotgun2(Void*, Void*),CDoom::Statenum::S_DSGUN6,0,0}, # S_DSGUN5
-    {CDoom::Spritenum::SPR_SHT2,4,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSGUN7,0,0}, # S_DSGUN6
-    {CDoom::Spritenum::SPR_SHT2,5,7,->CDoom.a_load_shotgun2(Void*, Void*),CDoom::Statenum::S_DSGUN8,0,0}, # S_DSGUN7
-    {CDoom::Spritenum::SPR_SHT2,6,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSGUN9,0,0}, # S_DSGUN8
-    {CDoom::Spritenum::SPR_SHT2,7,6,->CDoom.a_close_shotgun2(Void*, Void*),CDoom::Statenum::S_DSGUN10,0,0}, # S_DSGUN9
-    {CDoom::Spritenum::SPR_SHT2,0,5,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_DSGUN,0,0}, # S_DSGUN10
-    {CDoom::Spritenum::SPR_SHT2,1,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSNR2,0,0}, # S_DSNR1
-    {CDoom::Spritenum::SPR_SHT2,0,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_DSGUNDOWN,0,0}, # S_DSNR2
-    {CDoom::Spritenum::SPR_SHT2,32776,5,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_DSGUNFLASH2,0,0}, # S_DSGUNFLASH1
-    {CDoom::Spritenum::SPR_SHT2,32777,4,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_DSGUNFLASH2
-    {CDoom::Spritenum::SPR_CHGG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_CHAIN,0,0}, # S_CHAIN
-    {CDoom::Spritenum::SPR_CHGG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_CHAINDOWN,0,0}, # S_CHAINDOWN
-    {CDoom::Spritenum::SPR_CHGG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_CHAINUP,0,0}, # S_CHAINUP
-    {CDoom::Spritenum::SPR_CHGG,0,4,->CDoom.a_fire_cgun(Void*, Void*),CDoom::Statenum::S_CHAIN2,0,0}, # S_CHAIN1
-    {CDoom::Spritenum::SPR_CHGG,1,4,->CDoom.a_fire_cgun(Void*, Void*),CDoom::Statenum::S_CHAIN3,0,0}, # S_CHAIN2
-    {CDoom::Spritenum::SPR_CHGG,1,0,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_CHAIN,0,0}, # S_CHAIN3
-    {CDoom::Spritenum::SPR_CHGF,32768,5,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_CHAINFLASH1
-    {CDoom::Spritenum::SPR_CHGF,32769,5,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_CHAINFLASH2
-    {CDoom::Spritenum::SPR_MISG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_MISSILE,0,0}, # S_MISSILE
-    {CDoom::Spritenum::SPR_MISG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_MISSILEDOWN,0,0}, # S_MISSILEDOWN
-    {CDoom::Spritenum::SPR_MISG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_MISSILEUP,0,0}, # S_MISSILEUP
-    {CDoom::Spritenum::SPR_MISG,1,8,->CDoom.a_gun_flash(Void*, Void*),CDoom::Statenum::S_MISSILE2,0,0}, # S_MISSILE1
-    {CDoom::Spritenum::SPR_MISG,1,12,->CDoom.a_fire_missile(Void*, Void*),CDoom::Statenum::S_MISSILE3,0,0}, # S_MISSILE2
-    {CDoom::Spritenum::SPR_MISG,1,0,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_MISSILE,0,0}, # S_MISSILE3
-    {CDoom::Spritenum::SPR_MISF,32768,3,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_MISSILEFLASH2,0,0}, # S_MISSILEFLASH1
-    {CDoom::Spritenum::SPR_MISF,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_MISSILEFLASH3,0,0}, # S_MISSILEFLASH2
-    {CDoom::Spritenum::SPR_MISF,32770,4,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_MISSILEFLASH4,0,0}, # S_MISSILEFLASH3
-    {CDoom::Spritenum::SPR_MISF,32771,4,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_MISSILEFLASH4
-    {CDoom::Spritenum::SPR_SAWG,2,4,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_SAWB,0,0}, # S_SAW
-    {CDoom::Spritenum::SPR_SAWG,3,4,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_SAW,0,0}, # S_SAWB
-    {CDoom::Spritenum::SPR_SAWG,2,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_SAWDOWN,0,0}, # S_SAWDOWN
-    {CDoom::Spritenum::SPR_SAWG,2,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_SAWUP,0,0}, # S_SAWUP
-    {CDoom::Spritenum::SPR_SAWG,0,4,->CDoom.a_saw(Void*, Void*),CDoom::Statenum::S_SAW2,0,0}, # S_SAW1
-    {CDoom::Spritenum::SPR_SAWG,1,4,->CDoom.a_saw(Void*, Void*),CDoom::Statenum::S_SAW3,0,0}, # S_SAW2
-    {CDoom::Spritenum::SPR_SAWG,1,0,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_SAW,0,0}, # S_SAW3
-    {CDoom::Spritenum::SPR_PLSG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_PLASMA,0,0}, # S_PLASMA
-    {CDoom::Spritenum::SPR_PLSG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_PLASMADOWN,0,0}, # S_PLASMADOWN
-    {CDoom::Spritenum::SPR_PLSG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_PLASMAUP,0,0}, # S_PLASMAUP
-    {CDoom::Spritenum::SPR_PLSG,0,3,->CDoom.a_fire_plasma(Void*, Void*),CDoom::Statenum::S_PLASMA2,0,0}, # S_PLASMA1
-    {CDoom::Spritenum::SPR_PLSG,1,20,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_PLASMA,0,0}, # S_PLASMA2
-    {CDoom::Spritenum::SPR_PLSF,32768,4,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_PLASMAFLASH1
-    {CDoom::Spritenum::SPR_PLSF,32769,4,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_PLASMAFLASH2
-    {CDoom::Spritenum::SPR_BFGG,0,1,->CDoom.a_weapon_ready(Void*, Void*),CDoom::Statenum::S_BFG,0,0}, # S_BFG
-    {CDoom::Spritenum::SPR_BFGG,0,1,->CDoom.a_lower(Void*, Void*),CDoom::Statenum::S_BFGDOWN,0,0}, # S_BFGDOWN
-    {CDoom::Spritenum::SPR_BFGG,0,1,->CDoom.a_raise(Void*, Void*),CDoom::Statenum::S_BFGUP,0,0}, # S_BFGUP
-    {CDoom::Spritenum::SPR_BFGG,0,20,->CDoom.a_bfg_sound(Void*, Void*),CDoom::Statenum::S_BFG2,0,0}, # S_BFG1
-    {CDoom::Spritenum::SPR_BFGG,1,10,->CDoom.a_gun_flash(Void*, Void*),CDoom::Statenum::S_BFG3,0,0}, # S_BFG2
-    {CDoom::Spritenum::SPR_BFGG,1,10,->CDoom.a_fire_bfg(Void*, Void*),CDoom::Statenum::S_BFG4,0,0}, # S_BFG3
-    {CDoom::Spritenum::SPR_BFGG,1,20,->CDoom.a_refire(Void*, Void*),CDoom::Statenum::S_BFG,0,0}, # S_BFG4
-    {CDoom::Spritenum::SPR_BFGF,32768,11,->CDoom.a_light1(Void*, Void*),CDoom::Statenum::S_BFGFLASH2,0,0}, # S_BFGFLASH1
-    {CDoom::Spritenum::SPR_BFGF,32769,6,->CDoom.a_light2(Void*, Void*),CDoom::Statenum::S_LIGHTDONE,0,0}, # S_BFGFLASH2
-    {CDoom::Spritenum::SPR_BLUD,2,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOOD2,0,0}, # S_BLOOD1
-    {CDoom::Spritenum::SPR_BLUD,1,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOOD3,0,0}, # S_BLOOD2
-    {CDoom::Spritenum::SPR_BLUD,0,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BLOOD3
-    {CDoom::Spritenum::SPR_PUFF,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUFF2,0,0}, # S_PUFF1
-    {CDoom::Spritenum::SPR_PUFF,1,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUFF3,0,0}, # S_PUFF2
-    {CDoom::Spritenum::SPR_PUFF,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PUFF4,0,0}, # S_PUFF3
-    {CDoom::Spritenum::SPR_PUFF,3,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PUFF4
-    {CDoom::Spritenum::SPR_BAL1,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TBALL2,0,0}, # S_TBALL1
-    {CDoom::Spritenum::SPR_BAL1,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TBALL1,0,0}, # S_TBALL2
-    {CDoom::Spritenum::SPR_BAL1,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TBALLX2,0,0}, # S_TBALLX1
-    {CDoom::Spritenum::SPR_BAL1,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TBALLX3,0,0}, # S_TBALLX2
-    {CDoom::Spritenum::SPR_BAL1,32772,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TBALLX3
-    {CDoom::Spritenum::SPR_BAL2,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RBALL2,0,0}, # S_RBALL1
-    {CDoom::Spritenum::SPR_BAL2,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RBALL1,0,0}, # S_RBALL2
-    {CDoom::Spritenum::SPR_BAL2,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RBALLX2,0,0}, # S_RBALLX1
-    {CDoom::Spritenum::SPR_BAL2,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RBALLX3,0,0}, # S_RBALLX2
-    {CDoom::Spritenum::SPR_BAL2,32772,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_RBALLX3
-    {CDoom::Spritenum::SPR_PLSS,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASBALL2,0,0}, # S_PLASBALL
-    {CDoom::Spritenum::SPR_PLSS,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASBALL,0,0}, # S_PLASBALL2
-    {CDoom::Spritenum::SPR_PLSE,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASEXP2,0,0}, # S_PLASEXP
-    {CDoom::Spritenum::SPR_PLSE,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASEXP3,0,0}, # S_PLASEXP2
-    {CDoom::Spritenum::SPR_PLSE,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASEXP4,0,0}, # S_PLASEXP3
-    {CDoom::Spritenum::SPR_PLSE,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLASEXP5,0,0}, # S_PLASEXP4
-    {CDoom::Spritenum::SPR_PLSE,32772,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PLASEXP5
-    {CDoom::Spritenum::SPR_MISL,32768,1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ROCKET,0,0}, # S_ROCKET
-    {CDoom::Spritenum::SPR_BFS1,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGSHOT2,0,0}, # S_BFGSHOT
-    {CDoom::Spritenum::SPR_BFS1,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGSHOT,0,0}, # S_BFGSHOT2
-    {CDoom::Spritenum::SPR_BFE1,32768,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGLAND2,0,0}, # S_BFGLAND
-    {CDoom::Spritenum::SPR_BFE1,32769,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGLAND3,0,0}, # S_BFGLAND2
-    {CDoom::Spritenum::SPR_BFE1,32770,8,->CDoom.a_bfg_spray(Void*, Void*),CDoom::Statenum::S_BFGLAND4,0,0}, # S_BFGLAND3
-    {CDoom::Spritenum::SPR_BFE1,32771,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGLAND5,0,0}, # S_BFGLAND4
-    {CDoom::Spritenum::SPR_BFE1,32772,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGLAND6,0,0}, # S_BFGLAND5
-    {CDoom::Spritenum::SPR_BFE1,32773,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BFGLAND6
-    {CDoom::Spritenum::SPR_BFE2,32768,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGEXP2,0,0}, # S_BFGEXP
-    {CDoom::Spritenum::SPR_BFE2,32769,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGEXP3,0,0}, # S_BFGEXP2
-    {CDoom::Spritenum::SPR_BFE2,32770,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BFGEXP4,0,0}, # S_BFGEXP3
-    {CDoom::Spritenum::SPR_BFE2,32771,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BFGEXP4
-    {CDoom::Spritenum::SPR_MISL,32769,8,->CDoom.a_explode(Void*, Void*),CDoom::Statenum::S_EXPLODE2,0,0}, # S_EXPLODE1
-    {CDoom::Spritenum::SPR_MISL,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_EXPLODE3,0,0}, # S_EXPLODE2
-    {CDoom::Spritenum::SPR_MISL,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_EXPLODE3
-    {CDoom::Spritenum::SPR_TFOG,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG01,0,0}, # S_TFOG
-    {CDoom::Spritenum::SPR_TFOG,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG02,0,0}, # S_TFOG01
-    {CDoom::Spritenum::SPR_TFOG,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG2,0,0}, # S_TFOG02
-    {CDoom::Spritenum::SPR_TFOG,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG3,0,0}, # S_TFOG2
-    {CDoom::Spritenum::SPR_TFOG,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG4,0,0}, # S_TFOG3
-    {CDoom::Spritenum::SPR_TFOG,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG5,0,0}, # S_TFOG4
-    {CDoom::Spritenum::SPR_TFOG,32772,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG6,0,0}, # S_TFOG5
-    {CDoom::Spritenum::SPR_TFOG,32773,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG7,0,0}, # S_TFOG6
-    {CDoom::Spritenum::SPR_TFOG,32774,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG8,0,0}, # S_TFOG7
-    {CDoom::Spritenum::SPR_TFOG,32775,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG9,0,0}, # S_TFOG8
-    {CDoom::Spritenum::SPR_TFOG,32776,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TFOG10,0,0}, # S_TFOG9
-    {CDoom::Spritenum::SPR_TFOG,32777,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TFOG10
-    {CDoom::Spritenum::SPR_IFOG,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG01,0,0}, # S_IFOG
-    {CDoom::Spritenum::SPR_IFOG,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG02,0,0}, # S_IFOG01
-    {CDoom::Spritenum::SPR_IFOG,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG2,0,0}, # S_IFOG02
-    {CDoom::Spritenum::SPR_IFOG,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG3,0,0}, # S_IFOG2
-    {CDoom::Spritenum::SPR_IFOG,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG4,0,0}, # S_IFOG3
-    {CDoom::Spritenum::SPR_IFOG,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_IFOG5,0,0}, # S_IFOG4
-    {CDoom::Spritenum::SPR_IFOG,32772,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_IFOG5
-    {CDoom::Spritenum::SPR_PLAY,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PLAY
-    {CDoom::Spritenum::SPR_PLAY,0,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_RUN2,0,0}, # S_PLAY_RUN1
-    {CDoom::Spritenum::SPR_PLAY,1,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_RUN3,0,0}, # S_PLAY_RUN2
-    {CDoom::Spritenum::SPR_PLAY,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_RUN4,0,0}, # S_PLAY_RUN3
-    {CDoom::Spritenum::SPR_PLAY,3,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_RUN1,0,0}, # S_PLAY_RUN4
-    {CDoom::Spritenum::SPR_PLAY,4,12,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY,0,0}, # S_PLAY_ATK1
-    {CDoom::Spritenum::SPR_PLAY,32773,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_ATK1,0,0}, # S_PLAY_ATK2
-    {CDoom::Spritenum::SPR_PLAY,6,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_PAIN2,0,0}, # S_PLAY_PAIN
-    {CDoom::Spritenum::SPR_PLAY,6,4,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_PLAY,0,0}, # S_PLAY_PAIN2
-    {CDoom::Spritenum::SPR_PLAY,7,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_DIE2,0,0}, # S_PLAY_DIE1
-    {CDoom::Spritenum::SPR_PLAY,8,10,->CDoom.a_player_scream(Void*, Void*),CDoom::Statenum::S_PLAY_DIE3,0,0}, # S_PLAY_DIE2
-    {CDoom::Spritenum::SPR_PLAY,9,10,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_PLAY_DIE4,0,0}, # S_PLAY_DIE3
-    {CDoom::Spritenum::SPR_PLAY,10,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_DIE5,0,0}, # S_PLAY_DIE4
-    {CDoom::Spritenum::SPR_PLAY,11,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_DIE6,0,0}, # S_PLAY_DIE5
-    {CDoom::Spritenum::SPR_PLAY,12,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_DIE7,0,0}, # S_PLAY_DIE6
-    {CDoom::Spritenum::SPR_PLAY,13,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PLAY_DIE7
-    {CDoom::Spritenum::SPR_PLAY,14,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE2,0,0}, # S_PLAY_XDIE1
-    {CDoom::Spritenum::SPR_PLAY,15,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_PLAY_XDIE3,0,0}, # S_PLAY_XDIE2
-    {CDoom::Spritenum::SPR_PLAY,16,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_PLAY_XDIE4,0,0}, # S_PLAY_XDIE3
-    {CDoom::Spritenum::SPR_PLAY,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE5,0,0}, # S_PLAY_XDIE4
-    {CDoom::Spritenum::SPR_PLAY,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE6,0,0}, # S_PLAY_XDIE5
-    {CDoom::Spritenum::SPR_PLAY,19,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE7,0,0}, # S_PLAY_XDIE6
-    {CDoom::Spritenum::SPR_PLAY,20,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE8,0,0}, # S_PLAY_XDIE7
-    {CDoom::Spritenum::SPR_PLAY,21,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PLAY_XDIE9,0,0}, # S_PLAY_XDIE8
-    {CDoom::Spritenum::SPR_PLAY,22,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PLAY_XDIE9
-    {CDoom::Spritenum::SPR_POSS,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_POSS_STND2,0,0}, # S_POSS_STND
-    {CDoom::Spritenum::SPR_POSS,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_POSS_STND,0,0}, # S_POSS_STND2
-    {CDoom::Spritenum::SPR_POSS,0,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN2,0,0}, # S_POSS_RUN1
-    {CDoom::Spritenum::SPR_POSS,0,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN3,0,0}, # S_POSS_RUN2
-    {CDoom::Spritenum::SPR_POSS,1,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN4,0,0}, # S_POSS_RUN3
-    {CDoom::Spritenum::SPR_POSS,1,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN5,0,0}, # S_POSS_RUN4
-    {CDoom::Spritenum::SPR_POSS,2,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN6,0,0}, # S_POSS_RUN5
-    {CDoom::Spritenum::SPR_POSS,2,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN7,0,0}, # S_POSS_RUN6
-    {CDoom::Spritenum::SPR_POSS,3,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN8,0,0}, # S_POSS_RUN7
-    {CDoom::Spritenum::SPR_POSS,3,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_POSS_RUN1,0,0}, # S_POSS_RUN8
-    {CDoom::Spritenum::SPR_POSS,4,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_POSS_ATK2,0,0}, # S_POSS_ATK1
-    {CDoom::Spritenum::SPR_POSS,5,8,->CDoom.a_pos_attack(Void*, Void*),CDoom::Statenum::S_POSS_ATK3,0,0}, # S_POSS_ATK2
-    {CDoom::Spritenum::SPR_POSS,4,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_RUN1,0,0}, # S_POSS_ATK3
-    {CDoom::Spritenum::SPR_POSS,6,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_PAIN2,0,0}, # S_POSS_PAIN
-    {CDoom::Spritenum::SPR_POSS,6,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_POSS_RUN1,0,0}, # S_POSS_PAIN2
-    {CDoom::Spritenum::SPR_POSS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_DIE2,0,0}, # S_POSS_DIE1
-    {CDoom::Spritenum::SPR_POSS,8,5,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_POSS_DIE3,0,0}, # S_POSS_DIE2
-    {CDoom::Spritenum::SPR_POSS,9,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_POSS_DIE4,0,0}, # S_POSS_DIE3
-    {CDoom::Spritenum::SPR_POSS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_DIE5,0,0}, # S_POSS_DIE4
-    {CDoom::Spritenum::SPR_POSS,11,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_POSS_DIE5
-    {CDoom::Spritenum::SPR_POSS,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE2,0,0}, # S_POSS_XDIE1
-    {CDoom::Spritenum::SPR_POSS,13,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_POSS_XDIE3,0,0}, # S_POSS_XDIE2
-    {CDoom::Spritenum::SPR_POSS,14,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_POSS_XDIE4,0,0}, # S_POSS_XDIE3
-    {CDoom::Spritenum::SPR_POSS,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE5,0,0}, # S_POSS_XDIE4
-    {CDoom::Spritenum::SPR_POSS,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE6,0,0}, # S_POSS_XDIE5
-    {CDoom::Spritenum::SPR_POSS,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE7,0,0}, # S_POSS_XDIE6
-    {CDoom::Spritenum::SPR_POSS,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE8,0,0}, # S_POSS_XDIE7
-    {CDoom::Spritenum::SPR_POSS,19,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_XDIE9,0,0}, # S_POSS_XDIE8
-    {CDoom::Spritenum::SPR_POSS,20,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_POSS_XDIE9
-    {CDoom::Spritenum::SPR_POSS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_RAISE2,0,0}, # S_POSS_RAISE1
-    {CDoom::Spritenum::SPR_POSS,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_RAISE3,0,0}, # S_POSS_RAISE2
-    {CDoom::Spritenum::SPR_POSS,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_RAISE4,0,0}, # S_POSS_RAISE3
-    {CDoom::Spritenum::SPR_POSS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_POSS_RUN1,0,0}, # S_POSS_RAISE4
-    {CDoom::Spritenum::SPR_SPOS,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SPOS_STND2,0,0}, # S_SPOS_STND
-    {CDoom::Spritenum::SPR_SPOS,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SPOS_STND,0,0}, # S_SPOS_STND2
-    {CDoom::Spritenum::SPR_SPOS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN2,0,0}, # S_SPOS_RUN1
-    {CDoom::Spritenum::SPR_SPOS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN3,0,0}, # S_SPOS_RUN2
-    {CDoom::Spritenum::SPR_SPOS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN4,0,0}, # S_SPOS_RUN3
-    {CDoom::Spritenum::SPR_SPOS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN5,0,0}, # S_SPOS_RUN4
-    {CDoom::Spritenum::SPR_SPOS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN6,0,0}, # S_SPOS_RUN5
-    {CDoom::Spritenum::SPR_SPOS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN7,0,0}, # S_SPOS_RUN6
-    {CDoom::Spritenum::SPR_SPOS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN8,0,0}, # S_SPOS_RUN7
-    {CDoom::Spritenum::SPR_SPOS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPOS_RUN1,0,0}, # S_SPOS_RUN8
-    {CDoom::Spritenum::SPR_SPOS,4,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SPOS_ATK2,0,0}, # S_SPOS_ATK1
-    {CDoom::Spritenum::SPR_SPOS,32773,10,->CDoom.a_spos_attack(Void*, Void*),CDoom::Statenum::S_SPOS_ATK3,0,0}, # S_SPOS_ATK2
-    {CDoom::Spritenum::SPR_SPOS,4,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RUN1,0,0}, # S_SPOS_ATK3
-    {CDoom::Spritenum::SPR_SPOS,6,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_PAIN2,0,0}, # S_SPOS_PAIN
-    {CDoom::Spritenum::SPR_SPOS,6,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SPOS_RUN1,0,0}, # S_SPOS_PAIN2
-    {CDoom::Spritenum::SPR_SPOS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_DIE2,0,0}, # S_SPOS_DIE1
-    {CDoom::Spritenum::SPR_SPOS,8,5,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SPOS_DIE3,0,0}, # S_SPOS_DIE2
-    {CDoom::Spritenum::SPR_SPOS,9,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SPOS_DIE4,0,0}, # S_SPOS_DIE3
-    {CDoom::Spritenum::SPR_SPOS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_DIE5,0,0}, # S_SPOS_DIE4
-    {CDoom::Spritenum::SPR_SPOS,11,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SPOS_DIE5
-    {CDoom::Spritenum::SPR_SPOS,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE2,0,0}, # S_SPOS_XDIE1
-    {CDoom::Spritenum::SPR_SPOS,13,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_SPOS_XDIE3,0,0}, # S_SPOS_XDIE2
-    {CDoom::Spritenum::SPR_SPOS,14,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SPOS_XDIE4,0,0}, # S_SPOS_XDIE3
-    {CDoom::Spritenum::SPR_SPOS,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE5,0,0}, # S_SPOS_XDIE4
-    {CDoom::Spritenum::SPR_SPOS,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE6,0,0}, # S_SPOS_XDIE5
-    {CDoom::Spritenum::SPR_SPOS,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE7,0,0}, # S_SPOS_XDIE6
-    {CDoom::Spritenum::SPR_SPOS,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE8,0,0}, # S_SPOS_XDIE7
-    {CDoom::Spritenum::SPR_SPOS,19,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_XDIE9,0,0}, # S_SPOS_XDIE8
-    {CDoom::Spritenum::SPR_SPOS,20,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SPOS_XDIE9
-    {CDoom::Spritenum::SPR_SPOS,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RAISE2,0,0}, # S_SPOS_RAISE1
-    {CDoom::Spritenum::SPR_SPOS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RAISE3,0,0}, # S_SPOS_RAISE2
-    {CDoom::Spritenum::SPR_SPOS,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RAISE4,0,0}, # S_SPOS_RAISE3
-    {CDoom::Spritenum::SPR_SPOS,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RAISE5,0,0}, # S_SPOS_RAISE4
-    {CDoom::Spritenum::SPR_SPOS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPOS_RUN1,0,0}, # S_SPOS_RAISE5
-    {CDoom::Spritenum::SPR_VILE,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_VILE_STND2,0,0}, # S_VILE_STND
-    {CDoom::Spritenum::SPR_VILE,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_VILE_STND,0,0}, # S_VILE_STND2
-    {CDoom::Spritenum::SPR_VILE,0,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN2,0,0}, # S_VILE_RUN1
-    {CDoom::Spritenum::SPR_VILE,0,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN3,0,0}, # S_VILE_RUN2
-    {CDoom::Spritenum::SPR_VILE,1,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN4,0,0}, # S_VILE_RUN3
-    {CDoom::Spritenum::SPR_VILE,1,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN5,0,0}, # S_VILE_RUN4
-    {CDoom::Spritenum::SPR_VILE,2,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN6,0,0}, # S_VILE_RUN5
-    {CDoom::Spritenum::SPR_VILE,2,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN7,0,0}, # S_VILE_RUN6
-    {CDoom::Spritenum::SPR_VILE,3,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN8,0,0}, # S_VILE_RUN7
-    {CDoom::Spritenum::SPR_VILE,3,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN9,0,0}, # S_VILE_RUN8
-    {CDoom::Spritenum::SPR_VILE,4,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN10,0,0}, # S_VILE_RUN9
-    {CDoom::Spritenum::SPR_VILE,4,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN11,0,0}, # S_VILE_RUN10
-    {CDoom::Spritenum::SPR_VILE,5,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN12,0,0}, # S_VILE_RUN11
-    {CDoom::Spritenum::SPR_VILE,5,2,->CDoom.a_vile_chase(Void*, Void*),CDoom::Statenum::S_VILE_RUN1,0,0}, # S_VILE_RUN12
-    {CDoom::Spritenum::SPR_VILE,32774,0,->CDoom.a_vile_start(Void*, Void*),CDoom::Statenum::S_VILE_ATK2,0,0}, # S_VILE_ATK1
-    {CDoom::Spritenum::SPR_VILE,32774,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK3,0,0}, # S_VILE_ATK2
-    {CDoom::Spritenum::SPR_VILE,32775,8,->CDoom.a_vile_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK4,0,0}, # S_VILE_ATK3
-    {CDoom::Spritenum::SPR_VILE,32776,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK5,0,0}, # S_VILE_ATK4
-    {CDoom::Spritenum::SPR_VILE,32777,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK6,0,0}, # S_VILE_ATK5
-    {CDoom::Spritenum::SPR_VILE,32778,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK7,0,0}, # S_VILE_ATK6
-    {CDoom::Spritenum::SPR_VILE,32779,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK8,0,0}, # S_VILE_ATK7
-    {CDoom::Spritenum::SPR_VILE,32780,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK9,0,0}, # S_VILE_ATK8
-    {CDoom::Spritenum::SPR_VILE,32781,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_VILE_ATK10,0,0}, # S_VILE_ATK9
-    {CDoom::Spritenum::SPR_VILE,32782,8,->CDoom.a_vile_attack(Void*, Void*),CDoom::Statenum::S_VILE_ATK11,0,0}, # S_VILE_ATK10
-    {CDoom::Spritenum::SPR_VILE,32783,20,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_RUN1,0,0}, # S_VILE_ATK11
-    {CDoom::Spritenum::SPR_VILE,32794,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_HEAL2,0,0}, # S_VILE_HEAL1
-    {CDoom::Spritenum::SPR_VILE,32795,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_HEAL3,0,0}, # S_VILE_HEAL2
-    {CDoom::Spritenum::SPR_VILE,32796,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_RUN1,0,0}, # S_VILE_HEAL3
-    {CDoom::Spritenum::SPR_VILE,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_PAIN2,0,0}, # S_VILE_PAIN
-    {CDoom::Spritenum::SPR_VILE,16,5,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_VILE_RUN1,0,0}, # S_VILE_PAIN2
-    {CDoom::Spritenum::SPR_VILE,16,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE2,0,0}, # S_VILE_DIE1
-    {CDoom::Spritenum::SPR_VILE,17,7,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_VILE_DIE3,0,0}, # S_VILE_DIE2
-    {CDoom::Spritenum::SPR_VILE,18,7,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_VILE_DIE4,0,0}, # S_VILE_DIE3
-    {CDoom::Spritenum::SPR_VILE,19,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE5,0,0}, # S_VILE_DIE4
-    {CDoom::Spritenum::SPR_VILE,20,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE6,0,0}, # S_VILE_DIE5
-    {CDoom::Spritenum::SPR_VILE,21,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE7,0,0}, # S_VILE_DIE6
-    {CDoom::Spritenum::SPR_VILE,22,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE8,0,0}, # S_VILE_DIE7
-    {CDoom::Spritenum::SPR_VILE,23,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE9,0,0}, # S_VILE_DIE8
-    {CDoom::Spritenum::SPR_VILE,24,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_VILE_DIE10,0,0}, # S_VILE_DIE9
-    {CDoom::Spritenum::SPR_VILE,25,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_VILE_DIE10
-    {CDoom::Spritenum::SPR_FIRE,32768,2,->CDoom.a_start_fire(Void*, Void*),CDoom::Statenum::S_FIRE2,0,0}, # S_FIRE1
-    {CDoom::Spritenum::SPR_FIRE,32769,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE3,0,0}, # S_FIRE2
-    {CDoom::Spritenum::SPR_FIRE,32768,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE4,0,0}, # S_FIRE3
-    {CDoom::Spritenum::SPR_FIRE,32769,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE5,0,0}, # S_FIRE4
-    {CDoom::Spritenum::SPR_FIRE,32770,2,->CDoom.a_fire_crackle(Void*, Void*),CDoom::Statenum::S_FIRE6,0,0}, # S_FIRE5
-    {CDoom::Spritenum::SPR_FIRE,32769,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE7,0,0}, # S_FIRE6
-    {CDoom::Spritenum::SPR_FIRE,32770,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE8,0,0}, # S_FIRE7
-    {CDoom::Spritenum::SPR_FIRE,32769,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE9,0,0}, # S_FIRE8
-    {CDoom::Spritenum::SPR_FIRE,32770,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE10,0,0}, # S_FIRE9
-    {CDoom::Spritenum::SPR_FIRE,32771,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE11,0,0}, # S_FIRE10
-    {CDoom::Spritenum::SPR_FIRE,32770,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE12,0,0}, # S_FIRE11
-    {CDoom::Spritenum::SPR_FIRE,32771,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE13,0,0}, # S_FIRE12
-    {CDoom::Spritenum::SPR_FIRE,32770,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE14,0,0}, # S_FIRE13
-    {CDoom::Spritenum::SPR_FIRE,32771,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE15,0,0}, # S_FIRE14
-    {CDoom::Spritenum::SPR_FIRE,32772,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE16,0,0}, # S_FIRE15
-    {CDoom::Spritenum::SPR_FIRE,32771,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE17,0,0}, # S_FIRE16
-    {CDoom::Spritenum::SPR_FIRE,32772,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE18,0,0}, # S_FIRE17
-    {CDoom::Spritenum::SPR_FIRE,32771,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE19,0,0}, # S_FIRE18
-    {CDoom::Spritenum::SPR_FIRE,32772,2,->CDoom.a_fire_crackle(Void*, Void*),CDoom::Statenum::S_FIRE20,0,0}, # S_FIRE19
-    {CDoom::Spritenum::SPR_FIRE,32773,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE21,0,0}, # S_FIRE20
-    {CDoom::Spritenum::SPR_FIRE,32772,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE22,0,0}, # S_FIRE21
-    {CDoom::Spritenum::SPR_FIRE,32773,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE23,0,0}, # S_FIRE22
-    {CDoom::Spritenum::SPR_FIRE,32772,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE24,0,0}, # S_FIRE23
-    {CDoom::Spritenum::SPR_FIRE,32773,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE25,0,0}, # S_FIRE24
-    {CDoom::Spritenum::SPR_FIRE,32774,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE26,0,0}, # S_FIRE25
-    {CDoom::Spritenum::SPR_FIRE,32775,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE27,0,0}, # S_FIRE26
-    {CDoom::Spritenum::SPR_FIRE,32774,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE28,0,0}, # S_FIRE27
-    {CDoom::Spritenum::SPR_FIRE,32775,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE29,0,0}, # S_FIRE28
-    {CDoom::Spritenum::SPR_FIRE,32774,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_FIRE30,0,0}, # S_FIRE29
-    {CDoom::Spritenum::SPR_FIRE,32775,2,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_FIRE30
-    {CDoom::Spritenum::SPR_PUFF,1,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SMOKE2,0,0}, # S_SMOKE1
-    {CDoom::Spritenum::SPR_PUFF,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SMOKE3,0,0}, # S_SMOKE2
-    {CDoom::Spritenum::SPR_PUFF,1,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SMOKE4,0,0}, # S_SMOKE3
-    {CDoom::Spritenum::SPR_PUFF,2,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SMOKE5,0,0}, # S_SMOKE4
-    {CDoom::Spritenum::SPR_PUFF,3,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SMOKE5
-    {CDoom::Spritenum::SPR_FATB,32768,2,->CDoom.a_tracer(Void*, Void*),CDoom::Statenum::S_TRACER2,0,0}, # S_TRACER
-    {CDoom::Spritenum::SPR_FATB,32769,2,->CDoom.a_tracer(Void*, Void*),CDoom::Statenum::S_TRACER,0,0}, # S_TRACER2
-    {CDoom::Spritenum::SPR_FBXP,32768,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TRACEEXP2,0,0}, # S_TRACEEXP1
-    {CDoom::Spritenum::SPR_FBXP,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TRACEEXP3,0,0}, # S_TRACEEXP2
-    {CDoom::Spritenum::SPR_FBXP,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TRACEEXP3
-    {CDoom::Spritenum::SPR_SKEL,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SKEL_STND2,0,0}, # S_SKEL_STND
-    {CDoom::Spritenum::SPR_SKEL,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SKEL_STND,0,0}, # S_SKEL_STND2
-    {CDoom::Spritenum::SPR_SKEL,0,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN2,0,0}, # S_SKEL_RUN1
-    {CDoom::Spritenum::SPR_SKEL,0,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN3,0,0}, # S_SKEL_RUN2
-    {CDoom::Spritenum::SPR_SKEL,1,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN4,0,0}, # S_SKEL_RUN3
-    {CDoom::Spritenum::SPR_SKEL,1,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN5,0,0}, # S_SKEL_RUN4
-    {CDoom::Spritenum::SPR_SKEL,2,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN6,0,0}, # S_SKEL_RUN5
-    {CDoom::Spritenum::SPR_SKEL,2,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN7,0,0}, # S_SKEL_RUN6
-    {CDoom::Spritenum::SPR_SKEL,3,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN8,0,0}, # S_SKEL_RUN7
-    {CDoom::Spritenum::SPR_SKEL,3,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN9,0,0}, # S_SKEL_RUN8
-    {CDoom::Spritenum::SPR_SKEL,4,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN10,0,0}, # S_SKEL_RUN9
-    {CDoom::Spritenum::SPR_SKEL,4,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN11,0,0}, # S_SKEL_RUN10
-    {CDoom::Spritenum::SPR_SKEL,5,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN12,0,0}, # S_SKEL_RUN11
-    {CDoom::Spritenum::SPR_SKEL,5,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKEL_RUN1,0,0}, # S_SKEL_RUN12
-    {CDoom::Spritenum::SPR_SKEL,6,0,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKEL_FIST2,0,0}, # S_SKEL_FIST1
-    {CDoom::Spritenum::SPR_SKEL,6,6,->CDoom.a_skel_whoosh(Void*, Void*),CDoom::Statenum::S_SKEL_FIST3,0,0}, # S_SKEL_FIST2
-    {CDoom::Spritenum::SPR_SKEL,7,6,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKEL_FIST4,0,0}, # S_SKEL_FIST3
-    {CDoom::Spritenum::SPR_SKEL,8,6,->CDoom.a_skel_fist(Void*, Void*),CDoom::Statenum::S_SKEL_RUN1,0,0}, # S_SKEL_FIST4
-    {CDoom::Spritenum::SPR_SKEL,32777,0,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKEL_MISS2,0,0}, # S_SKEL_MISS1
-    {CDoom::Spritenum::SPR_SKEL,32777,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKEL_MISS3,0,0}, # S_SKEL_MISS2
-    {CDoom::Spritenum::SPR_SKEL,10,10,->CDoom.a_skel_missile(Void*, Void*),CDoom::Statenum::S_SKEL_MISS4,0,0}, # S_SKEL_MISS3
-    {CDoom::Spritenum::SPR_SKEL,10,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKEL_RUN1,0,0}, # S_SKEL_MISS4
-    {CDoom::Spritenum::SPR_SKEL,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_PAIN2,0,0}, # S_SKEL_PAIN
-    {CDoom::Spritenum::SPR_SKEL,11,5,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SKEL_RUN1,0,0}, # S_SKEL_PAIN2
-    {CDoom::Spritenum::SPR_SKEL,11,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_DIE2,0,0}, # S_SKEL_DIE1
-    {CDoom::Spritenum::SPR_SKEL,12,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_DIE3,0,0}, # S_SKEL_DIE2
-    {CDoom::Spritenum::SPR_SKEL,13,7,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SKEL_DIE4,0,0}, # S_SKEL_DIE3
-    {CDoom::Spritenum::SPR_SKEL,14,7,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SKEL_DIE5,0,0}, # S_SKEL_DIE4
-    {CDoom::Spritenum::SPR_SKEL,15,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_DIE6,0,0}, # S_SKEL_DIE5
-    {CDoom::Spritenum::SPR_SKEL,16,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SKEL_DIE6
-    {CDoom::Spritenum::SPR_SKEL,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RAISE2,0,0}, # S_SKEL_RAISE1
-    {CDoom::Spritenum::SPR_SKEL,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RAISE3,0,0}, # S_SKEL_RAISE2
-    {CDoom::Spritenum::SPR_SKEL,14,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RAISE4,0,0}, # S_SKEL_RAISE3
-    {CDoom::Spritenum::SPR_SKEL,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RAISE5,0,0}, # S_SKEL_RAISE4
-    {CDoom::Spritenum::SPR_SKEL,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RAISE6,0,0}, # S_SKEL_RAISE5
-    {CDoom::Spritenum::SPR_SKEL,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKEL_RUN1,0,0}, # S_SKEL_RAISE6
-    {CDoom::Spritenum::SPR_MANF,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATSHOT2,0,0}, # S_FATSHOT1
-    {CDoom::Spritenum::SPR_MANF,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATSHOT1,0,0}, # S_FATSHOT2
-    {CDoom::Spritenum::SPR_MISL,32769,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATSHOTX2,0,0}, # S_FATSHOTX1
-    {CDoom::Spritenum::SPR_MISL,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATSHOTX3,0,0}, # S_FATSHOTX2
-    {CDoom::Spritenum::SPR_MISL,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_FATSHOTX3
-    {CDoom::Spritenum::SPR_FATT,0,15,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_FATT_STND2,0,0}, # S_FATT_STND
-    {CDoom::Spritenum::SPR_FATT,1,15,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_FATT_STND,0,0}, # S_FATT_STND2
-    {CDoom::Spritenum::SPR_FATT,0,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN2,0,0}, # S_FATT_RUN1
-    {CDoom::Spritenum::SPR_FATT,0,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN3,0,0}, # S_FATT_RUN2
-    {CDoom::Spritenum::SPR_FATT,1,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN4,0,0}, # S_FATT_RUN3
-    {CDoom::Spritenum::SPR_FATT,1,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN5,0,0}, # S_FATT_RUN4
-    {CDoom::Spritenum::SPR_FATT,2,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN6,0,0}, # S_FATT_RUN5
-    {CDoom::Spritenum::SPR_FATT,2,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN7,0,0}, # S_FATT_RUN6
-    {CDoom::Spritenum::SPR_FATT,3,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN8,0,0}, # S_FATT_RUN7
-    {CDoom::Spritenum::SPR_FATT,3,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN9,0,0}, # S_FATT_RUN8
-    {CDoom::Spritenum::SPR_FATT,4,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN10,0,0}, # S_FATT_RUN9
-    {CDoom::Spritenum::SPR_FATT,4,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN11,0,0}, # S_FATT_RUN10
-    {CDoom::Spritenum::SPR_FATT,5,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN12,0,0}, # S_FATT_RUN11
-    {CDoom::Spritenum::SPR_FATT,5,4,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_FATT_RUN1,0,0}, # S_FATT_RUN12
-    {CDoom::Spritenum::SPR_FATT,6,20,->CDoom.a_fat_raise(Void*, Void*),CDoom::Statenum::S_FATT_ATK2,0,0}, # S_FATT_ATK1
-    {CDoom::Spritenum::SPR_FATT,32775,10,->CDoom.a_fat_attack1(Void*, Void*),CDoom::Statenum::S_FATT_ATK3,0,0}, # S_FATT_ATK2
-    {CDoom::Spritenum::SPR_FATT,8,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_ATK4,0,0}, # S_FATT_ATK3
-    {CDoom::Spritenum::SPR_FATT,6,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_ATK5,0,0}, # S_FATT_ATK4
-    {CDoom::Spritenum::SPR_FATT,32775,10,->CDoom.a_fat_attack2(Void*, Void*),CDoom::Statenum::S_FATT_ATK6,0,0}, # S_FATT_ATK5
-    {CDoom::Spritenum::SPR_FATT,8,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_ATK7,0,0}, # S_FATT_ATK6
-    {CDoom::Spritenum::SPR_FATT,6,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_ATK8,0,0}, # S_FATT_ATK7
-    {CDoom::Spritenum::SPR_FATT,32775,10,->CDoom.a_fat_attack3(Void*, Void*),CDoom::Statenum::S_FATT_ATK9,0,0}, # S_FATT_ATK8
-    {CDoom::Spritenum::SPR_FATT,8,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_ATK10,0,0}, # S_FATT_ATK9
-    {CDoom::Spritenum::SPR_FATT,6,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_FATT_RUN1,0,0}, # S_FATT_ATK10
-    {CDoom::Spritenum::SPR_FATT,9,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_PAIN2,0,0}, # S_FATT_PAIN
-    {CDoom::Spritenum::SPR_FATT,9,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_FATT_RUN1,0,0}, # S_FATT_PAIN2
-    {CDoom::Spritenum::SPR_FATT,10,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE2,0,0}, # S_FATT_DIE1
-    {CDoom::Spritenum::SPR_FATT,11,6,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_FATT_DIE3,0,0}, # S_FATT_DIE2
-    {CDoom::Spritenum::SPR_FATT,12,6,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_FATT_DIE4,0,0}, # S_FATT_DIE3
-    {CDoom::Spritenum::SPR_FATT,13,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE5,0,0}, # S_FATT_DIE4
-    {CDoom::Spritenum::SPR_FATT,14,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE6,0,0}, # S_FATT_DIE5
-    {CDoom::Spritenum::SPR_FATT,15,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE7,0,0}, # S_FATT_DIE6
-    {CDoom::Spritenum::SPR_FATT,16,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE8,0,0}, # S_FATT_DIE7
-    {CDoom::Spritenum::SPR_FATT,17,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE9,0,0}, # S_FATT_DIE8
-    {CDoom::Spritenum::SPR_FATT,18,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_DIE10,0,0}, # S_FATT_DIE9
-    {CDoom::Spritenum::SPR_FATT,19,-1,->CDoom.a_boss_death(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_FATT_DIE10
-    {CDoom::Spritenum::SPR_FATT,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE2,0,0}, # S_FATT_RAISE1
-    {CDoom::Spritenum::SPR_FATT,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE3,0,0}, # S_FATT_RAISE2
-    {CDoom::Spritenum::SPR_FATT,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE4,0,0}, # S_FATT_RAISE3
-    {CDoom::Spritenum::SPR_FATT,14,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE5,0,0}, # S_FATT_RAISE4
-    {CDoom::Spritenum::SPR_FATT,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE6,0,0}, # S_FATT_RAISE5
-    {CDoom::Spritenum::SPR_FATT,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE7,0,0}, # S_FATT_RAISE6
-    {CDoom::Spritenum::SPR_FATT,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RAISE8,0,0}, # S_FATT_RAISE7
-    {CDoom::Spritenum::SPR_FATT,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FATT_RUN1,0,0}, # S_FATT_RAISE8
-    {CDoom::Spritenum::SPR_CPOS,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_CPOS_STND2,0,0}, # S_CPOS_STND
-    {CDoom::Spritenum::SPR_CPOS,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_CPOS_STND,0,0}, # S_CPOS_STND2
-    {CDoom::Spritenum::SPR_CPOS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN2,0,0}, # S_CPOS_RUN1
-    {CDoom::Spritenum::SPR_CPOS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN3,0,0}, # S_CPOS_RUN2
-    {CDoom::Spritenum::SPR_CPOS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN4,0,0}, # S_CPOS_RUN3
-    {CDoom::Spritenum::SPR_CPOS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN5,0,0}, # S_CPOS_RUN4
-    {CDoom::Spritenum::SPR_CPOS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN6,0,0}, # S_CPOS_RUN5
-    {CDoom::Spritenum::SPR_CPOS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN7,0,0}, # S_CPOS_RUN6
-    {CDoom::Spritenum::SPR_CPOS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN8,0,0}, # S_CPOS_RUN7
-    {CDoom::Spritenum::SPR_CPOS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CPOS_RUN1,0,0}, # S_CPOS_RUN8
-    {CDoom::Spritenum::SPR_CPOS,4,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_CPOS_ATK2,0,0}, # S_CPOS_ATK1
-    {CDoom::Spritenum::SPR_CPOS,32773,4,->CDoom.a_cpos_attack(Void*, Void*),CDoom::Statenum::S_CPOS_ATK3,0,0}, # S_CPOS_ATK2
-    {CDoom::Spritenum::SPR_CPOS,32772,4,->CDoom.a_cpos_attack(Void*, Void*),CDoom::Statenum::S_CPOS_ATK4,0,0}, # S_CPOS_ATK3
-    {CDoom::Spritenum::SPR_CPOS,5,1,->CDoom.a_cpos_refire(Void*, Void*),CDoom::Statenum::S_CPOS_ATK2,0,0}, # S_CPOS_ATK4
-    {CDoom::Spritenum::SPR_CPOS,6,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_PAIN2,0,0}, # S_CPOS_PAIN
-    {CDoom::Spritenum::SPR_CPOS,6,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_CPOS_RUN1,0,0}, # S_CPOS_PAIN2
-    {CDoom::Spritenum::SPR_CPOS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_DIE2,0,0}, # S_CPOS_DIE1
-    {CDoom::Spritenum::SPR_CPOS,8,5,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_CPOS_DIE3,0,0}, # S_CPOS_DIE2
-    {CDoom::Spritenum::SPR_CPOS,9,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_CPOS_DIE4,0,0}, # S_CPOS_DIE3
-    {CDoom::Spritenum::SPR_CPOS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_DIE5,0,0}, # S_CPOS_DIE4
-    {CDoom::Spritenum::SPR_CPOS,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_DIE6,0,0}, # S_CPOS_DIE5
-    {CDoom::Spritenum::SPR_CPOS,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_DIE7,0,0}, # S_CPOS_DIE6
-    {CDoom::Spritenum::SPR_CPOS,13,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CPOS_DIE7
-    {CDoom::Spritenum::SPR_CPOS,14,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_XDIE2,0,0}, # S_CPOS_XDIE1
-    {CDoom::Spritenum::SPR_CPOS,15,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_CPOS_XDIE3,0,0}, # S_CPOS_XDIE2
-    {CDoom::Spritenum::SPR_CPOS,16,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_CPOS_XDIE4,0,0}, # S_CPOS_XDIE3
-    {CDoom::Spritenum::SPR_CPOS,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_XDIE5,0,0}, # S_CPOS_XDIE4
-    {CDoom::Spritenum::SPR_CPOS,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_XDIE6,0,0}, # S_CPOS_XDIE5
-    {CDoom::Spritenum::SPR_CPOS,19,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CPOS_XDIE6
-    {CDoom::Spritenum::SPR_CPOS,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE2,0,0}, # S_CPOS_RAISE1
-    {CDoom::Spritenum::SPR_CPOS,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE3,0,0}, # S_CPOS_RAISE2
-    {CDoom::Spritenum::SPR_CPOS,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE4,0,0}, # S_CPOS_RAISE3
-    {CDoom::Spritenum::SPR_CPOS,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE5,0,0}, # S_CPOS_RAISE4
-    {CDoom::Spritenum::SPR_CPOS,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE6,0,0}, # S_CPOS_RAISE5
-    {CDoom::Spritenum::SPR_CPOS,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RAISE7,0,0}, # S_CPOS_RAISE6
-    {CDoom::Spritenum::SPR_CPOS,7,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CPOS_RUN1,0,0}, # S_CPOS_RAISE7
-    {CDoom::Spritenum::SPR_TROO,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_TROO_STND2,0,0}, # S_TROO_STND
-    {CDoom::Spritenum::SPR_TROO,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_TROO_STND,0,0}, # S_TROO_STND2
-    {CDoom::Spritenum::SPR_TROO,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN2,0,0}, # S_TROO_RUN1
-    {CDoom::Spritenum::SPR_TROO,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN3,0,0}, # S_TROO_RUN2
-    {CDoom::Spritenum::SPR_TROO,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN4,0,0}, # S_TROO_RUN3
-    {CDoom::Spritenum::SPR_TROO,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN5,0,0}, # S_TROO_RUN4
-    {CDoom::Spritenum::SPR_TROO,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN6,0,0}, # S_TROO_RUN5
-    {CDoom::Spritenum::SPR_TROO,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN7,0,0}, # S_TROO_RUN6
-    {CDoom::Spritenum::SPR_TROO,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN8,0,0}, # S_TROO_RUN7
-    {CDoom::Spritenum::SPR_TROO,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_TROO_RUN1,0,0}, # S_TROO_RUN8
-    {CDoom::Spritenum::SPR_TROO,4,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_TROO_ATK2,0,0}, # S_TROO_ATK1
-    {CDoom::Spritenum::SPR_TROO,5,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_TROO_ATK3,0,0}, # S_TROO_ATK2
-    {CDoom::Spritenum::SPR_TROO,6,6,->CDoom.a_troop_attack(Void*, Void*),CDoom::Statenum::S_TROO_RUN1,0,0}, # S_TROO_ATK3
-    {CDoom::Spritenum::SPR_TROO,7,2,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_PAIN2,0,0}, # S_TROO_PAIN
-    {CDoom::Spritenum::SPR_TROO,7,2,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_TROO_RUN1,0,0}, # S_TROO_PAIN2
-    {CDoom::Spritenum::SPR_TROO,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_DIE2,0,0}, # S_TROO_DIE1
-    {CDoom::Spritenum::SPR_TROO,9,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_TROO_DIE3,0,0}, # S_TROO_DIE2
-    {CDoom::Spritenum::SPR_TROO,10,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_DIE4,0,0}, # S_TROO_DIE3
-    {CDoom::Spritenum::SPR_TROO,11,6,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_TROO_DIE5,0,0}, # S_TROO_DIE4
-    {CDoom::Spritenum::SPR_TROO,12,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TROO_DIE5
-    {CDoom::Spritenum::SPR_TROO,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_XDIE2,0,0}, # S_TROO_XDIE1
-    {CDoom::Spritenum::SPR_TROO,14,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_TROO_XDIE3,0,0}, # S_TROO_XDIE2
-    {CDoom::Spritenum::SPR_TROO,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_XDIE4,0,0}, # S_TROO_XDIE3
-    {CDoom::Spritenum::SPR_TROO,16,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_TROO_XDIE5,0,0}, # S_TROO_XDIE4
-    {CDoom::Spritenum::SPR_TROO,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_XDIE6,0,0}, # S_TROO_XDIE5
-    {CDoom::Spritenum::SPR_TROO,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_XDIE7,0,0}, # S_TROO_XDIE6
-    {CDoom::Spritenum::SPR_TROO,19,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_XDIE8,0,0}, # S_TROO_XDIE7
-    {CDoom::Spritenum::SPR_TROO,20,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TROO_XDIE8
-    {CDoom::Spritenum::SPR_TROO,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_RAISE2,0,0}, # S_TROO_RAISE1
-    {CDoom::Spritenum::SPR_TROO,11,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_RAISE3,0,0}, # S_TROO_RAISE2
-    {CDoom::Spritenum::SPR_TROO,10,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_RAISE4,0,0}, # S_TROO_RAISE3
-    {CDoom::Spritenum::SPR_TROO,9,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_RAISE5,0,0}, # S_TROO_RAISE4
-    {CDoom::Spritenum::SPR_TROO,8,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TROO_RUN1,0,0}, # S_TROO_RAISE5
-    {CDoom::Spritenum::SPR_SARG,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SARG_STND2,0,0}, # S_SARG_STND
-    {CDoom::Spritenum::SPR_SARG,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SARG_STND,0,0}, # S_SARG_STND2
-    {CDoom::Spritenum::SPR_SARG,0,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN2,0,0}, # S_SARG_RUN1
-    {CDoom::Spritenum::SPR_SARG,0,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN3,0,0}, # S_SARG_RUN2
-    {CDoom::Spritenum::SPR_SARG,1,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN4,0,0}, # S_SARG_RUN3
-    {CDoom::Spritenum::SPR_SARG,1,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN5,0,0}, # S_SARG_RUN4
-    {CDoom::Spritenum::SPR_SARG,2,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN6,0,0}, # S_SARG_RUN5
-    {CDoom::Spritenum::SPR_SARG,2,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN7,0,0}, # S_SARG_RUN6
-    {CDoom::Spritenum::SPR_SARG,3,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN8,0,0}, # S_SARG_RUN7
-    {CDoom::Spritenum::SPR_SARG,3,2,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SARG_RUN1,0,0}, # S_SARG_RUN8
-    {CDoom::Spritenum::SPR_SARG,4,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SARG_ATK2,0,0}, # S_SARG_ATK1
-    {CDoom::Spritenum::SPR_SARG,5,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SARG_ATK3,0,0}, # S_SARG_ATK2
-    {CDoom::Spritenum::SPR_SARG,6,8,->CDoom.a_sarg_attack(Void*, Void*),CDoom::Statenum::S_SARG_RUN1,0,0}, # S_SARG_ATK3
-    {CDoom::Spritenum::SPR_SARG,7,2,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_PAIN2,0,0}, # S_SARG_PAIN
-    {CDoom::Spritenum::SPR_SARG,7,2,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SARG_RUN1,0,0}, # S_SARG_PAIN2
-    {CDoom::Spritenum::SPR_SARG,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_DIE2,0,0}, # S_SARG_DIE1
-    {CDoom::Spritenum::SPR_SARG,9,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SARG_DIE3,0,0}, # S_SARG_DIE2
-    {CDoom::Spritenum::SPR_SARG,10,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_DIE4,0,0}, # S_SARG_DIE3
-    {CDoom::Spritenum::SPR_SARG,11,4,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SARG_DIE5,0,0}, # S_SARG_DIE4
-    {CDoom::Spritenum::SPR_SARG,12,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_DIE6,0,0}, # S_SARG_DIE5
-    {CDoom::Spritenum::SPR_SARG,13,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SARG_DIE6
-    {CDoom::Spritenum::SPR_SARG,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RAISE2,0,0}, # S_SARG_RAISE1
-    {CDoom::Spritenum::SPR_SARG,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RAISE3,0,0}, # S_SARG_RAISE2
-    {CDoom::Spritenum::SPR_SARG,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RAISE4,0,0}, # S_SARG_RAISE3
-    {CDoom::Spritenum::SPR_SARG,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RAISE5,0,0}, # S_SARG_RAISE4
-    {CDoom::Spritenum::SPR_SARG,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RAISE6,0,0}, # S_SARG_RAISE5
-    {CDoom::Spritenum::SPR_SARG,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SARG_RUN1,0,0}, # S_SARG_RAISE6
-    {CDoom::Spritenum::SPR_HEAD,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_HEAD_STND,0,0}, # S_HEAD_STND
-    {CDoom::Spritenum::SPR_HEAD,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_HEAD_RUN1,0,0}, # S_HEAD_RUN1
-    {CDoom::Spritenum::SPR_HEAD,1,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_HEAD_ATK2,0,0}, # S_HEAD_ATK1
-    {CDoom::Spritenum::SPR_HEAD,2,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_HEAD_ATK3,0,0}, # S_HEAD_ATK2
-    {CDoom::Spritenum::SPR_HEAD,32771,5,->CDoom.a_head_attack(Void*, Void*),CDoom::Statenum::S_HEAD_RUN1,0,0}, # S_HEAD_ATK3
-    {CDoom::Spritenum::SPR_HEAD,4,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_PAIN2,0,0}, # S_HEAD_PAIN
-    {CDoom::Spritenum::SPR_HEAD,4,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_HEAD_PAIN3,0,0}, # S_HEAD_PAIN2
-    {CDoom::Spritenum::SPR_HEAD,5,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RUN1,0,0}, # S_HEAD_PAIN3
-    {CDoom::Spritenum::SPR_HEAD,6,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_DIE2,0,0}, # S_HEAD_DIE1
-    {CDoom::Spritenum::SPR_HEAD,7,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_HEAD_DIE3,0,0}, # S_HEAD_DIE2
-    {CDoom::Spritenum::SPR_HEAD,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_DIE4,0,0}, # S_HEAD_DIE3
-    {CDoom::Spritenum::SPR_HEAD,9,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_DIE5,0,0}, # S_HEAD_DIE4
-    {CDoom::Spritenum::SPR_HEAD,10,8,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_HEAD_DIE6,0,0}, # S_HEAD_DIE5
-    {CDoom::Spritenum::SPR_HEAD,11,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HEAD_DIE6
-    {CDoom::Spritenum::SPR_HEAD,11,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RAISE2,0,0}, # S_HEAD_RAISE1
-    {CDoom::Spritenum::SPR_HEAD,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RAISE3,0,0}, # S_HEAD_RAISE2
-    {CDoom::Spritenum::SPR_HEAD,9,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RAISE4,0,0}, # S_HEAD_RAISE3
-    {CDoom::Spritenum::SPR_HEAD,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RAISE5,0,0}, # S_HEAD_RAISE4
-    {CDoom::Spritenum::SPR_HEAD,7,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RAISE6,0,0}, # S_HEAD_RAISE5
-    {CDoom::Spritenum::SPR_HEAD,6,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEAD_RUN1,0,0}, # S_HEAD_RAISE6
-    {CDoom::Spritenum::SPR_BAL7,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRBALL2,0,0}, # S_BRBALL1
-    {CDoom::Spritenum::SPR_BAL7,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRBALL1,0,0}, # S_BRBALL2
-    {CDoom::Spritenum::SPR_BAL7,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRBALLX2,0,0}, # S_BRBALLX1
-    {CDoom::Spritenum::SPR_BAL7,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRBALLX3,0,0}, # S_BRBALLX2
-    {CDoom::Spritenum::SPR_BAL7,32772,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BRBALLX3
-    {CDoom::Spritenum::SPR_BOSS,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BOSS_STND2,0,0}, # S_BOSS_STND
-    {CDoom::Spritenum::SPR_BOSS,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BOSS_STND,0,0}, # S_BOSS_STND2
-    {CDoom::Spritenum::SPR_BOSS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN2,0,0}, # S_BOSS_RUN1
-    {CDoom::Spritenum::SPR_BOSS,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN3,0,0}, # S_BOSS_RUN2
-    {CDoom::Spritenum::SPR_BOSS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN4,0,0}, # S_BOSS_RUN3
-    {CDoom::Spritenum::SPR_BOSS,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN5,0,0}, # S_BOSS_RUN4
-    {CDoom::Spritenum::SPR_BOSS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN6,0,0}, # S_BOSS_RUN5
-    {CDoom::Spritenum::SPR_BOSS,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN7,0,0}, # S_BOSS_RUN6
-    {CDoom::Spritenum::SPR_BOSS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN8,0,0}, # S_BOSS_RUN7
-    {CDoom::Spritenum::SPR_BOSS,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOSS_RUN1,0,0}, # S_BOSS_RUN8
-    {CDoom::Spritenum::SPR_BOSS,4,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_BOSS_ATK2,0,0}, # S_BOSS_ATK1
-    {CDoom::Spritenum::SPR_BOSS,5,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_BOSS_ATK3,0,0}, # S_BOSS_ATK2
-    {CDoom::Spritenum::SPR_BOSS,6,8,->CDoom.a_bruis_attack(Void*, Void*),CDoom::Statenum::S_BOSS_RUN1,0,0}, # S_BOSS_ATK3
-    {CDoom::Spritenum::SPR_BOSS,7,2,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_PAIN2,0,0}, # S_BOSS_PAIN
-    {CDoom::Spritenum::SPR_BOSS,7,2,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_BOSS_RUN1,0,0}, # S_BOSS_PAIN2
-    {CDoom::Spritenum::SPR_BOSS,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_DIE2,0,0}, # S_BOSS_DIE1
-    {CDoom::Spritenum::SPR_BOSS,9,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_BOSS_DIE3,0,0}, # S_BOSS_DIE2
-    {CDoom::Spritenum::SPR_BOSS,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_DIE4,0,0}, # S_BOSS_DIE3
-    {CDoom::Spritenum::SPR_BOSS,11,8,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_BOSS_DIE5,0,0}, # S_BOSS_DIE4
-    {CDoom::Spritenum::SPR_BOSS,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_DIE6,0,0}, # S_BOSS_DIE5
-    {CDoom::Spritenum::SPR_BOSS,13,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_DIE7,0,0}, # S_BOSS_DIE6
-    {CDoom::Spritenum::SPR_BOSS,14,-1,->CDoom.a_boss_death(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_BOSS_DIE7
-    {CDoom::Spritenum::SPR_BOSS,14,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE2,0,0}, # S_BOSS_RAISE1
-    {CDoom::Spritenum::SPR_BOSS,13,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE3,0,0}, # S_BOSS_RAISE2
-    {CDoom::Spritenum::SPR_BOSS,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE4,0,0}, # S_BOSS_RAISE3
-    {CDoom::Spritenum::SPR_BOSS,11,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE5,0,0}, # S_BOSS_RAISE4
-    {CDoom::Spritenum::SPR_BOSS,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE6,0,0}, # S_BOSS_RAISE5
-    {CDoom::Spritenum::SPR_BOSS,9,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RAISE7,0,0}, # S_BOSS_RAISE6
-    {CDoom::Spritenum::SPR_BOSS,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOSS_RUN1,0,0}, # S_BOSS_RAISE7
-    {CDoom::Spritenum::SPR_BOS2,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BOS2_STND2,0,0}, # S_BOS2_STND
-    {CDoom::Spritenum::SPR_BOS2,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BOS2_STND,0,0}, # S_BOS2_STND2
-    {CDoom::Spritenum::SPR_BOS2,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN2,0,0}, # S_BOS2_RUN1
-    {CDoom::Spritenum::SPR_BOS2,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN3,0,0}, # S_BOS2_RUN2
-    {CDoom::Spritenum::SPR_BOS2,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN4,0,0}, # S_BOS2_RUN3
-    {CDoom::Spritenum::SPR_BOS2,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN5,0,0}, # S_BOS2_RUN4
-    {CDoom::Spritenum::SPR_BOS2,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN6,0,0}, # S_BOS2_RUN5
-    {CDoom::Spritenum::SPR_BOS2,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN7,0,0}, # S_BOS2_RUN6
-    {CDoom::Spritenum::SPR_BOS2,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN8,0,0}, # S_BOS2_RUN7
-    {CDoom::Spritenum::SPR_BOS2,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BOS2_RUN1,0,0}, # S_BOS2_RUN8
-    {CDoom::Spritenum::SPR_BOS2,4,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_BOS2_ATK2,0,0}, # S_BOS2_ATK1
-    {CDoom::Spritenum::SPR_BOS2,5,8,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_BOS2_ATK3,0,0}, # S_BOS2_ATK2
-    {CDoom::Spritenum::SPR_BOS2,6,8,->CDoom.a_bruis_attack(Void*, Void*),CDoom::Statenum::S_BOS2_RUN1,0,0}, # S_BOS2_ATK3
-    {CDoom::Spritenum::SPR_BOS2,7,2,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_PAIN2,0,0}, # S_BOS2_PAIN
-    {CDoom::Spritenum::SPR_BOS2,7,2,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_BOS2_RUN1,0,0}, # S_BOS2_PAIN2
-    {CDoom::Spritenum::SPR_BOS2,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_DIE2,0,0}, # S_BOS2_DIE1
-    {CDoom::Spritenum::SPR_BOS2,9,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_BOS2_DIE3,0,0}, # S_BOS2_DIE2
-    {CDoom::Spritenum::SPR_BOS2,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_DIE4,0,0}, # S_BOS2_DIE3
-    {CDoom::Spritenum::SPR_BOS2,11,8,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_BOS2_DIE5,0,0}, # S_BOS2_DIE4
-    {CDoom::Spritenum::SPR_BOS2,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_DIE6,0,0}, # S_BOS2_DIE5
-    {CDoom::Spritenum::SPR_BOS2,13,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_DIE7,0,0}, # S_BOS2_DIE6
-    {CDoom::Spritenum::SPR_BOS2,14,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BOS2_DIE7
-    {CDoom::Spritenum::SPR_BOS2,14,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE2,0,0}, # S_BOS2_RAISE1
-    {CDoom::Spritenum::SPR_BOS2,13,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE3,0,0}, # S_BOS2_RAISE2
-    {CDoom::Spritenum::SPR_BOS2,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE4,0,0}, # S_BOS2_RAISE3
-    {CDoom::Spritenum::SPR_BOS2,11,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE5,0,0}, # S_BOS2_RAISE4
-    {CDoom::Spritenum::SPR_BOS2,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE6,0,0}, # S_BOS2_RAISE5
-    {CDoom::Spritenum::SPR_BOS2,9,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RAISE7,0,0}, # S_BOS2_RAISE6
-    {CDoom::Spritenum::SPR_BOS2,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BOS2_RUN1,0,0}, # S_BOS2_RAISE7
-    {CDoom::Spritenum::SPR_SKUL,32768,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SKULL_STND2,0,0}, # S_SKULL_STND
-    {CDoom::Spritenum::SPR_SKUL,32769,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SKULL_STND,0,0}, # S_SKULL_STND2
-    {CDoom::Spritenum::SPR_SKUL,32768,6,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKULL_RUN2,0,0}, # S_SKULL_RUN1
-    {CDoom::Spritenum::SPR_SKUL,32769,6,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SKULL_RUN1,0,0}, # S_SKULL_RUN2
-    {CDoom::Spritenum::SPR_SKUL,32770,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SKULL_ATK2,0,0}, # S_SKULL_ATK1
-    {CDoom::Spritenum::SPR_SKUL,32771,4,->CDoom.a_skull_attack(Void*, Void*),CDoom::Statenum::S_SKULL_ATK3,0,0}, # S_SKULL_ATK2
-    {CDoom::Spritenum::SPR_SKUL,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_ATK4,0,0}, # S_SKULL_ATK3
-    {CDoom::Spritenum::SPR_SKUL,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_ATK3,0,0}, # S_SKULL_ATK4
-    {CDoom::Spritenum::SPR_SKUL,32772,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_PAIN2,0,0}, # S_SKULL_PAIN
-    {CDoom::Spritenum::SPR_SKUL,32772,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SKULL_RUN1,0,0}, # S_SKULL_PAIN2
-    {CDoom::Spritenum::SPR_SKUL,32773,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_DIE2,0,0}, # S_SKULL_DIE1
-    {CDoom::Spritenum::SPR_SKUL,32774,6,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SKULL_DIE3,0,0}, # S_SKULL_DIE2
-    {CDoom::Spritenum::SPR_SKUL,32775,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_DIE4,0,0}, # S_SKULL_DIE3
-    {CDoom::Spritenum::SPR_SKUL,32776,6,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SKULL_DIE5,0,0}, # S_SKULL_DIE4
-    {CDoom::Spritenum::SPR_SKUL,9,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SKULL_DIE6,0,0}, # S_SKULL_DIE5
-    {CDoom::Spritenum::SPR_SKUL,10,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SKULL_DIE6
-    {CDoom::Spritenum::SPR_SPID,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SPID_STND2,0,0}, # S_SPID_STND
-    {CDoom::Spritenum::SPR_SPID,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SPID_STND,0,0}, # S_SPID_STND2
-    {CDoom::Spritenum::SPR_SPID,0,3,->CDoom.a_metal(Void*, Void*),CDoom::Statenum::S_SPID_RUN2,0,0}, # S_SPID_RUN1
-    {CDoom::Spritenum::SPR_SPID,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN3,0,0}, # S_SPID_RUN2
-    {CDoom::Spritenum::SPR_SPID,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN4,0,0}, # S_SPID_RUN3
-    {CDoom::Spritenum::SPR_SPID,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN5,0,0}, # S_SPID_RUN4
-    {CDoom::Spritenum::SPR_SPID,2,3,->CDoom.a_metal(Void*, Void*),CDoom::Statenum::S_SPID_RUN6,0,0}, # S_SPID_RUN5
-    {CDoom::Spritenum::SPR_SPID,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN7,0,0}, # S_SPID_RUN6
-    {CDoom::Spritenum::SPR_SPID,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN8,0,0}, # S_SPID_RUN7
-    {CDoom::Spritenum::SPR_SPID,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN9,0,0}, # S_SPID_RUN8
-    {CDoom::Spritenum::SPR_SPID,4,3,->CDoom.a_metal(Void*, Void*),CDoom::Statenum::S_SPID_RUN10,0,0}, # S_SPID_RUN9
-    {CDoom::Spritenum::SPR_SPID,4,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN11,0,0}, # S_SPID_RUN10
-    {CDoom::Spritenum::SPR_SPID,5,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN12,0,0}, # S_SPID_RUN11
-    {CDoom::Spritenum::SPR_SPID,5,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SPID_RUN1,0,0}, # S_SPID_RUN12
-    {CDoom::Spritenum::SPR_SPID,32768,20,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SPID_ATK2,0,0}, # S_SPID_ATK1
-    {CDoom::Spritenum::SPR_SPID,32774,4,->CDoom.a_spos_attack(Void*, Void*),CDoom::Statenum::S_SPID_ATK3,0,0}, # S_SPID_ATK2
-    {CDoom::Spritenum::SPR_SPID,32775,4,->CDoom.a_spos_attack(Void*, Void*),CDoom::Statenum::S_SPID_ATK4,0,0}, # S_SPID_ATK3
-    {CDoom::Spritenum::SPR_SPID,32775,1,->CDoom.a_spid_refire(Void*, Void*),CDoom::Statenum::S_SPID_ATK2,0,0}, # S_SPID_ATK4
-    {CDoom::Spritenum::SPR_SPID,8,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_PAIN2,0,0}, # S_SPID_PAIN
-    {CDoom::Spritenum::SPR_SPID,8,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SPID_RUN1,0,0}, # S_SPID_PAIN2
-    {CDoom::Spritenum::SPR_SPID,9,20,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SPID_DIE2,0,0}, # S_SPID_DIE1
-    {CDoom::Spritenum::SPR_SPID,10,10,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SPID_DIE3,0,0}, # S_SPID_DIE2
-    {CDoom::Spritenum::SPR_SPID,11,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE4,0,0}, # S_SPID_DIE3
-    {CDoom::Spritenum::SPR_SPID,12,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE5,0,0}, # S_SPID_DIE4
-    {CDoom::Spritenum::SPR_SPID,13,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE6,0,0}, # S_SPID_DIE5
-    {CDoom::Spritenum::SPR_SPID,14,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE7,0,0}, # S_SPID_DIE6
-    {CDoom::Spritenum::SPR_SPID,15,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE8,0,0}, # S_SPID_DIE7
-    {CDoom::Spritenum::SPR_SPID,16,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE9,0,0}, # S_SPID_DIE8
-    {CDoom::Spritenum::SPR_SPID,17,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE10,0,0}, # S_SPID_DIE9
-    {CDoom::Spritenum::SPR_SPID,18,30,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SPID_DIE11,0,0}, # S_SPID_DIE10
-    {CDoom::Spritenum::SPR_SPID,18,-1,->CDoom.a_boss_death(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_SPID_DIE11
-    {CDoom::Spritenum::SPR_BSPI,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BSPI_STND2,0,0}, # S_BSPI_STND
-    {CDoom::Spritenum::SPR_BSPI,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BSPI_STND,0,0}, # S_BSPI_STND2
-    {CDoom::Spritenum::SPR_BSPI,0,20,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RUN1,0,0}, # S_BSPI_SIGHT
-    {CDoom::Spritenum::SPR_BSPI,0,3,->CDoom.a_baby_metal(Void*, Void*),CDoom::Statenum::S_BSPI_RUN2,0,0}, # S_BSPI_RUN1
-    {CDoom::Spritenum::SPR_BSPI,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN3,0,0}, # S_BSPI_RUN2
-    {CDoom::Spritenum::SPR_BSPI,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN4,0,0}, # S_BSPI_RUN3
-    {CDoom::Spritenum::SPR_BSPI,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN5,0,0}, # S_BSPI_RUN4
-    {CDoom::Spritenum::SPR_BSPI,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN6,0,0}, # S_BSPI_RUN5
-    {CDoom::Spritenum::SPR_BSPI,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN7,0,0}, # S_BSPI_RUN6
-    {CDoom::Spritenum::SPR_BSPI,3,3,->CDoom.a_baby_metal(Void*, Void*),CDoom::Statenum::S_BSPI_RUN8,0,0}, # S_BSPI_RUN7
-    {CDoom::Spritenum::SPR_BSPI,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN9,0,0}, # S_BSPI_RUN8
-    {CDoom::Spritenum::SPR_BSPI,4,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN10,0,0}, # S_BSPI_RUN9
-    {CDoom::Spritenum::SPR_BSPI,4,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN11,0,0}, # S_BSPI_RUN10
-    {CDoom::Spritenum::SPR_BSPI,5,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN12,0,0}, # S_BSPI_RUN11
-    {CDoom::Spritenum::SPR_BSPI,5,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_BSPI_RUN1,0,0}, # S_BSPI_RUN12
-    {CDoom::Spritenum::SPR_BSPI,32768,20,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_BSPI_ATK2,0,0}, # S_BSPI_ATK1
-    {CDoom::Spritenum::SPR_BSPI,32774,4,->CDoom.a_bspi_attack(Void*, Void*),CDoom::Statenum::S_BSPI_ATK3,0,0}, # S_BSPI_ATK2
-    {CDoom::Spritenum::SPR_BSPI,32775,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_ATK4,0,0}, # S_BSPI_ATK3
-    {CDoom::Spritenum::SPR_BSPI,32775,1,->CDoom.a_spid_refire(Void*, Void*),CDoom::Statenum::S_BSPI_ATK2,0,0}, # S_BSPI_ATK4
-    {CDoom::Spritenum::SPR_BSPI,8,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_PAIN2,0,0}, # S_BSPI_PAIN
-    {CDoom::Spritenum::SPR_BSPI,8,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_BSPI_RUN1,0,0}, # S_BSPI_PAIN2
-    {CDoom::Spritenum::SPR_BSPI,9,20,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_BSPI_DIE2,0,0}, # S_BSPI_DIE1
-    {CDoom::Spritenum::SPR_BSPI,10,7,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_BSPI_DIE3,0,0}, # S_BSPI_DIE2
-    {CDoom::Spritenum::SPR_BSPI,11,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_DIE4,0,0}, # S_BSPI_DIE3
-    {CDoom::Spritenum::SPR_BSPI,12,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_DIE5,0,0}, # S_BSPI_DIE4
-    {CDoom::Spritenum::SPR_BSPI,13,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_DIE6,0,0}, # S_BSPI_DIE5
-    {CDoom::Spritenum::SPR_BSPI,14,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_DIE7,0,0}, # S_BSPI_DIE6
-    {CDoom::Spritenum::SPR_BSPI,15,-1,->CDoom.a_boss_death(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_BSPI_DIE7
-    {CDoom::Spritenum::SPR_BSPI,15,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE2,0,0}, # S_BSPI_RAISE1
-    {CDoom::Spritenum::SPR_BSPI,14,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE3,0,0}, # S_BSPI_RAISE2
-    {CDoom::Spritenum::SPR_BSPI,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE4,0,0}, # S_BSPI_RAISE3
-    {CDoom::Spritenum::SPR_BSPI,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE5,0,0}, # S_BSPI_RAISE4
-    {CDoom::Spritenum::SPR_BSPI,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE6,0,0}, # S_BSPI_RAISE5
-    {CDoom::Spritenum::SPR_BSPI,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RAISE7,0,0}, # S_BSPI_RAISE6
-    {CDoom::Spritenum::SPR_BSPI,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSPI_RUN1,0,0}, # S_BSPI_RAISE7
-    {CDoom::Spritenum::SPR_APLS,32768,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLAZ2,0,0}, # S_ARACH_PLAZ
-    {CDoom::Spritenum::SPR_APLS,32769,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLAZ,0,0}, # S_ARACH_PLAZ2
-    {CDoom::Spritenum::SPR_APBX,32768,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLEX2,0,0}, # S_ARACH_PLEX
-    {CDoom::Spritenum::SPR_APBX,32769,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLEX3,0,0}, # S_ARACH_PLEX2
-    {CDoom::Spritenum::SPR_APBX,32770,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLEX4,0,0}, # S_ARACH_PLEX3
-    {CDoom::Spritenum::SPR_APBX,32771,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARACH_PLEX5,0,0}, # S_ARACH_PLEX4
-    {CDoom::Spritenum::SPR_APBX,32772,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_ARACH_PLEX5
-    {CDoom::Spritenum::SPR_CYBR,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_CYBER_STND2,0,0}, # S_CYBER_STND
-    {CDoom::Spritenum::SPR_CYBR,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_CYBER_STND,0,0}, # S_CYBER_STND2
-    {CDoom::Spritenum::SPR_CYBR,0,3,->CDoom.a_hoof(Void*, Void*),CDoom::Statenum::S_CYBER_RUN2,0,0}, # S_CYBER_RUN1
-    {CDoom::Spritenum::SPR_CYBR,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN3,0,0}, # S_CYBER_RUN2
-    {CDoom::Spritenum::SPR_CYBR,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN4,0,0}, # S_CYBER_RUN3
-    {CDoom::Spritenum::SPR_CYBR,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN5,0,0}, # S_CYBER_RUN4
-    {CDoom::Spritenum::SPR_CYBR,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN6,0,0}, # S_CYBER_RUN5
-    {CDoom::Spritenum::SPR_CYBR,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN7,0,0}, # S_CYBER_RUN6
-    {CDoom::Spritenum::SPR_CYBR,3,3,->CDoom.a_metal(Void*, Void*),CDoom::Statenum::S_CYBER_RUN8,0,0}, # S_CYBER_RUN7
-    {CDoom::Spritenum::SPR_CYBR,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_CYBER_RUN1,0,0}, # S_CYBER_RUN8
-    {CDoom::Spritenum::SPR_CYBR,4,6,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_CYBER_ATK2,0,0}, # S_CYBER_ATK1
-    {CDoom::Spritenum::SPR_CYBR,5,12,->CDoom.a_cyber_attack(Void*, Void*),CDoom::Statenum::S_CYBER_ATK3,0,0}, # S_CYBER_ATK2
-    {CDoom::Spritenum::SPR_CYBR,4,12,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_CYBER_ATK4,0,0}, # S_CYBER_ATK3
-    {CDoom::Spritenum::SPR_CYBR,5,12,->CDoom.a_cyber_attack(Void*, Void*),CDoom::Statenum::S_CYBER_ATK5,0,0}, # S_CYBER_ATK4
-    {CDoom::Spritenum::SPR_CYBR,4,12,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_CYBER_ATK6,0,0}, # S_CYBER_ATK5
-    {CDoom::Spritenum::SPR_CYBR,5,12,->CDoom.a_cyber_attack(Void*, Void*),CDoom::Statenum::S_CYBER_RUN1,0,0}, # S_CYBER_ATK6
-    {CDoom::Spritenum::SPR_CYBR,6,10,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_CYBER_RUN1,0,0}, # S_CYBER_PAIN
-    {CDoom::Spritenum::SPR_CYBR,7,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE2,0,0}, # S_CYBER_DIE1
-    {CDoom::Spritenum::SPR_CYBR,8,10,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_CYBER_DIE3,0,0}, # S_CYBER_DIE2
-    {CDoom::Spritenum::SPR_CYBR,9,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE4,0,0}, # S_CYBER_DIE3
-    {CDoom::Spritenum::SPR_CYBR,10,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE5,0,0}, # S_CYBER_DIE4
-    {CDoom::Spritenum::SPR_CYBR,11,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE6,0,0}, # S_CYBER_DIE5
-    {CDoom::Spritenum::SPR_CYBR,12,10,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_CYBER_DIE7,0,0}, # S_CYBER_DIE6
-    {CDoom::Spritenum::SPR_CYBR,13,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE8,0,0}, # S_CYBER_DIE7
-    {CDoom::Spritenum::SPR_CYBR,14,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE9,0,0}, # S_CYBER_DIE8
-    {CDoom::Spritenum::SPR_CYBR,15,30,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_CYBER_DIE10,0,0}, # S_CYBER_DIE9
-    {CDoom::Spritenum::SPR_CYBR,15,-1,->CDoom.a_boss_death(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_CYBER_DIE10
-    {CDoom::Spritenum::SPR_PAIN,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_PAIN_STND,0,0}, # S_PAIN_STND
-    {CDoom::Spritenum::SPR_PAIN,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN2,0,0}, # S_PAIN_RUN1
-    {CDoom::Spritenum::SPR_PAIN,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN3,0,0}, # S_PAIN_RUN2
-    {CDoom::Spritenum::SPR_PAIN,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN4,0,0}, # S_PAIN_RUN3
-    {CDoom::Spritenum::SPR_PAIN,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN5,0,0}, # S_PAIN_RUN4
-    {CDoom::Spritenum::SPR_PAIN,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN6,0,0}, # S_PAIN_RUN5
-    {CDoom::Spritenum::SPR_PAIN,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_PAIN_RUN1,0,0}, # S_PAIN_RUN6
-    {CDoom::Spritenum::SPR_PAIN,3,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_PAIN_ATK2,0,0}, # S_PAIN_ATK1
-    {CDoom::Spritenum::SPR_PAIN,4,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_PAIN_ATK3,0,0}, # S_PAIN_ATK2
-    {CDoom::Spritenum::SPR_PAIN,32773,5,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_PAIN_ATK4,0,0}, # S_PAIN_ATK3
-    {CDoom::Spritenum::SPR_PAIN,32773,0,->CDoom.a_pain_attack(Void*, Void*),CDoom::Statenum::S_PAIN_RUN1,0,0}, # S_PAIN_ATK4
-    {CDoom::Spritenum::SPR_PAIN,6,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_PAIN2,0,0}, # S_PAIN_PAIN
-    {CDoom::Spritenum::SPR_PAIN,6,6,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_PAIN_RUN1,0,0}, # S_PAIN_PAIN2
-    {CDoom::Spritenum::SPR_PAIN,32775,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_DIE2,0,0}, # S_PAIN_DIE1
-    {CDoom::Spritenum::SPR_PAIN,32776,8,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_PAIN_DIE3,0,0}, # S_PAIN_DIE2
-    {CDoom::Spritenum::SPR_PAIN,32777,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_DIE4,0,0}, # S_PAIN_DIE3
-    {CDoom::Spritenum::SPR_PAIN,32778,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_DIE5,0,0}, # S_PAIN_DIE4
-    {CDoom::Spritenum::SPR_PAIN,32779,8,->CDoom.a_pain_die(Void*, Void*),CDoom::Statenum::S_PAIN_DIE6,0,0}, # S_PAIN_DIE5
-    {CDoom::Spritenum::SPR_PAIN,32780,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PAIN_DIE6
-    {CDoom::Spritenum::SPR_PAIN,12,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RAISE2,0,0}, # S_PAIN_RAISE1
-    {CDoom::Spritenum::SPR_PAIN,11,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RAISE3,0,0}, # S_PAIN_RAISE2
-    {CDoom::Spritenum::SPR_PAIN,10,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RAISE4,0,0}, # S_PAIN_RAISE3
-    {CDoom::Spritenum::SPR_PAIN,9,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RAISE5,0,0}, # S_PAIN_RAISE4
-    {CDoom::Spritenum::SPR_PAIN,8,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RAISE6,0,0}, # S_PAIN_RAISE5
-    {CDoom::Spritenum::SPR_PAIN,7,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PAIN_RUN1,0,0}, # S_PAIN_RAISE6
-    {CDoom::Spritenum::SPR_SSWV,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SSWV_STND2,0,0}, # S_SSWV_STND
-    {CDoom::Spritenum::SPR_SSWV,1,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_SSWV_STND,0,0}, # S_SSWV_STND2
-    {CDoom::Spritenum::SPR_SSWV,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN2,0,0}, # S_SSWV_RUN1
-    {CDoom::Spritenum::SPR_SSWV,0,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN3,0,0}, # S_SSWV_RUN2
-    {CDoom::Spritenum::SPR_SSWV,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN4,0,0}, # S_SSWV_RUN3
-    {CDoom::Spritenum::SPR_SSWV,1,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN5,0,0}, # S_SSWV_RUN4
-    {CDoom::Spritenum::SPR_SSWV,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN6,0,0}, # S_SSWV_RUN5
-    {CDoom::Spritenum::SPR_SSWV,2,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN7,0,0}, # S_SSWV_RUN6
-    {CDoom::Spritenum::SPR_SSWV,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN8,0,0}, # S_SSWV_RUN7
-    {CDoom::Spritenum::SPR_SSWV,3,3,->CDoom.a_chase(Void*, Void*),CDoom::Statenum::S_SSWV_RUN1,0,0}, # S_SSWV_RUN8
-    {CDoom::Spritenum::SPR_SSWV,4,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SSWV_ATK2,0,0}, # S_SSWV_ATK1
-    {CDoom::Spritenum::SPR_SSWV,5,10,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SSWV_ATK3,0,0}, # S_SSWV_ATK2
-    {CDoom::Spritenum::SPR_SSWV,32774,4,->CDoom.a_cpos_attack(Void*, Void*),CDoom::Statenum::S_SSWV_ATK4,0,0}, # S_SSWV_ATK3
-    {CDoom::Spritenum::SPR_SSWV,5,6,->CDoom.a_face_target(Void*, Void*),CDoom::Statenum::S_SSWV_ATK5,0,0}, # S_SSWV_ATK4
-    {CDoom::Spritenum::SPR_SSWV,32774,4,->CDoom.a_cpos_attack(Void*, Void*),CDoom::Statenum::S_SSWV_ATK6,0,0}, # S_SSWV_ATK5
-    {CDoom::Spritenum::SPR_SSWV,5,1,->CDoom.a_cpos_refire(Void*, Void*),CDoom::Statenum::S_SSWV_ATK2,0,0}, # S_SSWV_ATK6
-    {CDoom::Spritenum::SPR_SSWV,7,3,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_PAIN2,0,0}, # S_SSWV_PAIN
-    {CDoom::Spritenum::SPR_SSWV,7,3,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_SSWV_RUN1,0,0}, # S_SSWV_PAIN2
-    {CDoom::Spritenum::SPR_SSWV,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_DIE2,0,0}, # S_SSWV_DIE1
-    {CDoom::Spritenum::SPR_SSWV,9,5,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_SSWV_DIE3,0,0}, # S_SSWV_DIE2
-    {CDoom::Spritenum::SPR_SSWV,10,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SSWV_DIE4,0,0}, # S_SSWV_DIE3
-    {CDoom::Spritenum::SPR_SSWV,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_DIE5,0,0}, # S_SSWV_DIE4
-    {CDoom::Spritenum::SPR_SSWV,12,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SSWV_DIE5
-    {CDoom::Spritenum::SPR_SSWV,13,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE2,0,0}, # S_SSWV_XDIE1
-    {CDoom::Spritenum::SPR_SSWV,14,5,->CDoom.a_xscream(Void*, Void*),CDoom::Statenum::S_SSWV_XDIE3,0,0}, # S_SSWV_XDIE2
-    {CDoom::Spritenum::SPR_SSWV,15,5,->CDoom.a_fall(Void*, Void*),CDoom::Statenum::S_SSWV_XDIE4,0,0}, # S_SSWV_XDIE3
-    {CDoom::Spritenum::SPR_SSWV,16,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE5,0,0}, # S_SSWV_XDIE4
-    {CDoom::Spritenum::SPR_SSWV,17,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE6,0,0}, # S_SSWV_XDIE5
-    {CDoom::Spritenum::SPR_SSWV,18,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE7,0,0}, # S_SSWV_XDIE6
-    {CDoom::Spritenum::SPR_SSWV,19,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE8,0,0}, # S_SSWV_XDIE7
-    {CDoom::Spritenum::SPR_SSWV,20,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_XDIE9,0,0}, # S_SSWV_XDIE8
-    {CDoom::Spritenum::SPR_SSWV,21,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SSWV_XDIE9
-    {CDoom::Spritenum::SPR_SSWV,12,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_RAISE2,0,0}, # S_SSWV_RAISE1
-    {CDoom::Spritenum::SPR_SSWV,11,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_RAISE3,0,0}, # S_SSWV_RAISE2
-    {CDoom::Spritenum::SPR_SSWV,10,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_RAISE4,0,0}, # S_SSWV_RAISE3
-    {CDoom::Spritenum::SPR_SSWV,9,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_RAISE5,0,0}, # S_SSWV_RAISE4
-    {CDoom::Spritenum::SPR_SSWV,8,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SSWV_RUN1,0,0}, # S_SSWV_RAISE5
-    {CDoom::Spritenum::SPR_KEEN,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_KEENSTND,0,0}, # S_KEENSTND
-    {CDoom::Spritenum::SPR_KEEN,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN2,0,0}, # S_COMMKEEN
-    {CDoom::Spritenum::SPR_KEEN,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN3,0,0}, # S_COMMKEEN2
-    {CDoom::Spritenum::SPR_KEEN,2,6,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_COMMKEEN4,0,0}, # S_COMMKEEN3
-    {CDoom::Spritenum::SPR_KEEN,3,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN5,0,0}, # S_COMMKEEN4
-    {CDoom::Spritenum::SPR_KEEN,4,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN6,0,0}, # S_COMMKEEN5
-    {CDoom::Spritenum::SPR_KEEN,5,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN7,0,0}, # S_COMMKEEN6
-    {CDoom::Spritenum::SPR_KEEN,6,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN8,0,0}, # S_COMMKEEN7
-    {CDoom::Spritenum::SPR_KEEN,7,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN9,0,0}, # S_COMMKEEN8
-    {CDoom::Spritenum::SPR_KEEN,8,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN10,0,0}, # S_COMMKEEN9
-    {CDoom::Spritenum::SPR_KEEN,9,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_COMMKEEN11,0,0}, # S_COMMKEEN10
-    {CDoom::Spritenum::SPR_KEEN,10,6,->CDoom.a_keen_die(Void*, Void*),CDoom::Statenum::S_COMMKEEN12,0,0},# S_COMMKEEN11
-    {CDoom::Spritenum::SPR_KEEN,11,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_COMMKEEN12
-    {CDoom::Spritenum::SPR_KEEN,12,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_KEENPAIN2,0,0}, # S_KEENPAIN
-    {CDoom::Spritenum::SPR_KEEN,12,8,->CDoom.a_pain(Void*, Void*),CDoom::Statenum::S_KEENSTND,0,0}, # S_KEENPAIN2
-    {CDoom::Spritenum::SPR_BBRN,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BRAIN
-    {CDoom::Spritenum::SPR_BBRN,1,36,->CDoom.a_brain_pain(Void*, Void*),CDoom::Statenum::S_BRAIN,0,0}, # S_BRAIN_PAIN
-    {CDoom::Spritenum::SPR_BBRN,0,100,->CDoom.a_brain_scream(Void*, Void*),CDoom::Statenum::S_BRAIN_DIE2,0,0}, # S_BRAIN_DIE1
-    {CDoom::Spritenum::SPR_BBRN,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRAIN_DIE3,0,0}, # S_BRAIN_DIE2
-    {CDoom::Spritenum::SPR_BBRN,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRAIN_DIE4,0,0}, # S_BRAIN_DIE3
-    {CDoom::Spritenum::SPR_BBRN,0,-1,->CDoom.a_brain_die(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_BRAIN_DIE4
-    {CDoom::Spritenum::SPR_SSWV,0,10,->CDoom.a_look(Void*, Void*),CDoom::Statenum::S_BRAINEYE,0,0}, # S_BRAINEYE
-    {CDoom::Spritenum::SPR_SSWV,0,181,->CDoom.a_brain_awake(Void*, Void*),CDoom::Statenum::S_BRAINEYE1,0,0}, # S_BRAINEYESEE
-    {CDoom::Spritenum::SPR_SSWV,0,150,->CDoom.a_brain_spit(Void*, Void*),CDoom::Statenum::S_BRAINEYE1,0,0}, # S_BRAINEYE1
-    {CDoom::Spritenum::SPR_BOSF,32768,3,->CDoom.a_spawn_sound(Void*, Void*),CDoom::Statenum::S_SPAWN2,0,0}, # S_SPAWN1
-    {CDoom::Spritenum::SPR_BOSF,32769,3,->CDoom.a_spawn_fly(Void*, Void*),CDoom::Statenum::S_SPAWN3,0,0}, # S_SPAWN2
-    {CDoom::Spritenum::SPR_BOSF,32770,3,->CDoom.a_spawn_fly(Void*, Void*),CDoom::Statenum::S_SPAWN4,0,0}, # S_SPAWN3
-    {CDoom::Spritenum::SPR_BOSF,32771,3,->CDoom.a_spawn_fly(Void*, Void*),CDoom::Statenum::S_SPAWN1,0,0}, # S_SPAWN4
-    {CDoom::Spritenum::SPR_FIRE,32768,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE2,0,0}, # S_SPAWNFIRE1
-    {CDoom::Spritenum::SPR_FIRE,32769,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE3,0,0}, # S_SPAWNFIRE2
-    {CDoom::Spritenum::SPR_FIRE,32770,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE4,0,0}, # S_SPAWNFIRE3
-    {CDoom::Spritenum::SPR_FIRE,32771,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE5,0,0}, # S_SPAWNFIRE4
-    {CDoom::Spritenum::SPR_FIRE,32772,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE6,0,0}, # S_SPAWNFIRE5
-    {CDoom::Spritenum::SPR_FIRE,32773,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE7,0,0}, # S_SPAWNFIRE6
-    {CDoom::Spritenum::SPR_FIRE,32774,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_SPAWNFIRE8,0,0}, # S_SPAWNFIRE7
-    {CDoom::Spritenum::SPR_FIRE,32775,4,->CDoom.a_fire(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_SPAWNFIRE8
-    {CDoom::Spritenum::SPR_MISL,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRAINEXPLODE2,0,0}, # S_BRAINEXPLODE1
-    {CDoom::Spritenum::SPR_MISL,32770,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BRAINEXPLODE3,0,0}, # S_BRAINEXPLODE2
-    {CDoom::Spritenum::SPR_MISL,32771,10,->CDoom.a_brain_explode(Void*, Void*),CDoom::Statenum::S_NULL,0,0}, # S_BRAINEXPLODE3
-    {CDoom::Spritenum::SPR_ARM1,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARM1A,0,0}, # S_ARM1
-    {CDoom::Spritenum::SPR_ARM1,32769,7,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARM1,0,0}, # S_ARM1A
-    {CDoom::Spritenum::SPR_ARM2,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARM2A,0,0}, # S_ARM2
-    {CDoom::Spritenum::SPR_ARM2,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_ARM2,0,0}, # S_ARM2A
-    {CDoom::Spritenum::SPR_BAR1,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BAR2,0,0}, # S_BAR1
-    {CDoom::Spritenum::SPR_BAR1,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BAR1,0,0}, # S_BAR2
-    {CDoom::Spritenum::SPR_BEXP,32768,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BEXP2,0,0}, # S_BEXP
-    {CDoom::Spritenum::SPR_BEXP,32769,5,->CDoom.a_scream(Void*, Void*),CDoom::Statenum::S_BEXP3,0,0}, # S_BEXP2
-    {CDoom::Spritenum::SPR_BEXP,32770,5,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BEXP4,0,0}, # S_BEXP3
-    {CDoom::Spritenum::SPR_BEXP,32771,10,->CDoom.a_explode(Void*, Void*),CDoom::Statenum::S_BEXP5,0,0}, # S_BEXP4
-    {CDoom::Spritenum::SPR_BEXP,32772,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BEXP5
-    {CDoom::Spritenum::SPR_FCAN,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BBAR2,0,0}, # S_BBAR1
-    {CDoom::Spritenum::SPR_FCAN,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BBAR3,0,0}, # S_BBAR2
-    {CDoom::Spritenum::SPR_FCAN,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BBAR1,0,0}, # S_BBAR3
-    {CDoom::Spritenum::SPR_BON1,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1A,0,0}, # S_BON1
-    {CDoom::Spritenum::SPR_BON1,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1B,0,0}, # S_BON1A
-    {CDoom::Spritenum::SPR_BON1,2,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1C,0,0}, # S_BON1B
-    {CDoom::Spritenum::SPR_BON1,3,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1D,0,0}, # S_BON1C
-    {CDoom::Spritenum::SPR_BON1,2,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1E,0,0}, # S_BON1D
-    {CDoom::Spritenum::SPR_BON1,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON1,0,0}, # S_BON1E
-    {CDoom::Spritenum::SPR_BON2,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2A,0,0}, # S_BON2
-    {CDoom::Spritenum::SPR_BON2,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2B,0,0}, # S_BON2A
-    {CDoom::Spritenum::SPR_BON2,2,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2C,0,0}, # S_BON2B
-    {CDoom::Spritenum::SPR_BON2,3,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2D,0,0}, # S_BON2C
-    {CDoom::Spritenum::SPR_BON2,2,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2E,0,0}, # S_BON2D
-    {CDoom::Spritenum::SPR_BON2,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BON2,0,0}, # S_BON2E
-    {CDoom::Spritenum::SPR_BKEY,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BKEY2,0,0}, # S_BKEY
-    {CDoom::Spritenum::SPR_BKEY,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BKEY,0,0}, # S_BKEY2
-    {CDoom::Spritenum::SPR_RKEY,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RKEY2,0,0}, # S_RKEY
-    {CDoom::Spritenum::SPR_RKEY,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RKEY,0,0}, # S_RKEY2
-    {CDoom::Spritenum::SPR_YKEY,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_YKEY2,0,0}, # S_YKEY
-    {CDoom::Spritenum::SPR_YKEY,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_YKEY,0,0}, # S_YKEY2
-    {CDoom::Spritenum::SPR_BSKU,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSKULL2,0,0}, # S_BSKULL
-    {CDoom::Spritenum::SPR_BSKU,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BSKULL,0,0}, # S_BSKULL2
-    {CDoom::Spritenum::SPR_RSKU,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RSKULL2,0,0}, # S_RSKULL
-    {CDoom::Spritenum::SPR_RSKU,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RSKULL,0,0}, # S_RSKULL2
-    {CDoom::Spritenum::SPR_YSKU,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_YSKULL2,0,0}, # S_YSKULL
-    {CDoom::Spritenum::SPR_YSKU,32769,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_YSKULL,0,0}, # S_YSKULL2
-    {CDoom::Spritenum::SPR_STIM,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_STIM
-    {CDoom::Spritenum::SPR_MEDI,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MEDI
-    {CDoom::Spritenum::SPR_SOUL,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL2,0,0}, # S_SOUL
-    {CDoom::Spritenum::SPR_SOUL,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL3,0,0}, # S_SOUL2
-    {CDoom::Spritenum::SPR_SOUL,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL4,0,0}, # S_SOUL3
-    {CDoom::Spritenum::SPR_SOUL,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL5,0,0}, # S_SOUL4
-    {CDoom::Spritenum::SPR_SOUL,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL6,0,0}, # S_SOUL5
-    {CDoom::Spritenum::SPR_SOUL,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_SOUL,0,0}, # S_SOUL6
-    {CDoom::Spritenum::SPR_PINV,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINV2,0,0}, # S_PINV
-    {CDoom::Spritenum::SPR_PINV,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINV3,0,0}, # S_PINV2
-    {CDoom::Spritenum::SPR_PINV,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINV4,0,0}, # S_PINV3
-    {CDoom::Spritenum::SPR_PINV,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINV,0,0}, # S_PINV4
-    {CDoom::Spritenum::SPR_PSTR,32768,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PSTR
-    {CDoom::Spritenum::SPR_PINS,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINS2,0,0}, # S_PINS
-    {CDoom::Spritenum::SPR_PINS,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINS3,0,0}, # S_PINS2
-    {CDoom::Spritenum::SPR_PINS,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINS4,0,0}, # S_PINS3
-    {CDoom::Spritenum::SPR_PINS,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PINS,0,0}, # S_PINS4
-    {CDoom::Spritenum::SPR_MEGA,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_MEGA2,0,0}, # S_MEGA
-    {CDoom::Spritenum::SPR_MEGA,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_MEGA3,0,0}, # S_MEGA2
-    {CDoom::Spritenum::SPR_MEGA,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_MEGA4,0,0}, # S_MEGA3
-    {CDoom::Spritenum::SPR_MEGA,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_MEGA,0,0}, # S_MEGA4
-    {CDoom::Spritenum::SPR_SUIT,32768,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SUIT
-    {CDoom::Spritenum::SPR_PMAP,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP2,0,0}, # S_PMAP
-    {CDoom::Spritenum::SPR_PMAP,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP3,0,0}, # S_PMAP2
-    {CDoom::Spritenum::SPR_PMAP,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP4,0,0}, # S_PMAP3
-    {CDoom::Spritenum::SPR_PMAP,32771,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP5,0,0}, # S_PMAP4
-    {CDoom::Spritenum::SPR_PMAP,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP6,0,0}, # S_PMAP5
-    {CDoom::Spritenum::SPR_PMAP,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PMAP,0,0}, # S_PMAP6
-    {CDoom::Spritenum::SPR_PVIS,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PVIS2,0,0}, # S_PVIS
-    {CDoom::Spritenum::SPR_PVIS,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_PVIS,0,0}, # S_PVIS2
-    {CDoom::Spritenum::SPR_CLIP,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CLIP
-    {CDoom::Spritenum::SPR_AMMO,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_AMMO
-    {CDoom::Spritenum::SPR_ROCK,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_ROCK
-    {CDoom::Spritenum::SPR_BROK,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BROK
-    {CDoom::Spritenum::SPR_CELL,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CELL
-    {CDoom::Spritenum::SPR_CELP,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CELP
-    {CDoom::Spritenum::SPR_SHEL,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SHEL
-    {CDoom::Spritenum::SPR_SBOX,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SBOX
-    {CDoom::Spritenum::SPR_BPAK,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BPAK
-    {CDoom::Spritenum::SPR_BFUG,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BFUG
-    {CDoom::Spritenum::SPR_MGUN,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MGUN
-    {CDoom::Spritenum::SPR_CSAW,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CSAW
-    {CDoom::Spritenum::SPR_LAUN,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_LAUN
-    {CDoom::Spritenum::SPR_PLAS,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_PLAS
-    {CDoom::Spritenum::SPR_SHOT,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SHOT
-    {CDoom::Spritenum::SPR_SGN2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SHOT2
-    {CDoom::Spritenum::SPR_COLU,32768,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_COLU
-    {CDoom::Spritenum::SPR_SMT2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_STALAG
-    {CDoom::Spritenum::SPR_GOR1,0,10,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOODYTWITCH2,0,0}, # S_BLOODYTWITCH
-    {CDoom::Spritenum::SPR_GOR1,1,15,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOODYTWITCH3,0,0}, # S_BLOODYTWITCH2
-    {CDoom::Spritenum::SPR_GOR1,2,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOODYTWITCH4,0,0}, # S_BLOODYTWITCH3
-    {CDoom::Spritenum::SPR_GOR1,1,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLOODYTWITCH,0,0}, # S_BLOODYTWITCH4
-    {CDoom::Spritenum::SPR_PLAY,13,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_DEADTORSO
-    {CDoom::Spritenum::SPR_PLAY,18,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_DEADBOTTOM
-    {CDoom::Spritenum::SPR_POL2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HEADSONSTICK
-    {CDoom::Spritenum::SPR_POL5,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_GIBS
-    {CDoom::Spritenum::SPR_POL4,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HEADONASTICK
-    {CDoom::Spritenum::SPR_POL3,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEADCANDLES2,0,0}, # S_HEADCANDLES
-    {CDoom::Spritenum::SPR_POL3,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEADCANDLES,0,0}, # S_HEADCANDLES2
-    {CDoom::Spritenum::SPR_POL1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_DEADSTICK
-    {CDoom::Spritenum::SPR_POL6,0,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_LIVESTICK2,0,0}, # S_LIVESTICK
-    {CDoom::Spritenum::SPR_POL6,1,8,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_LIVESTICK,0,0}, # S_LIVESTICK2
-    {CDoom::Spritenum::SPR_GOR2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MEAT2
-    {CDoom::Spritenum::SPR_GOR3,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MEAT3
-    {CDoom::Spritenum::SPR_GOR4,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MEAT4
-    {CDoom::Spritenum::SPR_GOR5,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_MEAT5
-    {CDoom::Spritenum::SPR_SMIT,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_STALAGTITE
-    {CDoom::Spritenum::SPR_COL1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TALLGRNCOL
-    {CDoom::Spritenum::SPR_COL2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SHRTGRNCOL
-    {CDoom::Spritenum::SPR_COL3,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TALLREDCOL
-    {CDoom::Spritenum::SPR_COL4,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SHRTREDCOL
-    {CDoom::Spritenum::SPR_CAND,32768,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CANDLESTIK
-    {CDoom::Spritenum::SPR_CBRA,32768,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_CANDELABRA
-    {CDoom::Spritenum::SPR_COL6,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SKULLCOL
-    {CDoom::Spritenum::SPR_TRE1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TORCHTREE
-    {CDoom::Spritenum::SPR_TRE2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BIGTREE
-    {CDoom::Spritenum::SPR_ELEC,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_TECHPILLAR
-    {CDoom::Spritenum::SPR_CEYE,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_EVILEYE2,0,0}, # S_EVILEYE
-    {CDoom::Spritenum::SPR_CEYE,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_EVILEYE3,0,0}, # S_EVILEYE2
-    {CDoom::Spritenum::SPR_CEYE,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_EVILEYE4,0,0}, # S_EVILEYE3
-    {CDoom::Spritenum::SPR_CEYE,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_EVILEYE,0,0}, # S_EVILEYE4
-    {CDoom::Spritenum::SPR_FSKU,32768,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FLOATSKULL2,0,0}, # S_FLOATSKULL
-    {CDoom::Spritenum::SPR_FSKU,32769,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FLOATSKULL3,0,0}, # S_FLOATSKULL2
-    {CDoom::Spritenum::SPR_FSKU,32770,6,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_FLOATSKULL,0,0}, # S_FLOATSKULL3
-    {CDoom::Spritenum::SPR_COL5,0,14,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEARTCOL2,0,0}, # S_HEARTCOL
-    {CDoom::Spritenum::SPR_COL5,1,14,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_HEARTCOL,0,0}, # S_HEARTCOL2
-    {CDoom::Spritenum::SPR_TBLU,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLUETORCH2,0,0}, # S_BLUETORCH
-    {CDoom::Spritenum::SPR_TBLU,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLUETORCH3,0,0}, # S_BLUETORCH2
-    {CDoom::Spritenum::SPR_TBLU,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLUETORCH4,0,0}, # S_BLUETORCH3
-    {CDoom::Spritenum::SPR_TBLU,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BLUETORCH,0,0}, # S_BLUETORCH4
-    {CDoom::Spritenum::SPR_TGRN,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GREENTORCH2,0,0}, # S_GREENTORCH
-    {CDoom::Spritenum::SPR_TGRN,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GREENTORCH3,0,0}, # S_GREENTORCH2
-    {CDoom::Spritenum::SPR_TGRN,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GREENTORCH4,0,0}, # S_GREENTORCH3
-    {CDoom::Spritenum::SPR_TGRN,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GREENTORCH,0,0}, # S_GREENTORCH4
-    {CDoom::Spritenum::SPR_TRED,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_REDTORCH2,0,0}, # S_REDTORCH
-    {CDoom::Spritenum::SPR_TRED,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_REDTORCH3,0,0}, # S_REDTORCH2
-    {CDoom::Spritenum::SPR_TRED,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_REDTORCH4,0,0}, # S_REDTORCH3
-    {CDoom::Spritenum::SPR_TRED,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_REDTORCH,0,0}, # S_REDTORCH4
-    {CDoom::Spritenum::SPR_SMBT,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BTORCHSHRT2,0,0}, # S_BTORCHSHRT
-    {CDoom::Spritenum::SPR_SMBT,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BTORCHSHRT3,0,0}, # S_BTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMBT,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BTORCHSHRT4,0,0}, # S_BTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMBT,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_BTORCHSHRT,0,0}, # S_BTORCHSHRT4
-    {CDoom::Spritenum::SPR_SMGT,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GTORCHSHRT2,0,0}, # S_GTORCHSHRT
-    {CDoom::Spritenum::SPR_SMGT,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GTORCHSHRT3,0,0}, # S_GTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMGT,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GTORCHSHRT4,0,0}, # S_GTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMGT,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_GTORCHSHRT,0,0}, # S_GTORCHSHRT4
-    {CDoom::Spritenum::SPR_SMRT,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RTORCHSHRT2,0,0}, # S_RTORCHSHRT
-    {CDoom::Spritenum::SPR_SMRT,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RTORCHSHRT3,0,0}, # S_RTORCHSHRT2
-    {CDoom::Spritenum::SPR_SMRT,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RTORCHSHRT4,0,0}, # S_RTORCHSHRT3
-    {CDoom::Spritenum::SPR_SMRT,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_RTORCHSHRT,0,0}, # S_RTORCHSHRT4
-    {CDoom::Spritenum::SPR_HDB1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGNOGUTS
-    {CDoom::Spritenum::SPR_HDB2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGBNOBRAIN
-    {CDoom::Spritenum::SPR_HDB3,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGTLOOKDN
-    {CDoom::Spritenum::SPR_HDB4,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGTSKULL
-    {CDoom::Spritenum::SPR_HDB5,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGTLOOKUP
-    {CDoom::Spritenum::SPR_HDB6,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_HANGTNOBRAIN
-    {CDoom::Spritenum::SPR_POB1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_COLONGIBS
-    {CDoom::Spritenum::SPR_POB2,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_SMALLPOOL
-    {CDoom::Spritenum::SPR_BRS1,0,-1,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_NULL,0,0}, # S_BRAINSTEM
-    {CDoom::Spritenum::SPR_TLMP,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECHLAMP2,0,0}, # S_TECHLAMP
-    {CDoom::Spritenum::SPR_TLMP,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECHLAMP3,0,0}, # S_TECHLAMP2
-    {CDoom::Spritenum::SPR_TLMP,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECHLAMP4,0,0}, # S_TECHLAMP3
-    {CDoom::Spritenum::SPR_TLMP,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECHLAMP,0,0}, # S_TECHLAMP4
-    {CDoom::Spritenum::SPR_TLP2,32768,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECH2LAMP2,0,0}, # S_TECH2LAMP
-    {CDoom::Spritenum::SPR_TLP2,32769,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECH2LAMP3,0,0}, # S_TECH2LAMP2
-    {CDoom::Spritenum::SPR_TLP2,32770,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECH2LAMP4,0,0}, # S_TECH2LAMP3
-    {CDoom::Spritenum::SPR_TLP2,32771,4,CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null),CDoom::Statenum::S_TECH2LAMP,0,0}        # S_TECH2LAMP4
-]
+    {CDoom::Spritenum::SPR_TROO, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_NULL
+    {CDoom::Spritenum::SPR_SHTG, 4, 0, ->CDoom.a_light0(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                            # S_LIGHTDONE
+    {CDoom::Spritenum::SPR_PUNG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_PUNCH, 0, 0},                                     # S_PUNCH
+    {CDoom::Spritenum::SPR_PUNG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_PUNCHDOWN, 0, 0},                                        # S_PUNCHDOWN
+    {CDoom::Spritenum::SPR_PUNG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_PUNCHUP, 0, 0},                                          # S_PUNCHUP
+    {CDoom::Spritenum::SPR_PUNG, 1, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUNCH2, 0, 0},             # S_PUNCH1
+    {CDoom::Spritenum::SPR_PUNG, 2, 4, ->CDoom.a_punch(Void*, Void*), CDoom::Statenum::S_PUNCH3, 0, 0},                                           # S_PUNCH2
+    {CDoom::Spritenum::SPR_PUNG, 3, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUNCH4, 0, 0},             # S_PUNCH3
+    {CDoom::Spritenum::SPR_PUNG, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUNCH5, 0, 0},             # S_PUNCH4
+    {CDoom::Spritenum::SPR_PUNG, 1, 5, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_PUNCH, 0, 0},                                           # S_PUNCH5
+    {CDoom::Spritenum::SPR_PISG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_PISTOL, 0, 0},                                    # S_PISTOL
+    {CDoom::Spritenum::SPR_PISG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_PISTOLDOWN, 0, 0},                                       # S_PISTOLDOWN
+    {CDoom::Spritenum::SPR_PISG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_PISTOLUP, 0, 0},                                         # S_PISTOLUP
+    {CDoom::Spritenum::SPR_PISG, 0, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PISTOL2, 0, 0},            # S_PISTOL1
+    {CDoom::Spritenum::SPR_PISG, 1, 6, ->CDoom.a_fire_pistol(Void*, Void*), CDoom::Statenum::S_PISTOL3, 0, 0},                                    # S_PISTOL2
+    {CDoom::Spritenum::SPR_PISG, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PISTOL4, 0, 0},            # S_PISTOL3
+    {CDoom::Spritenum::SPR_PISG, 1, 5, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_PISTOL, 0, 0},                                          # S_PISTOL4
+    {CDoom::Spritenum::SPR_PISF, 32768, 7, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_PISTOLFLASH
+    {CDoom::Spritenum::SPR_SHTG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_SGUN, 0, 0},                                      # S_SGUN
+    {CDoom::Spritenum::SPR_SHTG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_SGUNDOWN, 0, 0},                                         # S_SGUNDOWN
+    {CDoom::Spritenum::SPR_SHTG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_SGUNUP, 0, 0},                                           # S_SGUNUP
+    {CDoom::Spritenum::SPR_SHTG, 0, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN2, 0, 0},              # S_SGUN1
+    {CDoom::Spritenum::SPR_SHTG, 0, 7, ->CDoom.a_fire_shotgun(Void*, Void*), CDoom::Statenum::S_SGUN3, 0, 0},                                     # S_SGUN2
+    {CDoom::Spritenum::SPR_SHTG, 1, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN4, 0, 0},              # S_SGUN3
+    {CDoom::Spritenum::SPR_SHTG, 2, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN5, 0, 0},              # S_SGUN4
+    {CDoom::Spritenum::SPR_SHTG, 3, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN6, 0, 0},              # S_SGUN5
+    {CDoom::Spritenum::SPR_SHTG, 2, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN7, 0, 0},              # S_SGUN6
+    {CDoom::Spritenum::SPR_SHTG, 1, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN8, 0, 0},              # S_SGUN7
+    {CDoom::Spritenum::SPR_SHTG, 0, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SGUN9, 0, 0},              # S_SGUN8
+    {CDoom::Spritenum::SPR_SHTG, 0, 7, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_SGUN, 0, 0},                                            # S_SGUN9
+    {CDoom::Spritenum::SPR_SHTF, 32768, 4, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_SGUNFLASH2, 0, 0},                                  # S_SGUNFLASH1
+    {CDoom::Spritenum::SPR_SHTF, 32769, 3, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_SGUNFLASH2
+    {CDoom::Spritenum::SPR_SHT2, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_DSGUN, 0, 0},                                     # S_DSGUN
+    {CDoom::Spritenum::SPR_SHT2, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_DSGUNDOWN, 0, 0},                                        # S_DSGUNDOWN
+    {CDoom::Spritenum::SPR_SHT2, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_DSGUNUP, 0, 0},                                          # S_DSGUNUP
+    {CDoom::Spritenum::SPR_SHT2, 0, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSGUN2, 0, 0},             # S_DSGUN1
+    {CDoom::Spritenum::SPR_SHT2, 0, 7, ->CDoom.a_fire_shotgun2(Void*, Void*), CDoom::Statenum::S_DSGUN3, 0, 0},                                   # S_DSGUN2
+    {CDoom::Spritenum::SPR_SHT2, 1, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSGUN4, 0, 0},             # S_DSGUN3
+    {CDoom::Spritenum::SPR_SHT2, 2, 7, ->CDoom.a_check_reload(Void*, Void*), CDoom::Statenum::S_DSGUN5, 0, 0},                                    # S_DSGUN4
+    {CDoom::Spritenum::SPR_SHT2, 3, 7, ->CDoom.a_open_shotgun2(Void*, Void*), CDoom::Statenum::S_DSGUN6, 0, 0},                                   # S_DSGUN5
+    {CDoom::Spritenum::SPR_SHT2, 4, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSGUN7, 0, 0},             # S_DSGUN6
+    {CDoom::Spritenum::SPR_SHT2, 5, 7, ->CDoom.a_load_shotgun2(Void*, Void*), CDoom::Statenum::S_DSGUN8, 0, 0},                                   # S_DSGUN7
+    {CDoom::Spritenum::SPR_SHT2, 6, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSGUN9, 0, 0},             # S_DSGUN8
+    {CDoom::Spritenum::SPR_SHT2, 7, 6, ->CDoom.a_close_shotgun2(Void*, Void*), CDoom::Statenum::S_DSGUN10, 0, 0},                                 # S_DSGUN9
+    {CDoom::Spritenum::SPR_SHT2, 0, 5, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_DSGUN, 0, 0},                                           # S_DSGUN10
+    {CDoom::Spritenum::SPR_SHT2, 1, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSNR2, 0, 0},              # S_DSNR1
+    {CDoom::Spritenum::SPR_SHT2, 0, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_DSGUNDOWN, 0, 0},          # S_DSNR2
+    {CDoom::Spritenum::SPR_SHT2, 32776, 5, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_DSGUNFLASH2, 0, 0},                                 # S_DSGUNFLASH1
+    {CDoom::Spritenum::SPR_SHT2, 32777, 4, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_DSGUNFLASH2
+    {CDoom::Spritenum::SPR_CHGG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_CHAIN, 0, 0},                                     # S_CHAIN
+    {CDoom::Spritenum::SPR_CHGG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_CHAINDOWN, 0, 0},                                        # S_CHAINDOWN
+    {CDoom::Spritenum::SPR_CHGG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_CHAINUP, 0, 0},                                          # S_CHAINUP
+    {CDoom::Spritenum::SPR_CHGG, 0, 4, ->CDoom.a_fire_cgun(Void*, Void*), CDoom::Statenum::S_CHAIN2, 0, 0},                                       # S_CHAIN1
+    {CDoom::Spritenum::SPR_CHGG, 1, 4, ->CDoom.a_fire_cgun(Void*, Void*), CDoom::Statenum::S_CHAIN3, 0, 0},                                       # S_CHAIN2
+    {CDoom::Spritenum::SPR_CHGG, 1, 0, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_CHAIN, 0, 0},                                           # S_CHAIN3
+    {CDoom::Spritenum::SPR_CHGF, 32768, 5, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_CHAINFLASH1
+    {CDoom::Spritenum::SPR_CHGF, 32769, 5, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_CHAINFLASH2
+    {CDoom::Spritenum::SPR_MISG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_MISSILE, 0, 0},                                   # S_MISSILE
+    {CDoom::Spritenum::SPR_MISG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_MISSILEDOWN, 0, 0},                                      # S_MISSILEDOWN
+    {CDoom::Spritenum::SPR_MISG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_MISSILEUP, 0, 0},                                        # S_MISSILEUP
+    {CDoom::Spritenum::SPR_MISG, 1, 8, ->CDoom.a_gun_flash(Void*, Void*), CDoom::Statenum::S_MISSILE2, 0, 0},                                     # S_MISSILE1
+    {CDoom::Spritenum::SPR_MISG, 1, 12, ->CDoom.a_fire_missile(Void*, Void*), CDoom::Statenum::S_MISSILE3, 0, 0},                                 # S_MISSILE2
+    {CDoom::Spritenum::SPR_MISG, 1, 0, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_MISSILE, 0, 0},                                         # S_MISSILE3
+    {CDoom::Spritenum::SPR_MISF, 32768, 3, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_MISSILEFLASH2, 0, 0},                               # S_MISSILEFLASH1
+    {CDoom::Spritenum::SPR_MISF, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_MISSILEFLASH3, 0, 0},  # S_MISSILEFLASH2
+    {CDoom::Spritenum::SPR_MISF, 32770, 4, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_MISSILEFLASH4, 0, 0},                               # S_MISSILEFLASH3
+    {CDoom::Spritenum::SPR_MISF, 32771, 4, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_MISSILEFLASH4
+    {CDoom::Spritenum::SPR_SAWG, 2, 4, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_SAWB, 0, 0},                                      # S_SAW
+    {CDoom::Spritenum::SPR_SAWG, 3, 4, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_SAW, 0, 0},                                       # S_SAWB
+    {CDoom::Spritenum::SPR_SAWG, 2, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_SAWDOWN, 0, 0},                                          # S_SAWDOWN
+    {CDoom::Spritenum::SPR_SAWG, 2, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_SAWUP, 0, 0},                                            # S_SAWUP
+    {CDoom::Spritenum::SPR_SAWG, 0, 4, ->CDoom.a_saw(Void*, Void*), CDoom::Statenum::S_SAW2, 0, 0},                                               # S_SAW1
+    {CDoom::Spritenum::SPR_SAWG, 1, 4, ->CDoom.a_saw(Void*, Void*), CDoom::Statenum::S_SAW3, 0, 0},                                               # S_SAW2
+    {CDoom::Spritenum::SPR_SAWG, 1, 0, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_SAW, 0, 0},                                             # S_SAW3
+    {CDoom::Spritenum::SPR_PLSG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_PLASMA, 0, 0},                                    # S_PLASMA
+    {CDoom::Spritenum::SPR_PLSG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_PLASMADOWN, 0, 0},                                       # S_PLASMADOWN
+    {CDoom::Spritenum::SPR_PLSG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_PLASMAUP, 0, 0},                                         # S_PLASMAUP
+    {CDoom::Spritenum::SPR_PLSG, 0, 3, ->CDoom.a_fire_plasma(Void*, Void*), CDoom::Statenum::S_PLASMA2, 0, 0},                                    # S_PLASMA1
+    {CDoom::Spritenum::SPR_PLSG, 1, 20, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_PLASMA, 0, 0},                                         # S_PLASMA2
+    {CDoom::Spritenum::SPR_PLSF, 32768, 4, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_PLASMAFLASH1
+    {CDoom::Spritenum::SPR_PLSF, 32769, 4, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_PLASMAFLASH2
+    {CDoom::Spritenum::SPR_BFGG, 0, 1, ->CDoom.a_weapon_ready(Void*, Void*), CDoom::Statenum::S_BFG, 0, 0},                                       # S_BFG
+    {CDoom::Spritenum::SPR_BFGG, 0, 1, ->CDoom.a_lower(Void*, Void*), CDoom::Statenum::S_BFGDOWN, 0, 0},                                          # S_BFGDOWN
+    {CDoom::Spritenum::SPR_BFGG, 0, 1, ->CDoom.a_raise(Void*, Void*), CDoom::Statenum::S_BFGUP, 0, 0},                                            # S_BFGUP
+    {CDoom::Spritenum::SPR_BFGG, 0, 20, ->CDoom.a_bfg_sound(Void*, Void*), CDoom::Statenum::S_BFG2, 0, 0},                                        # S_BFG1
+    {CDoom::Spritenum::SPR_BFGG, 1, 10, ->CDoom.a_gun_flash(Void*, Void*), CDoom::Statenum::S_BFG3, 0, 0},                                        # S_BFG2
+    {CDoom::Spritenum::SPR_BFGG, 1, 10, ->CDoom.a_fire_bfg(Void*, Void*), CDoom::Statenum::S_BFG4, 0, 0},                                         # S_BFG3
+    {CDoom::Spritenum::SPR_BFGG, 1, 20, ->CDoom.a_refire(Void*, Void*), CDoom::Statenum::S_BFG, 0, 0},                                            # S_BFG4
+    {CDoom::Spritenum::SPR_BFGF, 32768, 11, ->CDoom.a_light1(Void*, Void*), CDoom::Statenum::S_BFGFLASH2, 0, 0},                                  # S_BFGFLASH1
+    {CDoom::Spritenum::SPR_BFGF, 32769, 6, ->CDoom.a_light2(Void*, Void*), CDoom::Statenum::S_LIGHTDONE, 0, 0},                                   # S_BFGFLASH2
+    {CDoom::Spritenum::SPR_BLUD, 2, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOOD2, 0, 0},             # S_BLOOD1
+    {CDoom::Spritenum::SPR_BLUD, 1, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOOD3, 0, 0},             # S_BLOOD2
+    {CDoom::Spritenum::SPR_BLUD, 0, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},               # S_BLOOD3
+    {CDoom::Spritenum::SPR_PUFF, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUFF2, 0, 0},          # S_PUFF1
+    {CDoom::Spritenum::SPR_PUFF, 1, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUFF3, 0, 0},              # S_PUFF2
+    {CDoom::Spritenum::SPR_PUFF, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PUFF4, 0, 0},              # S_PUFF3
+    {CDoom::Spritenum::SPR_PUFF, 3, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},               # S_PUFF4
+    {CDoom::Spritenum::SPR_BAL1, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TBALL2, 0, 0},         # S_TBALL1
+    {CDoom::Spritenum::SPR_BAL1, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TBALL1, 0, 0},         # S_TBALL2
+    {CDoom::Spritenum::SPR_BAL1, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TBALLX2, 0, 0},        # S_TBALLX1
+    {CDoom::Spritenum::SPR_BAL1, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TBALLX3, 0, 0},        # S_TBALLX2
+    {CDoom::Spritenum::SPR_BAL1, 32772, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_TBALLX3
+    {CDoom::Spritenum::SPR_BAL2, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RBALL2, 0, 0},         # S_RBALL1
+    {CDoom::Spritenum::SPR_BAL2, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RBALL1, 0, 0},         # S_RBALL2
+    {CDoom::Spritenum::SPR_BAL2, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RBALLX2, 0, 0},        # S_RBALLX1
+    {CDoom::Spritenum::SPR_BAL2, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RBALLX3, 0, 0},        # S_RBALLX2
+    {CDoom::Spritenum::SPR_BAL2, 32772, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_RBALLX3
+    {CDoom::Spritenum::SPR_PLSS, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASBALL2, 0, 0},      # S_PLASBALL
+    {CDoom::Spritenum::SPR_PLSS, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASBALL, 0, 0},       # S_PLASBALL2
+    {CDoom::Spritenum::SPR_PLSE, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASEXP2, 0, 0},       # S_PLASEXP
+    {CDoom::Spritenum::SPR_PLSE, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASEXP3, 0, 0},       # S_PLASEXP2
+    {CDoom::Spritenum::SPR_PLSE, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASEXP4, 0, 0},       # S_PLASEXP3
+    {CDoom::Spritenum::SPR_PLSE, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLASEXP5, 0, 0},       # S_PLASEXP4
+    {CDoom::Spritenum::SPR_PLSE, 32772, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_PLASEXP5
+    {CDoom::Spritenum::SPR_MISL, 32768, 1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ROCKET, 0, 0},         # S_ROCKET
+    {CDoom::Spritenum::SPR_BFS1, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGSHOT2, 0, 0},       # S_BFGSHOT
+    {CDoom::Spritenum::SPR_BFS1, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGSHOT, 0, 0},        # S_BFGSHOT2
+    {CDoom::Spritenum::SPR_BFE1, 32768, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGLAND2, 0, 0},       # S_BFGLAND
+    {CDoom::Spritenum::SPR_BFE1, 32769, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGLAND3, 0, 0},       # S_BFGLAND2
+    {CDoom::Spritenum::SPR_BFE1, 32770, 8, ->CDoom.a_bfg_spray(Void*, Void*), CDoom::Statenum::S_BFGLAND4, 0, 0},                                 # S_BFGLAND3
+    {CDoom::Spritenum::SPR_BFE1, 32771, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGLAND5, 0, 0},       # S_BFGLAND4
+    {CDoom::Spritenum::SPR_BFE1, 32772, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGLAND6, 0, 0},       # S_BFGLAND5
+    {CDoom::Spritenum::SPR_BFE1, 32773, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_BFGLAND6
+    {CDoom::Spritenum::SPR_BFE2, 32768, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGEXP2, 0, 0},        # S_BFGEXP
+    {CDoom::Spritenum::SPR_BFE2, 32769, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGEXP3, 0, 0},        # S_BFGEXP2
+    {CDoom::Spritenum::SPR_BFE2, 32770, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BFGEXP4, 0, 0},        # S_BFGEXP3
+    {CDoom::Spritenum::SPR_BFE2, 32771, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_BFGEXP4
+    {CDoom::Spritenum::SPR_MISL, 32769, 8, ->CDoom.a_explode(Void*, Void*), CDoom::Statenum::S_EXPLODE2, 0, 0},                                   # S_EXPLODE1
+    {CDoom::Spritenum::SPR_MISL, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_EXPLODE3, 0, 0},       # S_EXPLODE2
+    {CDoom::Spritenum::SPR_MISL, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_EXPLODE3
+    {CDoom::Spritenum::SPR_TFOG, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG01, 0, 0},         # S_TFOG
+    {CDoom::Spritenum::SPR_TFOG, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG02, 0, 0},         # S_TFOG01
+    {CDoom::Spritenum::SPR_TFOG, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG2, 0, 0},          # S_TFOG02
+    {CDoom::Spritenum::SPR_TFOG, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG3, 0, 0},          # S_TFOG2
+    {CDoom::Spritenum::SPR_TFOG, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG4, 0, 0},          # S_TFOG3
+    {CDoom::Spritenum::SPR_TFOG, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG5, 0, 0},          # S_TFOG4
+    {CDoom::Spritenum::SPR_TFOG, 32772, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG6, 0, 0},          # S_TFOG5
+    {CDoom::Spritenum::SPR_TFOG, 32773, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG7, 0, 0},          # S_TFOG6
+    {CDoom::Spritenum::SPR_TFOG, 32774, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG8, 0, 0},          # S_TFOG7
+    {CDoom::Spritenum::SPR_TFOG, 32775, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG9, 0, 0},          # S_TFOG8
+    {CDoom::Spritenum::SPR_TFOG, 32776, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TFOG10, 0, 0},         # S_TFOG9
+    {CDoom::Spritenum::SPR_TFOG, 32777, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_TFOG10
+    {CDoom::Spritenum::SPR_IFOG, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG01, 0, 0},         # S_IFOG
+    {CDoom::Spritenum::SPR_IFOG, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG02, 0, 0},         # S_IFOG01
+    {CDoom::Spritenum::SPR_IFOG, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG2, 0, 0},          # S_IFOG02
+    {CDoom::Spritenum::SPR_IFOG, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG3, 0, 0},          # S_IFOG2
+    {CDoom::Spritenum::SPR_IFOG, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG4, 0, 0},          # S_IFOG3
+    {CDoom::Spritenum::SPR_IFOG, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_IFOG5, 0, 0},          # S_IFOG4
+    {CDoom::Spritenum::SPR_IFOG, 32772, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_IFOG5
+    {CDoom::Spritenum::SPR_PLAY, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_PLAY
+    {CDoom::Spritenum::SPR_PLAY, 0, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_RUN2, 0, 0},          # S_PLAY_RUN1
+    {CDoom::Spritenum::SPR_PLAY, 1, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_RUN3, 0, 0},          # S_PLAY_RUN2
+    {CDoom::Spritenum::SPR_PLAY, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_RUN4, 0, 0},          # S_PLAY_RUN3
+    {CDoom::Spritenum::SPR_PLAY, 3, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_RUN1, 0, 0},          # S_PLAY_RUN4
+    {CDoom::Spritenum::SPR_PLAY, 4, 12, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY, 0, 0},              # S_PLAY_ATK1
+    {CDoom::Spritenum::SPR_PLAY, 32773, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_ATK1, 0, 0},      # S_PLAY_ATK2
+    {CDoom::Spritenum::SPR_PLAY, 6, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_PAIN2, 0, 0},         # S_PLAY_PAIN
+    {CDoom::Spritenum::SPR_PLAY, 6, 4, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_PLAY, 0, 0},                                              # S_PLAY_PAIN2
+    {CDoom::Spritenum::SPR_PLAY, 7, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_DIE2, 0, 0},         # S_PLAY_DIE1
+    {CDoom::Spritenum::SPR_PLAY, 8, 10, ->CDoom.a_player_scream(Void*, Void*), CDoom::Statenum::S_PLAY_DIE3, 0, 0},                               # S_PLAY_DIE2
+    {CDoom::Spritenum::SPR_PLAY, 9, 10, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_PLAY_DIE4, 0, 0},                                        # S_PLAY_DIE3
+    {CDoom::Spritenum::SPR_PLAY, 10, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_DIE5, 0, 0},        # S_PLAY_DIE4
+    {CDoom::Spritenum::SPR_PLAY, 11, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_DIE6, 0, 0},        # S_PLAY_DIE5
+    {CDoom::Spritenum::SPR_PLAY, 12, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_DIE7, 0, 0},        # S_PLAY_DIE6
+    {CDoom::Spritenum::SPR_PLAY, 13, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_PLAY_DIE7
+    {CDoom::Spritenum::SPR_PLAY, 14, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE2, 0, 0},        # S_PLAY_XDIE1
+    {CDoom::Spritenum::SPR_PLAY, 15, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_PLAY_XDIE3, 0, 0},                                    # S_PLAY_XDIE2
+    {CDoom::Spritenum::SPR_PLAY, 16, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_PLAY_XDIE4, 0, 0},                                       # S_PLAY_XDIE3
+    {CDoom::Spritenum::SPR_PLAY, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE5, 0, 0},        # S_PLAY_XDIE4
+    {CDoom::Spritenum::SPR_PLAY, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE6, 0, 0},        # S_PLAY_XDIE5
+    {CDoom::Spritenum::SPR_PLAY, 19, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE7, 0, 0},        # S_PLAY_XDIE6
+    {CDoom::Spritenum::SPR_PLAY, 20, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE8, 0, 0},        # S_PLAY_XDIE7
+    {CDoom::Spritenum::SPR_PLAY, 21, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PLAY_XDIE9, 0, 0},        # S_PLAY_XDIE8
+    {CDoom::Spritenum::SPR_PLAY, 22, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_PLAY_XDIE9
+    {CDoom::Spritenum::SPR_POSS, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_POSS_STND2, 0, 0},                                       # S_POSS_STND
+    {CDoom::Spritenum::SPR_POSS, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_POSS_STND, 0, 0},                                        # S_POSS_STND2
+    {CDoom::Spritenum::SPR_POSS, 0, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN2, 0, 0},                                        # S_POSS_RUN1
+    {CDoom::Spritenum::SPR_POSS, 0, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN3, 0, 0},                                        # S_POSS_RUN2
+    {CDoom::Spritenum::SPR_POSS, 1, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN4, 0, 0},                                        # S_POSS_RUN3
+    {CDoom::Spritenum::SPR_POSS, 1, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN5, 0, 0},                                        # S_POSS_RUN4
+    {CDoom::Spritenum::SPR_POSS, 2, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN6, 0, 0},                                        # S_POSS_RUN5
+    {CDoom::Spritenum::SPR_POSS, 2, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN7, 0, 0},                                        # S_POSS_RUN6
+    {CDoom::Spritenum::SPR_POSS, 3, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN8, 0, 0},                                        # S_POSS_RUN7
+    {CDoom::Spritenum::SPR_POSS, 3, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_POSS_RUN1, 0, 0},                                        # S_POSS_RUN8
+    {CDoom::Spritenum::SPR_POSS, 4, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_POSS_ATK2, 0, 0},                                 # S_POSS_ATK1
+    {CDoom::Spritenum::SPR_POSS, 5, 8, ->CDoom.a_pos_attack(Void*, Void*), CDoom::Statenum::S_POSS_ATK3, 0, 0},                                   # S_POSS_ATK2
+    {CDoom::Spritenum::SPR_POSS, 4, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_RUN1, 0, 0},          # S_POSS_ATK3
+    {CDoom::Spritenum::SPR_POSS, 6, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_PAIN2, 0, 0},         # S_POSS_PAIN
+    {CDoom::Spritenum::SPR_POSS, 6, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_POSS_RUN1, 0, 0},                                         # S_POSS_PAIN2
+    {CDoom::Spritenum::SPR_POSS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_DIE2, 0, 0},          # S_POSS_DIE1
+    {CDoom::Spritenum::SPR_POSS, 8, 5, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_POSS_DIE3, 0, 0},                                       # S_POSS_DIE2
+    {CDoom::Spritenum::SPR_POSS, 9, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_POSS_DIE4, 0, 0},                                         # S_POSS_DIE3
+    {CDoom::Spritenum::SPR_POSS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_DIE5, 0, 0},         # S_POSS_DIE4
+    {CDoom::Spritenum::SPR_POSS, 11, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_POSS_DIE5
+    {CDoom::Spritenum::SPR_POSS, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE2, 0, 0},        # S_POSS_XDIE1
+    {CDoom::Spritenum::SPR_POSS, 13, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_POSS_XDIE3, 0, 0},                                    # S_POSS_XDIE2
+    {CDoom::Spritenum::SPR_POSS, 14, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_POSS_XDIE4, 0, 0},                                       # S_POSS_XDIE3
+    {CDoom::Spritenum::SPR_POSS, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE5, 0, 0},        # S_POSS_XDIE4
+    {CDoom::Spritenum::SPR_POSS, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE6, 0, 0},        # S_POSS_XDIE5
+    {CDoom::Spritenum::SPR_POSS, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE7, 0, 0},        # S_POSS_XDIE6
+    {CDoom::Spritenum::SPR_POSS, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE8, 0, 0},        # S_POSS_XDIE7
+    {CDoom::Spritenum::SPR_POSS, 19, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_XDIE9, 0, 0},        # S_POSS_XDIE8
+    {CDoom::Spritenum::SPR_POSS, 20, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_POSS_XDIE9
+    {CDoom::Spritenum::SPR_POSS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_RAISE2, 0, 0},       # S_POSS_RAISE1
+    {CDoom::Spritenum::SPR_POSS, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_RAISE3, 0, 0},        # S_POSS_RAISE2
+    {CDoom::Spritenum::SPR_POSS, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_RAISE4, 0, 0},        # S_POSS_RAISE3
+    {CDoom::Spritenum::SPR_POSS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_POSS_RUN1, 0, 0},          # S_POSS_RAISE4
+    {CDoom::Spritenum::SPR_SPOS, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SPOS_STND2, 0, 0},                                       # S_SPOS_STND
+    {CDoom::Spritenum::SPR_SPOS, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SPOS_STND, 0, 0},                                        # S_SPOS_STND2
+    {CDoom::Spritenum::SPR_SPOS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN2, 0, 0},                                        # S_SPOS_RUN1
+    {CDoom::Spritenum::SPR_SPOS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN3, 0, 0},                                        # S_SPOS_RUN2
+    {CDoom::Spritenum::SPR_SPOS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN4, 0, 0},                                        # S_SPOS_RUN3
+    {CDoom::Spritenum::SPR_SPOS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN5, 0, 0},                                        # S_SPOS_RUN4
+    {CDoom::Spritenum::SPR_SPOS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN6, 0, 0},                                        # S_SPOS_RUN5
+    {CDoom::Spritenum::SPR_SPOS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN7, 0, 0},                                        # S_SPOS_RUN6
+    {CDoom::Spritenum::SPR_SPOS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN8, 0, 0},                                        # S_SPOS_RUN7
+    {CDoom::Spritenum::SPR_SPOS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPOS_RUN1, 0, 0},                                        # S_SPOS_RUN8
+    {CDoom::Spritenum::SPR_SPOS, 4, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SPOS_ATK2, 0, 0},                                 # S_SPOS_ATK1
+    {CDoom::Spritenum::SPR_SPOS, 32773, 10, ->CDoom.a_spos_attack(Void*, Void*), CDoom::Statenum::S_SPOS_ATK3, 0, 0},                             # S_SPOS_ATK2
+    {CDoom::Spritenum::SPR_SPOS, 4, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RUN1, 0, 0},         # S_SPOS_ATK3
+    {CDoom::Spritenum::SPR_SPOS, 6, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_PAIN2, 0, 0},         # S_SPOS_PAIN
+    {CDoom::Spritenum::SPR_SPOS, 6, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SPOS_RUN1, 0, 0},                                         # S_SPOS_PAIN2
+    {CDoom::Spritenum::SPR_SPOS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_DIE2, 0, 0},          # S_SPOS_DIE1
+    {CDoom::Spritenum::SPR_SPOS, 8, 5, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SPOS_DIE3, 0, 0},                                       # S_SPOS_DIE2
+    {CDoom::Spritenum::SPR_SPOS, 9, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SPOS_DIE4, 0, 0},                                         # S_SPOS_DIE3
+    {CDoom::Spritenum::SPR_SPOS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_DIE5, 0, 0},         # S_SPOS_DIE4
+    {CDoom::Spritenum::SPR_SPOS, 11, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SPOS_DIE5
+    {CDoom::Spritenum::SPR_SPOS, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE2, 0, 0},        # S_SPOS_XDIE1
+    {CDoom::Spritenum::SPR_SPOS, 13, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_SPOS_XDIE3, 0, 0},                                    # S_SPOS_XDIE2
+    {CDoom::Spritenum::SPR_SPOS, 14, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SPOS_XDIE4, 0, 0},                                       # S_SPOS_XDIE3
+    {CDoom::Spritenum::SPR_SPOS, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE5, 0, 0},        # S_SPOS_XDIE4
+    {CDoom::Spritenum::SPR_SPOS, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE6, 0, 0},        # S_SPOS_XDIE5
+    {CDoom::Spritenum::SPR_SPOS, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE7, 0, 0},        # S_SPOS_XDIE6
+    {CDoom::Spritenum::SPR_SPOS, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE8, 0, 0},        # S_SPOS_XDIE7
+    {CDoom::Spritenum::SPR_SPOS, 19, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_XDIE9, 0, 0},        # S_SPOS_XDIE8
+    {CDoom::Spritenum::SPR_SPOS, 20, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SPOS_XDIE9
+    {CDoom::Spritenum::SPR_SPOS, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RAISE2, 0, 0},       # S_SPOS_RAISE1
+    {CDoom::Spritenum::SPR_SPOS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RAISE3, 0, 0},       # S_SPOS_RAISE2
+    {CDoom::Spritenum::SPR_SPOS, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RAISE4, 0, 0},        # S_SPOS_RAISE3
+    {CDoom::Spritenum::SPR_SPOS, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RAISE5, 0, 0},        # S_SPOS_RAISE4
+    {CDoom::Spritenum::SPR_SPOS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPOS_RUN1, 0, 0},          # S_SPOS_RAISE5
+    {CDoom::Spritenum::SPR_VILE, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_VILE_STND2, 0, 0},                                       # S_VILE_STND
+    {CDoom::Spritenum::SPR_VILE, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_VILE_STND, 0, 0},                                        # S_VILE_STND2
+    {CDoom::Spritenum::SPR_VILE, 0, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN2, 0, 0},                                   # S_VILE_RUN1
+    {CDoom::Spritenum::SPR_VILE, 0, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN3, 0, 0},                                   # S_VILE_RUN2
+    {CDoom::Spritenum::SPR_VILE, 1, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN4, 0, 0},                                   # S_VILE_RUN3
+    {CDoom::Spritenum::SPR_VILE, 1, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN5, 0, 0},                                   # S_VILE_RUN4
+    {CDoom::Spritenum::SPR_VILE, 2, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN6, 0, 0},                                   # S_VILE_RUN5
+    {CDoom::Spritenum::SPR_VILE, 2, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN7, 0, 0},                                   # S_VILE_RUN6
+    {CDoom::Spritenum::SPR_VILE, 3, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN8, 0, 0},                                   # S_VILE_RUN7
+    {CDoom::Spritenum::SPR_VILE, 3, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN9, 0, 0},                                   # S_VILE_RUN8
+    {CDoom::Spritenum::SPR_VILE, 4, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN10, 0, 0},                                  # S_VILE_RUN9
+    {CDoom::Spritenum::SPR_VILE, 4, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN11, 0, 0},                                  # S_VILE_RUN10
+    {CDoom::Spritenum::SPR_VILE, 5, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN12, 0, 0},                                  # S_VILE_RUN11
+    {CDoom::Spritenum::SPR_VILE, 5, 2, ->CDoom.a_vile_chase(Void*, Void*), CDoom::Statenum::S_VILE_RUN1, 0, 0},                                   # S_VILE_RUN12
+    {CDoom::Spritenum::SPR_VILE, 32774, 0, ->CDoom.a_vile_start(Void*, Void*), CDoom::Statenum::S_VILE_ATK2, 0, 0},                               # S_VILE_ATK1
+    {CDoom::Spritenum::SPR_VILE, 32774, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK3, 0, 0},                             # S_VILE_ATK2
+    {CDoom::Spritenum::SPR_VILE, 32775, 8, ->CDoom.a_vile_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK4, 0, 0},                              # S_VILE_ATK3
+    {CDoom::Spritenum::SPR_VILE, 32776, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK5, 0, 0},                              # S_VILE_ATK4
+    {CDoom::Spritenum::SPR_VILE, 32777, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK6, 0, 0},                              # S_VILE_ATK5
+    {CDoom::Spritenum::SPR_VILE, 32778, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK7, 0, 0},                              # S_VILE_ATK6
+    {CDoom::Spritenum::SPR_VILE, 32779, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK8, 0, 0},                              # S_VILE_ATK7
+    {CDoom::Spritenum::SPR_VILE, 32780, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK9, 0, 0},                              # S_VILE_ATK8
+    {CDoom::Spritenum::SPR_VILE, 32781, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_VILE_ATK10, 0, 0},                             # S_VILE_ATK9
+    {CDoom::Spritenum::SPR_VILE, 32782, 8, ->CDoom.a_vile_attack(Void*, Void*), CDoom::Statenum::S_VILE_ATK11, 0, 0},                             # S_VILE_ATK10
+    {CDoom::Spritenum::SPR_VILE, 32783, 20, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_RUN1, 0, 0},     # S_VILE_ATK11
+    {CDoom::Spritenum::SPR_VILE, 32794, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_HEAL2, 0, 0},    # S_VILE_HEAL1
+    {CDoom::Spritenum::SPR_VILE, 32795, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_HEAL3, 0, 0},    # S_VILE_HEAL2
+    {CDoom::Spritenum::SPR_VILE, 32796, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_RUN1, 0, 0},     # S_VILE_HEAL3
+    {CDoom::Spritenum::SPR_VILE, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_PAIN2, 0, 0},        # S_VILE_PAIN
+    {CDoom::Spritenum::SPR_VILE, 16, 5, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_VILE_RUN1, 0, 0},                                        # S_VILE_PAIN2
+    {CDoom::Spritenum::SPR_VILE, 16, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE2, 0, 0},         # S_VILE_DIE1
+    {CDoom::Spritenum::SPR_VILE, 17, 7, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_VILE_DIE3, 0, 0},                                      # S_VILE_DIE2
+    {CDoom::Spritenum::SPR_VILE, 18, 7, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_VILE_DIE4, 0, 0},                                        # S_VILE_DIE3
+    {CDoom::Spritenum::SPR_VILE, 19, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE5, 0, 0},         # S_VILE_DIE4
+    {CDoom::Spritenum::SPR_VILE, 20, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE6, 0, 0},         # S_VILE_DIE5
+    {CDoom::Spritenum::SPR_VILE, 21, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE7, 0, 0},         # S_VILE_DIE6
+    {CDoom::Spritenum::SPR_VILE, 22, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE8, 0, 0},         # S_VILE_DIE7
+    {CDoom::Spritenum::SPR_VILE, 23, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE9, 0, 0},         # S_VILE_DIE8
+    {CDoom::Spritenum::SPR_VILE, 24, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_VILE_DIE10, 0, 0},        # S_VILE_DIE9
+    {CDoom::Spritenum::SPR_VILE, 25, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_VILE_DIE10
+    {CDoom::Spritenum::SPR_FIRE, 32768, 2, ->CDoom.a_start_fire(Void*, Void*), CDoom::Statenum::S_FIRE2, 0, 0},                                   # S_FIRE1
+    {CDoom::Spritenum::SPR_FIRE, 32769, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE3, 0, 0},                                         # S_FIRE2
+    {CDoom::Spritenum::SPR_FIRE, 32768, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE4, 0, 0},                                         # S_FIRE3
+    {CDoom::Spritenum::SPR_FIRE, 32769, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE5, 0, 0},                                         # S_FIRE4
+    {CDoom::Spritenum::SPR_FIRE, 32770, 2, ->CDoom.a_fire_crackle(Void*, Void*), CDoom::Statenum::S_FIRE6, 0, 0},                                 # S_FIRE5
+    {CDoom::Spritenum::SPR_FIRE, 32769, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE7, 0, 0},                                         # S_FIRE6
+    {CDoom::Spritenum::SPR_FIRE, 32770, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE8, 0, 0},                                         # S_FIRE7
+    {CDoom::Spritenum::SPR_FIRE, 32769, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE9, 0, 0},                                         # S_FIRE8
+    {CDoom::Spritenum::SPR_FIRE, 32770, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE10, 0, 0},                                        # S_FIRE9
+    {CDoom::Spritenum::SPR_FIRE, 32771, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE11, 0, 0},                                        # S_FIRE10
+    {CDoom::Spritenum::SPR_FIRE, 32770, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE12, 0, 0},                                        # S_FIRE11
+    {CDoom::Spritenum::SPR_FIRE, 32771, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE13, 0, 0},                                        # S_FIRE12
+    {CDoom::Spritenum::SPR_FIRE, 32770, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE14, 0, 0},                                        # S_FIRE13
+    {CDoom::Spritenum::SPR_FIRE, 32771, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE15, 0, 0},                                        # S_FIRE14
+    {CDoom::Spritenum::SPR_FIRE, 32772, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE16, 0, 0},                                        # S_FIRE15
+    {CDoom::Spritenum::SPR_FIRE, 32771, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE17, 0, 0},                                        # S_FIRE16
+    {CDoom::Spritenum::SPR_FIRE, 32772, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE18, 0, 0},                                        # S_FIRE17
+    {CDoom::Spritenum::SPR_FIRE, 32771, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE19, 0, 0},                                        # S_FIRE18
+    {CDoom::Spritenum::SPR_FIRE, 32772, 2, ->CDoom.a_fire_crackle(Void*, Void*), CDoom::Statenum::S_FIRE20, 0, 0},                                # S_FIRE19
+    {CDoom::Spritenum::SPR_FIRE, 32773, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE21, 0, 0},                                        # S_FIRE20
+    {CDoom::Spritenum::SPR_FIRE, 32772, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE22, 0, 0},                                        # S_FIRE21
+    {CDoom::Spritenum::SPR_FIRE, 32773, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE23, 0, 0},                                        # S_FIRE22
+    {CDoom::Spritenum::SPR_FIRE, 32772, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE24, 0, 0},                                        # S_FIRE23
+    {CDoom::Spritenum::SPR_FIRE, 32773, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE25, 0, 0},                                        # S_FIRE24
+    {CDoom::Spritenum::SPR_FIRE, 32774, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE26, 0, 0},                                        # S_FIRE25
+    {CDoom::Spritenum::SPR_FIRE, 32775, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE27, 0, 0},                                        # S_FIRE26
+    {CDoom::Spritenum::SPR_FIRE, 32774, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE28, 0, 0},                                        # S_FIRE27
+    {CDoom::Spritenum::SPR_FIRE, 32775, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE29, 0, 0},                                        # S_FIRE28
+    {CDoom::Spritenum::SPR_FIRE, 32774, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_FIRE30, 0, 0},                                        # S_FIRE29
+    {CDoom::Spritenum::SPR_FIRE, 32775, 2, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                          # S_FIRE30
+    {CDoom::Spritenum::SPR_PUFF, 1, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SMOKE2, 0, 0},             # S_SMOKE1
+    {CDoom::Spritenum::SPR_PUFF, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SMOKE3, 0, 0},             # S_SMOKE2
+    {CDoom::Spritenum::SPR_PUFF, 1, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SMOKE4, 0, 0},             # S_SMOKE3
+    {CDoom::Spritenum::SPR_PUFF, 2, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SMOKE5, 0, 0},             # S_SMOKE4
+    {CDoom::Spritenum::SPR_PUFF, 3, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},               # S_SMOKE5
+    {CDoom::Spritenum::SPR_FATB, 32768, 2, ->CDoom.a_tracer(Void*, Void*), CDoom::Statenum::S_TRACER2, 0, 0},                                     # S_TRACER
+    {CDoom::Spritenum::SPR_FATB, 32769, 2, ->CDoom.a_tracer(Void*, Void*), CDoom::Statenum::S_TRACER, 0, 0},                                      # S_TRACER2
+    {CDoom::Spritenum::SPR_FBXP, 32768, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TRACEEXP2, 0, 0},      # S_TRACEEXP1
+    {CDoom::Spritenum::SPR_FBXP, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TRACEEXP3, 0, 0},      # S_TRACEEXP2
+    {CDoom::Spritenum::SPR_FBXP, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_TRACEEXP3
+    {CDoom::Spritenum::SPR_SKEL, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SKEL_STND2, 0, 0},                                       # S_SKEL_STND
+    {CDoom::Spritenum::SPR_SKEL, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SKEL_STND, 0, 0},                                        # S_SKEL_STND2
+    {CDoom::Spritenum::SPR_SKEL, 0, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN2, 0, 0},                                        # S_SKEL_RUN1
+    {CDoom::Spritenum::SPR_SKEL, 0, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN3, 0, 0},                                        # S_SKEL_RUN2
+    {CDoom::Spritenum::SPR_SKEL, 1, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN4, 0, 0},                                        # S_SKEL_RUN3
+    {CDoom::Spritenum::SPR_SKEL, 1, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN5, 0, 0},                                        # S_SKEL_RUN4
+    {CDoom::Spritenum::SPR_SKEL, 2, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN6, 0, 0},                                        # S_SKEL_RUN5
+    {CDoom::Spritenum::SPR_SKEL, 2, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN7, 0, 0},                                        # S_SKEL_RUN6
+    {CDoom::Spritenum::SPR_SKEL, 3, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN8, 0, 0},                                        # S_SKEL_RUN7
+    {CDoom::Spritenum::SPR_SKEL, 3, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN9, 0, 0},                                        # S_SKEL_RUN8
+    {CDoom::Spritenum::SPR_SKEL, 4, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN10, 0, 0},                                       # S_SKEL_RUN9
+    {CDoom::Spritenum::SPR_SKEL, 4, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN11, 0, 0},                                       # S_SKEL_RUN10
+    {CDoom::Spritenum::SPR_SKEL, 5, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN12, 0, 0},                                       # S_SKEL_RUN11
+    {CDoom::Spritenum::SPR_SKEL, 5, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKEL_RUN1, 0, 0},                                        # S_SKEL_RUN12
+    {CDoom::Spritenum::SPR_SKEL, 6, 0, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKEL_FIST2, 0, 0},                                 # S_SKEL_FIST1
+    {CDoom::Spritenum::SPR_SKEL, 6, 6, ->CDoom.a_skel_whoosh(Void*, Void*), CDoom::Statenum::S_SKEL_FIST3, 0, 0},                                 # S_SKEL_FIST2
+    {CDoom::Spritenum::SPR_SKEL, 7, 6, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKEL_FIST4, 0, 0},                                 # S_SKEL_FIST3
+    {CDoom::Spritenum::SPR_SKEL, 8, 6, ->CDoom.a_skel_fist(Void*, Void*), CDoom::Statenum::S_SKEL_RUN1, 0, 0},                                    # S_SKEL_FIST4
+    {CDoom::Spritenum::SPR_SKEL, 32777, 0, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKEL_MISS2, 0, 0},                             # S_SKEL_MISS1
+    {CDoom::Spritenum::SPR_SKEL, 32777, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKEL_MISS3, 0, 0},                            # S_SKEL_MISS2
+    {CDoom::Spritenum::SPR_SKEL, 10, 10, ->CDoom.a_skel_missile(Void*, Void*), CDoom::Statenum::S_SKEL_MISS4, 0, 0},                              # S_SKEL_MISS3
+    {CDoom::Spritenum::SPR_SKEL, 10, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKEL_RUN1, 0, 0},                                # S_SKEL_MISS4
+    {CDoom::Spritenum::SPR_SKEL, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_PAIN2, 0, 0},        # S_SKEL_PAIN
+    {CDoom::Spritenum::SPR_SKEL, 11, 5, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SKEL_RUN1, 0, 0},                                        # S_SKEL_PAIN2
+    {CDoom::Spritenum::SPR_SKEL, 11, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_DIE2, 0, 0},         # S_SKEL_DIE1
+    {CDoom::Spritenum::SPR_SKEL, 12, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_DIE3, 0, 0},         # S_SKEL_DIE2
+    {CDoom::Spritenum::SPR_SKEL, 13, 7, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SKEL_DIE4, 0, 0},                                      # S_SKEL_DIE3
+    {CDoom::Spritenum::SPR_SKEL, 14, 7, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SKEL_DIE5, 0, 0},                                        # S_SKEL_DIE4
+    {CDoom::Spritenum::SPR_SKEL, 15, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_DIE6, 0, 0},         # S_SKEL_DIE5
+    {CDoom::Spritenum::SPR_SKEL, 16, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SKEL_DIE6
+    {CDoom::Spritenum::SPR_SKEL, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RAISE2, 0, 0},       # S_SKEL_RAISE1
+    {CDoom::Spritenum::SPR_SKEL, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RAISE3, 0, 0},       # S_SKEL_RAISE2
+    {CDoom::Spritenum::SPR_SKEL, 14, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RAISE4, 0, 0},       # S_SKEL_RAISE3
+    {CDoom::Spritenum::SPR_SKEL, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RAISE5, 0, 0},       # S_SKEL_RAISE4
+    {CDoom::Spritenum::SPR_SKEL, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RAISE6, 0, 0},       # S_SKEL_RAISE5
+    {CDoom::Spritenum::SPR_SKEL, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKEL_RUN1, 0, 0},         # S_SKEL_RAISE6
+    {CDoom::Spritenum::SPR_MANF, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATSHOT2, 0, 0},       # S_FATSHOT1
+    {CDoom::Spritenum::SPR_MANF, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATSHOT1, 0, 0},       # S_FATSHOT2
+    {CDoom::Spritenum::SPR_MISL, 32769, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATSHOTX2, 0, 0},      # S_FATSHOTX1
+    {CDoom::Spritenum::SPR_MISL, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATSHOTX3, 0, 0},      # S_FATSHOTX2
+    {CDoom::Spritenum::SPR_MISL, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_FATSHOTX3
+    {CDoom::Spritenum::SPR_FATT, 0, 15, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_FATT_STND2, 0, 0},                                       # S_FATT_STND
+    {CDoom::Spritenum::SPR_FATT, 1, 15, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_FATT_STND, 0, 0},                                        # S_FATT_STND2
+    {CDoom::Spritenum::SPR_FATT, 0, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN2, 0, 0},                                        # S_FATT_RUN1
+    {CDoom::Spritenum::SPR_FATT, 0, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN3, 0, 0},                                        # S_FATT_RUN2
+    {CDoom::Spritenum::SPR_FATT, 1, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN4, 0, 0},                                        # S_FATT_RUN3
+    {CDoom::Spritenum::SPR_FATT, 1, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN5, 0, 0},                                        # S_FATT_RUN4
+    {CDoom::Spritenum::SPR_FATT, 2, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN6, 0, 0},                                        # S_FATT_RUN5
+    {CDoom::Spritenum::SPR_FATT, 2, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN7, 0, 0},                                        # S_FATT_RUN6
+    {CDoom::Spritenum::SPR_FATT, 3, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN8, 0, 0},                                        # S_FATT_RUN7
+    {CDoom::Spritenum::SPR_FATT, 3, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN9, 0, 0},                                        # S_FATT_RUN8
+    {CDoom::Spritenum::SPR_FATT, 4, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN10, 0, 0},                                       # S_FATT_RUN9
+    {CDoom::Spritenum::SPR_FATT, 4, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN11, 0, 0},                                       # S_FATT_RUN10
+    {CDoom::Spritenum::SPR_FATT, 5, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN12, 0, 0},                                       # S_FATT_RUN11
+    {CDoom::Spritenum::SPR_FATT, 5, 4, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_FATT_RUN1, 0, 0},                                        # S_FATT_RUN12
+    {CDoom::Spritenum::SPR_FATT, 6, 20, ->CDoom.a_fat_raise(Void*, Void*), CDoom::Statenum::S_FATT_ATK2, 0, 0},                                   # S_FATT_ATK1
+    {CDoom::Spritenum::SPR_FATT, 32775, 10, ->CDoom.a_fat_attack1(Void*, Void*), CDoom::Statenum::S_FATT_ATK3, 0, 0},                             # S_FATT_ATK2
+    {CDoom::Spritenum::SPR_FATT, 8, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_ATK4, 0, 0},                                  # S_FATT_ATK3
+    {CDoom::Spritenum::SPR_FATT, 6, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_ATK5, 0, 0},                                  # S_FATT_ATK4
+    {CDoom::Spritenum::SPR_FATT, 32775, 10, ->CDoom.a_fat_attack2(Void*, Void*), CDoom::Statenum::S_FATT_ATK6, 0, 0},                             # S_FATT_ATK5
+    {CDoom::Spritenum::SPR_FATT, 8, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_ATK7, 0, 0},                                  # S_FATT_ATK6
+    {CDoom::Spritenum::SPR_FATT, 6, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_ATK8, 0, 0},                                  # S_FATT_ATK7
+    {CDoom::Spritenum::SPR_FATT, 32775, 10, ->CDoom.a_fat_attack3(Void*, Void*), CDoom::Statenum::S_FATT_ATK9, 0, 0},                             # S_FATT_ATK8
+    {CDoom::Spritenum::SPR_FATT, 8, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_ATK10, 0, 0},                                 # S_FATT_ATK9
+    {CDoom::Spritenum::SPR_FATT, 6, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_FATT_RUN1, 0, 0},                                  # S_FATT_ATK10
+    {CDoom::Spritenum::SPR_FATT, 9, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_PAIN2, 0, 0},         # S_FATT_PAIN
+    {CDoom::Spritenum::SPR_FATT, 9, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_FATT_RUN1, 0, 0},                                         # S_FATT_PAIN2
+    {CDoom::Spritenum::SPR_FATT, 10, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE2, 0, 0},         # S_FATT_DIE1
+    {CDoom::Spritenum::SPR_FATT, 11, 6, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_FATT_DIE3, 0, 0},                                      # S_FATT_DIE2
+    {CDoom::Spritenum::SPR_FATT, 12, 6, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_FATT_DIE4, 0, 0},                                        # S_FATT_DIE3
+    {CDoom::Spritenum::SPR_FATT, 13, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE5, 0, 0},         # S_FATT_DIE4
+    {CDoom::Spritenum::SPR_FATT, 14, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE6, 0, 0},         # S_FATT_DIE5
+    {CDoom::Spritenum::SPR_FATT, 15, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE7, 0, 0},         # S_FATT_DIE6
+    {CDoom::Spritenum::SPR_FATT, 16, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE8, 0, 0},         # S_FATT_DIE7
+    {CDoom::Spritenum::SPR_FATT, 17, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE9, 0, 0},         # S_FATT_DIE8
+    {CDoom::Spritenum::SPR_FATT, 18, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_DIE10, 0, 0},        # S_FATT_DIE9
+    {CDoom::Spritenum::SPR_FATT, 19, -1, ->CDoom.a_boss_death(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                      # S_FATT_DIE10
+    {CDoom::Spritenum::SPR_FATT, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE2, 0, 0},       # S_FATT_RAISE1
+    {CDoom::Spritenum::SPR_FATT, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE3, 0, 0},       # S_FATT_RAISE2
+    {CDoom::Spritenum::SPR_FATT, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE4, 0, 0},       # S_FATT_RAISE3
+    {CDoom::Spritenum::SPR_FATT, 14, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE5, 0, 0},       # S_FATT_RAISE4
+    {CDoom::Spritenum::SPR_FATT, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE6, 0, 0},       # S_FATT_RAISE5
+    {CDoom::Spritenum::SPR_FATT, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE7, 0, 0},       # S_FATT_RAISE6
+    {CDoom::Spritenum::SPR_FATT, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RAISE8, 0, 0},       # S_FATT_RAISE7
+    {CDoom::Spritenum::SPR_FATT, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FATT_RUN1, 0, 0},         # S_FATT_RAISE8
+    {CDoom::Spritenum::SPR_CPOS, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_CPOS_STND2, 0, 0},                                       # S_CPOS_STND
+    {CDoom::Spritenum::SPR_CPOS, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_CPOS_STND, 0, 0},                                        # S_CPOS_STND2
+    {CDoom::Spritenum::SPR_CPOS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN2, 0, 0},                                        # S_CPOS_RUN1
+    {CDoom::Spritenum::SPR_CPOS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN3, 0, 0},                                        # S_CPOS_RUN2
+    {CDoom::Spritenum::SPR_CPOS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN4, 0, 0},                                        # S_CPOS_RUN3
+    {CDoom::Spritenum::SPR_CPOS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN5, 0, 0},                                        # S_CPOS_RUN4
+    {CDoom::Spritenum::SPR_CPOS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN6, 0, 0},                                        # S_CPOS_RUN5
+    {CDoom::Spritenum::SPR_CPOS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN7, 0, 0},                                        # S_CPOS_RUN6
+    {CDoom::Spritenum::SPR_CPOS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN8, 0, 0},                                        # S_CPOS_RUN7
+    {CDoom::Spritenum::SPR_CPOS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CPOS_RUN1, 0, 0},                                        # S_CPOS_RUN8
+    {CDoom::Spritenum::SPR_CPOS, 4, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_CPOS_ATK2, 0, 0},                                 # S_CPOS_ATK1
+    {CDoom::Spritenum::SPR_CPOS, 32773, 4, ->CDoom.a_cpos_attack(Void*, Void*), CDoom::Statenum::S_CPOS_ATK3, 0, 0},                              # S_CPOS_ATK2
+    {CDoom::Spritenum::SPR_CPOS, 32772, 4, ->CDoom.a_cpos_attack(Void*, Void*), CDoom::Statenum::S_CPOS_ATK4, 0, 0},                              # S_CPOS_ATK3
+    {CDoom::Spritenum::SPR_CPOS, 5, 1, ->CDoom.a_cpos_refire(Void*, Void*), CDoom::Statenum::S_CPOS_ATK2, 0, 0},                                  # S_CPOS_ATK4
+    {CDoom::Spritenum::SPR_CPOS, 6, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_PAIN2, 0, 0},         # S_CPOS_PAIN
+    {CDoom::Spritenum::SPR_CPOS, 6, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_CPOS_RUN1, 0, 0},                                         # S_CPOS_PAIN2
+    {CDoom::Spritenum::SPR_CPOS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_DIE2, 0, 0},          # S_CPOS_DIE1
+    {CDoom::Spritenum::SPR_CPOS, 8, 5, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_CPOS_DIE3, 0, 0},                                       # S_CPOS_DIE2
+    {CDoom::Spritenum::SPR_CPOS, 9, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_CPOS_DIE4, 0, 0},                                         # S_CPOS_DIE3
+    {CDoom::Spritenum::SPR_CPOS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_DIE5, 0, 0},         # S_CPOS_DIE4
+    {CDoom::Spritenum::SPR_CPOS, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_DIE6, 0, 0},         # S_CPOS_DIE5
+    {CDoom::Spritenum::SPR_CPOS, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_DIE7, 0, 0},         # S_CPOS_DIE6
+    {CDoom::Spritenum::SPR_CPOS, 13, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_CPOS_DIE7
+    {CDoom::Spritenum::SPR_CPOS, 14, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_XDIE2, 0, 0},        # S_CPOS_XDIE1
+    {CDoom::Spritenum::SPR_CPOS, 15, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_CPOS_XDIE3, 0, 0},                                    # S_CPOS_XDIE2
+    {CDoom::Spritenum::SPR_CPOS, 16, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_CPOS_XDIE4, 0, 0},                                       # S_CPOS_XDIE3
+    {CDoom::Spritenum::SPR_CPOS, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_XDIE5, 0, 0},        # S_CPOS_XDIE4
+    {CDoom::Spritenum::SPR_CPOS, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_XDIE6, 0, 0},        # S_CPOS_XDIE5
+    {CDoom::Spritenum::SPR_CPOS, 19, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_CPOS_XDIE6
+    {CDoom::Spritenum::SPR_CPOS, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE2, 0, 0},       # S_CPOS_RAISE1
+    {CDoom::Spritenum::SPR_CPOS, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE3, 0, 0},       # S_CPOS_RAISE2
+    {CDoom::Spritenum::SPR_CPOS, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE4, 0, 0},       # S_CPOS_RAISE3
+    {CDoom::Spritenum::SPR_CPOS, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE5, 0, 0},       # S_CPOS_RAISE4
+    {CDoom::Spritenum::SPR_CPOS, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE6, 0, 0},        # S_CPOS_RAISE5
+    {CDoom::Spritenum::SPR_CPOS, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RAISE7, 0, 0},        # S_CPOS_RAISE6
+    {CDoom::Spritenum::SPR_CPOS, 7, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CPOS_RUN1, 0, 0},          # S_CPOS_RAISE7
+    {CDoom::Spritenum::SPR_TROO, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_TROO_STND2, 0, 0},                                       # S_TROO_STND
+    {CDoom::Spritenum::SPR_TROO, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_TROO_STND, 0, 0},                                        # S_TROO_STND2
+    {CDoom::Spritenum::SPR_TROO, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN2, 0, 0},                                        # S_TROO_RUN1
+    {CDoom::Spritenum::SPR_TROO, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN3, 0, 0},                                        # S_TROO_RUN2
+    {CDoom::Spritenum::SPR_TROO, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN4, 0, 0},                                        # S_TROO_RUN3
+    {CDoom::Spritenum::SPR_TROO, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN5, 0, 0},                                        # S_TROO_RUN4
+    {CDoom::Spritenum::SPR_TROO, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN6, 0, 0},                                        # S_TROO_RUN5
+    {CDoom::Spritenum::SPR_TROO, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN7, 0, 0},                                        # S_TROO_RUN6
+    {CDoom::Spritenum::SPR_TROO, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN8, 0, 0},                                        # S_TROO_RUN7
+    {CDoom::Spritenum::SPR_TROO, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_TROO_RUN1, 0, 0},                                        # S_TROO_RUN8
+    {CDoom::Spritenum::SPR_TROO, 4, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_TROO_ATK2, 0, 0},                                  # S_TROO_ATK1
+    {CDoom::Spritenum::SPR_TROO, 5, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_TROO_ATK3, 0, 0},                                  # S_TROO_ATK2
+    {CDoom::Spritenum::SPR_TROO, 6, 6, ->CDoom.a_troop_attack(Void*, Void*), CDoom::Statenum::S_TROO_RUN1, 0, 0},                                 # S_TROO_ATK3
+    {CDoom::Spritenum::SPR_TROO, 7, 2, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_PAIN2, 0, 0},         # S_TROO_PAIN
+    {CDoom::Spritenum::SPR_TROO, 7, 2, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_TROO_RUN1, 0, 0},                                         # S_TROO_PAIN2
+    {CDoom::Spritenum::SPR_TROO, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_DIE2, 0, 0},          # S_TROO_DIE1
+    {CDoom::Spritenum::SPR_TROO, 9, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_TROO_DIE3, 0, 0},                                       # S_TROO_DIE2
+    {CDoom::Spritenum::SPR_TROO, 10, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_DIE4, 0, 0},         # S_TROO_DIE3
+    {CDoom::Spritenum::SPR_TROO, 11, 6, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_TROO_DIE5, 0, 0},                                        # S_TROO_DIE4
+    {CDoom::Spritenum::SPR_TROO, 12, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_TROO_DIE5
+    {CDoom::Spritenum::SPR_TROO, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_XDIE2, 0, 0},        # S_TROO_XDIE1
+    {CDoom::Spritenum::SPR_TROO, 14, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_TROO_XDIE3, 0, 0},                                    # S_TROO_XDIE2
+    {CDoom::Spritenum::SPR_TROO, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_XDIE4, 0, 0},        # S_TROO_XDIE3
+    {CDoom::Spritenum::SPR_TROO, 16, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_TROO_XDIE5, 0, 0},                                       # S_TROO_XDIE4
+    {CDoom::Spritenum::SPR_TROO, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_XDIE6, 0, 0},        # S_TROO_XDIE5
+    {CDoom::Spritenum::SPR_TROO, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_XDIE7, 0, 0},        # S_TROO_XDIE6
+    {CDoom::Spritenum::SPR_TROO, 19, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_XDIE8, 0, 0},        # S_TROO_XDIE7
+    {CDoom::Spritenum::SPR_TROO, 20, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_TROO_XDIE8
+    {CDoom::Spritenum::SPR_TROO, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_RAISE2, 0, 0},       # S_TROO_RAISE1
+    {CDoom::Spritenum::SPR_TROO, 11, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_RAISE3, 0, 0},       # S_TROO_RAISE2
+    {CDoom::Spritenum::SPR_TROO, 10, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_RAISE4, 0, 0},       # S_TROO_RAISE3
+    {CDoom::Spritenum::SPR_TROO, 9, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_RAISE5, 0, 0},        # S_TROO_RAISE4
+    {CDoom::Spritenum::SPR_TROO, 8, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TROO_RUN1, 0, 0},          # S_TROO_RAISE5
+    {CDoom::Spritenum::SPR_SARG, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SARG_STND2, 0, 0},                                       # S_SARG_STND
+    {CDoom::Spritenum::SPR_SARG, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SARG_STND, 0, 0},                                        # S_SARG_STND2
+    {CDoom::Spritenum::SPR_SARG, 0, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN2, 0, 0},                                        # S_SARG_RUN1
+    {CDoom::Spritenum::SPR_SARG, 0, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN3, 0, 0},                                        # S_SARG_RUN2
+    {CDoom::Spritenum::SPR_SARG, 1, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN4, 0, 0},                                        # S_SARG_RUN3
+    {CDoom::Spritenum::SPR_SARG, 1, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN5, 0, 0},                                        # S_SARG_RUN4
+    {CDoom::Spritenum::SPR_SARG, 2, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN6, 0, 0},                                        # S_SARG_RUN5
+    {CDoom::Spritenum::SPR_SARG, 2, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN7, 0, 0},                                        # S_SARG_RUN6
+    {CDoom::Spritenum::SPR_SARG, 3, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN8, 0, 0},                                        # S_SARG_RUN7
+    {CDoom::Spritenum::SPR_SARG, 3, 2, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SARG_RUN1, 0, 0},                                        # S_SARG_RUN8
+    {CDoom::Spritenum::SPR_SARG, 4, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SARG_ATK2, 0, 0},                                  # S_SARG_ATK1
+    {CDoom::Spritenum::SPR_SARG, 5, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SARG_ATK3, 0, 0},                                  # S_SARG_ATK2
+    {CDoom::Spritenum::SPR_SARG, 6, 8, ->CDoom.a_sarg_attack(Void*, Void*), CDoom::Statenum::S_SARG_RUN1, 0, 0},                                  # S_SARG_ATK3
+    {CDoom::Spritenum::SPR_SARG, 7, 2, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_PAIN2, 0, 0},         # S_SARG_PAIN
+    {CDoom::Spritenum::SPR_SARG, 7, 2, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SARG_RUN1, 0, 0},                                         # S_SARG_PAIN2
+    {CDoom::Spritenum::SPR_SARG, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_DIE2, 0, 0},          # S_SARG_DIE1
+    {CDoom::Spritenum::SPR_SARG, 9, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SARG_DIE3, 0, 0},                                       # S_SARG_DIE2
+    {CDoom::Spritenum::SPR_SARG, 10, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_DIE4, 0, 0},         # S_SARG_DIE3
+    {CDoom::Spritenum::SPR_SARG, 11, 4, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SARG_DIE5, 0, 0},                                        # S_SARG_DIE4
+    {CDoom::Spritenum::SPR_SARG, 12, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_DIE6, 0, 0},         # S_SARG_DIE5
+    {CDoom::Spritenum::SPR_SARG, 13, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SARG_DIE6
+    {CDoom::Spritenum::SPR_SARG, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RAISE2, 0, 0},       # S_SARG_RAISE1
+    {CDoom::Spritenum::SPR_SARG, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RAISE3, 0, 0},       # S_SARG_RAISE2
+    {CDoom::Spritenum::SPR_SARG, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RAISE4, 0, 0},       # S_SARG_RAISE3
+    {CDoom::Spritenum::SPR_SARG, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RAISE5, 0, 0},       # S_SARG_RAISE4
+    {CDoom::Spritenum::SPR_SARG, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RAISE6, 0, 0},        # S_SARG_RAISE5
+    {CDoom::Spritenum::SPR_SARG, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SARG_RUN1, 0, 0},          # S_SARG_RAISE6
+    {CDoom::Spritenum::SPR_HEAD, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_HEAD_STND, 0, 0},                                        # S_HEAD_STND
+    {CDoom::Spritenum::SPR_HEAD, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_HEAD_RUN1, 0, 0},                                        # S_HEAD_RUN1
+    {CDoom::Spritenum::SPR_HEAD, 1, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_HEAD_ATK2, 0, 0},                                  # S_HEAD_ATK1
+    {CDoom::Spritenum::SPR_HEAD, 2, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_HEAD_ATK3, 0, 0},                                  # S_HEAD_ATK2
+    {CDoom::Spritenum::SPR_HEAD, 32771, 5, ->CDoom.a_head_attack(Void*, Void*), CDoom::Statenum::S_HEAD_RUN1, 0, 0},                              # S_HEAD_ATK3
+    {CDoom::Spritenum::SPR_HEAD, 4, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_PAIN2, 0, 0},         # S_HEAD_PAIN
+    {CDoom::Spritenum::SPR_HEAD, 4, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_HEAD_PAIN3, 0, 0},                                        # S_HEAD_PAIN2
+    {CDoom::Spritenum::SPR_HEAD, 5, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RUN1, 0, 0},          # S_HEAD_PAIN3
+    {CDoom::Spritenum::SPR_HEAD, 6, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_DIE2, 0, 0},          # S_HEAD_DIE1
+    {CDoom::Spritenum::SPR_HEAD, 7, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_HEAD_DIE3, 0, 0},                                       # S_HEAD_DIE2
+    {CDoom::Spritenum::SPR_HEAD, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_DIE4, 0, 0},          # S_HEAD_DIE3
+    {CDoom::Spritenum::SPR_HEAD, 9, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_DIE5, 0, 0},          # S_HEAD_DIE4
+    {CDoom::Spritenum::SPR_HEAD, 10, 8, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_HEAD_DIE6, 0, 0},                                        # S_HEAD_DIE5
+    {CDoom::Spritenum::SPR_HEAD, 11, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_HEAD_DIE6
+    {CDoom::Spritenum::SPR_HEAD, 11, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RAISE2, 0, 0},       # S_HEAD_RAISE1
+    {CDoom::Spritenum::SPR_HEAD, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RAISE3, 0, 0},       # S_HEAD_RAISE2
+    {CDoom::Spritenum::SPR_HEAD, 9, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RAISE4, 0, 0},        # S_HEAD_RAISE3
+    {CDoom::Spritenum::SPR_HEAD, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RAISE5, 0, 0},        # S_HEAD_RAISE4
+    {CDoom::Spritenum::SPR_HEAD, 7, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RAISE6, 0, 0},        # S_HEAD_RAISE5
+    {CDoom::Spritenum::SPR_HEAD, 6, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEAD_RUN1, 0, 0},          # S_HEAD_RAISE6
+    {CDoom::Spritenum::SPR_BAL7, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRBALL2, 0, 0},        # S_BRBALL1
+    {CDoom::Spritenum::SPR_BAL7, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRBALL1, 0, 0},        # S_BRBALL2
+    {CDoom::Spritenum::SPR_BAL7, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRBALLX2, 0, 0},       # S_BRBALLX1
+    {CDoom::Spritenum::SPR_BAL7, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRBALLX3, 0, 0},       # S_BRBALLX2
+    {CDoom::Spritenum::SPR_BAL7, 32772, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_BRBALLX3
+    {CDoom::Spritenum::SPR_BOSS, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BOSS_STND2, 0, 0},                                       # S_BOSS_STND
+    {CDoom::Spritenum::SPR_BOSS, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BOSS_STND, 0, 0},                                        # S_BOSS_STND2
+    {CDoom::Spritenum::SPR_BOSS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN2, 0, 0},                                        # S_BOSS_RUN1
+    {CDoom::Spritenum::SPR_BOSS, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN3, 0, 0},                                        # S_BOSS_RUN2
+    {CDoom::Spritenum::SPR_BOSS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN4, 0, 0},                                        # S_BOSS_RUN3
+    {CDoom::Spritenum::SPR_BOSS, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN5, 0, 0},                                        # S_BOSS_RUN4
+    {CDoom::Spritenum::SPR_BOSS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN6, 0, 0},                                        # S_BOSS_RUN5
+    {CDoom::Spritenum::SPR_BOSS, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN7, 0, 0},                                        # S_BOSS_RUN6
+    {CDoom::Spritenum::SPR_BOSS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN8, 0, 0},                                        # S_BOSS_RUN7
+    {CDoom::Spritenum::SPR_BOSS, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOSS_RUN1, 0, 0},                                        # S_BOSS_RUN8
+    {CDoom::Spritenum::SPR_BOSS, 4, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_BOSS_ATK2, 0, 0},                                  # S_BOSS_ATK1
+    {CDoom::Spritenum::SPR_BOSS, 5, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_BOSS_ATK3, 0, 0},                                  # S_BOSS_ATK2
+    {CDoom::Spritenum::SPR_BOSS, 6, 8, ->CDoom.a_bruis_attack(Void*, Void*), CDoom::Statenum::S_BOSS_RUN1, 0, 0},                                 # S_BOSS_ATK3
+    {CDoom::Spritenum::SPR_BOSS, 7, 2, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_PAIN2, 0, 0},         # S_BOSS_PAIN
+    {CDoom::Spritenum::SPR_BOSS, 7, 2, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_BOSS_RUN1, 0, 0},                                         # S_BOSS_PAIN2
+    {CDoom::Spritenum::SPR_BOSS, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_DIE2, 0, 0},          # S_BOSS_DIE1
+    {CDoom::Spritenum::SPR_BOSS, 9, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_BOSS_DIE3, 0, 0},                                       # S_BOSS_DIE2
+    {CDoom::Spritenum::SPR_BOSS, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_DIE4, 0, 0},         # S_BOSS_DIE3
+    {CDoom::Spritenum::SPR_BOSS, 11, 8, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_BOSS_DIE5, 0, 0},                                        # S_BOSS_DIE4
+    {CDoom::Spritenum::SPR_BOSS, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_DIE6, 0, 0},         # S_BOSS_DIE5
+    {CDoom::Spritenum::SPR_BOSS, 13, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_DIE7, 0, 0},         # S_BOSS_DIE6
+    {CDoom::Spritenum::SPR_BOSS, 14, -1, ->CDoom.a_boss_death(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                      # S_BOSS_DIE7
+    {CDoom::Spritenum::SPR_BOSS, 14, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE2, 0, 0},       # S_BOSS_RAISE1
+    {CDoom::Spritenum::SPR_BOSS, 13, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE3, 0, 0},       # S_BOSS_RAISE2
+    {CDoom::Spritenum::SPR_BOSS, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE4, 0, 0},       # S_BOSS_RAISE3
+    {CDoom::Spritenum::SPR_BOSS, 11, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE5, 0, 0},       # S_BOSS_RAISE4
+    {CDoom::Spritenum::SPR_BOSS, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE6, 0, 0},       # S_BOSS_RAISE5
+    {CDoom::Spritenum::SPR_BOSS, 9, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RAISE7, 0, 0},        # S_BOSS_RAISE6
+    {CDoom::Spritenum::SPR_BOSS, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOSS_RUN1, 0, 0},          # S_BOSS_RAISE7
+    {CDoom::Spritenum::SPR_BOS2, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BOS2_STND2, 0, 0},                                       # S_BOS2_STND
+    {CDoom::Spritenum::SPR_BOS2, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BOS2_STND, 0, 0},                                        # S_BOS2_STND2
+    {CDoom::Spritenum::SPR_BOS2, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN2, 0, 0},                                        # S_BOS2_RUN1
+    {CDoom::Spritenum::SPR_BOS2, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN3, 0, 0},                                        # S_BOS2_RUN2
+    {CDoom::Spritenum::SPR_BOS2, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN4, 0, 0},                                        # S_BOS2_RUN3
+    {CDoom::Spritenum::SPR_BOS2, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN5, 0, 0},                                        # S_BOS2_RUN4
+    {CDoom::Spritenum::SPR_BOS2, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN6, 0, 0},                                        # S_BOS2_RUN5
+    {CDoom::Spritenum::SPR_BOS2, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN7, 0, 0},                                        # S_BOS2_RUN6
+    {CDoom::Spritenum::SPR_BOS2, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN8, 0, 0},                                        # S_BOS2_RUN7
+    {CDoom::Spritenum::SPR_BOS2, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BOS2_RUN1, 0, 0},                                        # S_BOS2_RUN8
+    {CDoom::Spritenum::SPR_BOS2, 4, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_BOS2_ATK2, 0, 0},                                  # S_BOS2_ATK1
+    {CDoom::Spritenum::SPR_BOS2, 5, 8, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_BOS2_ATK3, 0, 0},                                  # S_BOS2_ATK2
+    {CDoom::Spritenum::SPR_BOS2, 6, 8, ->CDoom.a_bruis_attack(Void*, Void*), CDoom::Statenum::S_BOS2_RUN1, 0, 0},                                 # S_BOS2_ATK3
+    {CDoom::Spritenum::SPR_BOS2, 7, 2, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_PAIN2, 0, 0},         # S_BOS2_PAIN
+    {CDoom::Spritenum::SPR_BOS2, 7, 2, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_BOS2_RUN1, 0, 0},                                         # S_BOS2_PAIN2
+    {CDoom::Spritenum::SPR_BOS2, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_DIE2, 0, 0},          # S_BOS2_DIE1
+    {CDoom::Spritenum::SPR_BOS2, 9, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_BOS2_DIE3, 0, 0},                                       # S_BOS2_DIE2
+    {CDoom::Spritenum::SPR_BOS2, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_DIE4, 0, 0},         # S_BOS2_DIE3
+    {CDoom::Spritenum::SPR_BOS2, 11, 8, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_BOS2_DIE5, 0, 0},                                        # S_BOS2_DIE4
+    {CDoom::Spritenum::SPR_BOS2, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_DIE6, 0, 0},         # S_BOS2_DIE5
+    {CDoom::Spritenum::SPR_BOS2, 13, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_DIE7, 0, 0},         # S_BOS2_DIE6
+    {CDoom::Spritenum::SPR_BOS2, 14, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_BOS2_DIE7
+    {CDoom::Spritenum::SPR_BOS2, 14, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE2, 0, 0},       # S_BOS2_RAISE1
+    {CDoom::Spritenum::SPR_BOS2, 13, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE3, 0, 0},       # S_BOS2_RAISE2
+    {CDoom::Spritenum::SPR_BOS2, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE4, 0, 0},       # S_BOS2_RAISE3
+    {CDoom::Spritenum::SPR_BOS2, 11, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE5, 0, 0},       # S_BOS2_RAISE4
+    {CDoom::Spritenum::SPR_BOS2, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE6, 0, 0},       # S_BOS2_RAISE5
+    {CDoom::Spritenum::SPR_BOS2, 9, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RAISE7, 0, 0},        # S_BOS2_RAISE6
+    {CDoom::Spritenum::SPR_BOS2, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BOS2_RUN1, 0, 0},          # S_BOS2_RAISE7
+    {CDoom::Spritenum::SPR_SKUL, 32768, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SKULL_STND2, 0, 0},                                  # S_SKULL_STND
+    {CDoom::Spritenum::SPR_SKUL, 32769, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SKULL_STND, 0, 0},                                   # S_SKULL_STND2
+    {CDoom::Spritenum::SPR_SKUL, 32768, 6, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKULL_RUN2, 0, 0},                                   # S_SKULL_RUN1
+    {CDoom::Spritenum::SPR_SKUL, 32769, 6, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SKULL_RUN1, 0, 0},                                   # S_SKULL_RUN2
+    {CDoom::Spritenum::SPR_SKUL, 32770, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SKULL_ATK2, 0, 0},                            # S_SKULL_ATK1
+    {CDoom::Spritenum::SPR_SKUL, 32771, 4, ->CDoom.a_skull_attack(Void*, Void*), CDoom::Statenum::S_SKULL_ATK3, 0, 0},                            # S_SKULL_ATK2
+    {CDoom::Spritenum::SPR_SKUL, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_ATK4, 0, 0},     # S_SKULL_ATK3
+    {CDoom::Spritenum::SPR_SKUL, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_ATK3, 0, 0},     # S_SKULL_ATK4
+    {CDoom::Spritenum::SPR_SKUL, 32772, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_PAIN2, 0, 0},    # S_SKULL_PAIN
+    {CDoom::Spritenum::SPR_SKUL, 32772, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SKULL_RUN1, 0, 0},                                    # S_SKULL_PAIN2
+    {CDoom::Spritenum::SPR_SKUL, 32773, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_DIE2, 0, 0},     # S_SKULL_DIE1
+    {CDoom::Spritenum::SPR_SKUL, 32774, 6, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SKULL_DIE3, 0, 0},                                  # S_SKULL_DIE2
+    {CDoom::Spritenum::SPR_SKUL, 32775, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_DIE4, 0, 0},     # S_SKULL_DIE3
+    {CDoom::Spritenum::SPR_SKUL, 32776, 6, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SKULL_DIE5, 0, 0},                                    # S_SKULL_DIE4
+    {CDoom::Spritenum::SPR_SKUL, 9, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SKULL_DIE6, 0, 0},         # S_SKULL_DIE5
+    {CDoom::Spritenum::SPR_SKUL, 10, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SKULL_DIE6
+    {CDoom::Spritenum::SPR_SPID, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SPID_STND2, 0, 0},                                       # S_SPID_STND
+    {CDoom::Spritenum::SPR_SPID, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SPID_STND, 0, 0},                                        # S_SPID_STND2
+    {CDoom::Spritenum::SPR_SPID, 0, 3, ->CDoom.a_metal(Void*, Void*), CDoom::Statenum::S_SPID_RUN2, 0, 0},                                        # S_SPID_RUN1
+    {CDoom::Spritenum::SPR_SPID, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN3, 0, 0},                                        # S_SPID_RUN2
+    {CDoom::Spritenum::SPR_SPID, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN4, 0, 0},                                        # S_SPID_RUN3
+    {CDoom::Spritenum::SPR_SPID, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN5, 0, 0},                                        # S_SPID_RUN4
+    {CDoom::Spritenum::SPR_SPID, 2, 3, ->CDoom.a_metal(Void*, Void*), CDoom::Statenum::S_SPID_RUN6, 0, 0},                                        # S_SPID_RUN5
+    {CDoom::Spritenum::SPR_SPID, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN7, 0, 0},                                        # S_SPID_RUN6
+    {CDoom::Spritenum::SPR_SPID, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN8, 0, 0},                                        # S_SPID_RUN7
+    {CDoom::Spritenum::SPR_SPID, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN9, 0, 0},                                        # S_SPID_RUN8
+    {CDoom::Spritenum::SPR_SPID, 4, 3, ->CDoom.a_metal(Void*, Void*), CDoom::Statenum::S_SPID_RUN10, 0, 0},                                       # S_SPID_RUN9
+    {CDoom::Spritenum::SPR_SPID, 4, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN11, 0, 0},                                       # S_SPID_RUN10
+    {CDoom::Spritenum::SPR_SPID, 5, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN12, 0, 0},                                       # S_SPID_RUN11
+    {CDoom::Spritenum::SPR_SPID, 5, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SPID_RUN1, 0, 0},                                        # S_SPID_RUN12
+    {CDoom::Spritenum::SPR_SPID, 32768, 20, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SPID_ATK2, 0, 0},                             # S_SPID_ATK1
+    {CDoom::Spritenum::SPR_SPID, 32774, 4, ->CDoom.a_spos_attack(Void*, Void*), CDoom::Statenum::S_SPID_ATK3, 0, 0},                              # S_SPID_ATK2
+    {CDoom::Spritenum::SPR_SPID, 32775, 4, ->CDoom.a_spos_attack(Void*, Void*), CDoom::Statenum::S_SPID_ATK4, 0, 0},                              # S_SPID_ATK3
+    {CDoom::Spritenum::SPR_SPID, 32775, 1, ->CDoom.a_spid_refire(Void*, Void*), CDoom::Statenum::S_SPID_ATK2, 0, 0},                              # S_SPID_ATK4
+    {CDoom::Spritenum::SPR_SPID, 8, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_PAIN2, 0, 0},         # S_SPID_PAIN
+    {CDoom::Spritenum::SPR_SPID, 8, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SPID_RUN1, 0, 0},                                         # S_SPID_PAIN2
+    {CDoom::Spritenum::SPR_SPID, 9, 20, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SPID_DIE2, 0, 0},                                      # S_SPID_DIE1
+    {CDoom::Spritenum::SPR_SPID, 10, 10, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SPID_DIE3, 0, 0},                                       # S_SPID_DIE2
+    {CDoom::Spritenum::SPR_SPID, 11, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE4, 0, 0},        # S_SPID_DIE3
+    {CDoom::Spritenum::SPR_SPID, 12, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE5, 0, 0},        # S_SPID_DIE4
+    {CDoom::Spritenum::SPR_SPID, 13, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE6, 0, 0},        # S_SPID_DIE5
+    {CDoom::Spritenum::SPR_SPID, 14, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE7, 0, 0},        # S_SPID_DIE6
+    {CDoom::Spritenum::SPR_SPID, 15, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE8, 0, 0},        # S_SPID_DIE7
+    {CDoom::Spritenum::SPR_SPID, 16, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE9, 0, 0},        # S_SPID_DIE8
+    {CDoom::Spritenum::SPR_SPID, 17, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE10, 0, 0},       # S_SPID_DIE9
+    {CDoom::Spritenum::SPR_SPID, 18, 30, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SPID_DIE11, 0, 0},       # S_SPID_DIE10
+    {CDoom::Spritenum::SPR_SPID, 18, -1, ->CDoom.a_boss_death(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                      # S_SPID_DIE11
+    {CDoom::Spritenum::SPR_BSPI, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BSPI_STND2, 0, 0},                                       # S_BSPI_STND
+    {CDoom::Spritenum::SPR_BSPI, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BSPI_STND, 0, 0},                                        # S_BSPI_STND2
+    {CDoom::Spritenum::SPR_BSPI, 0, 20, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RUN1, 0, 0},         # S_BSPI_SIGHT
+    {CDoom::Spritenum::SPR_BSPI, 0, 3, ->CDoom.a_baby_metal(Void*, Void*), CDoom::Statenum::S_BSPI_RUN2, 0, 0},                                   # S_BSPI_RUN1
+    {CDoom::Spritenum::SPR_BSPI, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN3, 0, 0},                                        # S_BSPI_RUN2
+    {CDoom::Spritenum::SPR_BSPI, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN4, 0, 0},                                        # S_BSPI_RUN3
+    {CDoom::Spritenum::SPR_BSPI, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN5, 0, 0},                                        # S_BSPI_RUN4
+    {CDoom::Spritenum::SPR_BSPI, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN6, 0, 0},                                        # S_BSPI_RUN5
+    {CDoom::Spritenum::SPR_BSPI, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN7, 0, 0},                                        # S_BSPI_RUN6
+    {CDoom::Spritenum::SPR_BSPI, 3, 3, ->CDoom.a_baby_metal(Void*, Void*), CDoom::Statenum::S_BSPI_RUN8, 0, 0},                                   # S_BSPI_RUN7
+    {CDoom::Spritenum::SPR_BSPI, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN9, 0, 0},                                        # S_BSPI_RUN8
+    {CDoom::Spritenum::SPR_BSPI, 4, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN10, 0, 0},                                       # S_BSPI_RUN9
+    {CDoom::Spritenum::SPR_BSPI, 4, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN11, 0, 0},                                       # S_BSPI_RUN10
+    {CDoom::Spritenum::SPR_BSPI, 5, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN12, 0, 0},                                       # S_BSPI_RUN11
+    {CDoom::Spritenum::SPR_BSPI, 5, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_BSPI_RUN1, 0, 0},                                        # S_BSPI_RUN12
+    {CDoom::Spritenum::SPR_BSPI, 32768, 20, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_BSPI_ATK2, 0, 0},                             # S_BSPI_ATK1
+    {CDoom::Spritenum::SPR_BSPI, 32774, 4, ->CDoom.a_bspi_attack(Void*, Void*), CDoom::Statenum::S_BSPI_ATK3, 0, 0},                              # S_BSPI_ATK2
+    {CDoom::Spritenum::SPR_BSPI, 32775, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_ATK4, 0, 0},      # S_BSPI_ATK3
+    {CDoom::Spritenum::SPR_BSPI, 32775, 1, ->CDoom.a_spid_refire(Void*, Void*), CDoom::Statenum::S_BSPI_ATK2, 0, 0},                              # S_BSPI_ATK4
+    {CDoom::Spritenum::SPR_BSPI, 8, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_PAIN2, 0, 0},         # S_BSPI_PAIN
+    {CDoom::Spritenum::SPR_BSPI, 8, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_BSPI_RUN1, 0, 0},                                         # S_BSPI_PAIN2
+    {CDoom::Spritenum::SPR_BSPI, 9, 20, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_BSPI_DIE2, 0, 0},                                      # S_BSPI_DIE1
+    {CDoom::Spritenum::SPR_BSPI, 10, 7, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_BSPI_DIE3, 0, 0},                                        # S_BSPI_DIE2
+    {CDoom::Spritenum::SPR_BSPI, 11, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_DIE4, 0, 0},         # S_BSPI_DIE3
+    {CDoom::Spritenum::SPR_BSPI, 12, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_DIE5, 0, 0},         # S_BSPI_DIE4
+    {CDoom::Spritenum::SPR_BSPI, 13, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_DIE6, 0, 0},         # S_BSPI_DIE5
+    {CDoom::Spritenum::SPR_BSPI, 14, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_DIE7, 0, 0},         # S_BSPI_DIE6
+    {CDoom::Spritenum::SPR_BSPI, 15, -1, ->CDoom.a_boss_death(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                      # S_BSPI_DIE7
+    {CDoom::Spritenum::SPR_BSPI, 15, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE2, 0, 0},       # S_BSPI_RAISE1
+    {CDoom::Spritenum::SPR_BSPI, 14, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE3, 0, 0},       # S_BSPI_RAISE2
+    {CDoom::Spritenum::SPR_BSPI, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE4, 0, 0},       # S_BSPI_RAISE3
+    {CDoom::Spritenum::SPR_BSPI, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE5, 0, 0},       # S_BSPI_RAISE4
+    {CDoom::Spritenum::SPR_BSPI, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE6, 0, 0},       # S_BSPI_RAISE5
+    {CDoom::Spritenum::SPR_BSPI, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RAISE7, 0, 0},       # S_BSPI_RAISE6
+    {CDoom::Spritenum::SPR_BSPI, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSPI_RUN1, 0, 0},          # S_BSPI_RAISE7
+    {CDoom::Spritenum::SPR_APLS, 32768, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLAZ2, 0, 0},    # S_ARACH_PLAZ
+    {CDoom::Spritenum::SPR_APLS, 32769, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLAZ, 0, 0},     # S_ARACH_PLAZ2
+    {CDoom::Spritenum::SPR_APBX, 32768, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLEX2, 0, 0},    # S_ARACH_PLEX
+    {CDoom::Spritenum::SPR_APBX, 32769, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLEX3, 0, 0},    # S_ARACH_PLEX2
+    {CDoom::Spritenum::SPR_APBX, 32770, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLEX4, 0, 0},    # S_ARACH_PLEX3
+    {CDoom::Spritenum::SPR_APBX, 32771, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARACH_PLEX5, 0, 0},    # S_ARACH_PLEX4
+    {CDoom::Spritenum::SPR_APBX, 32772, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_ARACH_PLEX5
+    {CDoom::Spritenum::SPR_CYBR, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_CYBER_STND2, 0, 0},                                      # S_CYBER_STND
+    {CDoom::Spritenum::SPR_CYBR, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_CYBER_STND, 0, 0},                                       # S_CYBER_STND2
+    {CDoom::Spritenum::SPR_CYBR, 0, 3, ->CDoom.a_hoof(Void*, Void*), CDoom::Statenum::S_CYBER_RUN2, 0, 0},                                        # S_CYBER_RUN1
+    {CDoom::Spritenum::SPR_CYBR, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN3, 0, 0},                                       # S_CYBER_RUN2
+    {CDoom::Spritenum::SPR_CYBR, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN4, 0, 0},                                       # S_CYBER_RUN3
+    {CDoom::Spritenum::SPR_CYBR, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN5, 0, 0},                                       # S_CYBER_RUN4
+    {CDoom::Spritenum::SPR_CYBR, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN6, 0, 0},                                       # S_CYBER_RUN5
+    {CDoom::Spritenum::SPR_CYBR, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN7, 0, 0},                                       # S_CYBER_RUN6
+    {CDoom::Spritenum::SPR_CYBR, 3, 3, ->CDoom.a_metal(Void*, Void*), CDoom::Statenum::S_CYBER_RUN8, 0, 0},                                       # S_CYBER_RUN7
+    {CDoom::Spritenum::SPR_CYBR, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_CYBER_RUN1, 0, 0},                                       # S_CYBER_RUN8
+    {CDoom::Spritenum::SPR_CYBR, 4, 6, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_CYBER_ATK2, 0, 0},                                 # S_CYBER_ATK1
+    {CDoom::Spritenum::SPR_CYBR, 5, 12, ->CDoom.a_cyber_attack(Void*, Void*), CDoom::Statenum::S_CYBER_ATK3, 0, 0},                               # S_CYBER_ATK2
+    {CDoom::Spritenum::SPR_CYBR, 4, 12, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_CYBER_ATK4, 0, 0},                                # S_CYBER_ATK3
+    {CDoom::Spritenum::SPR_CYBR, 5, 12, ->CDoom.a_cyber_attack(Void*, Void*), CDoom::Statenum::S_CYBER_ATK5, 0, 0},                               # S_CYBER_ATK4
+    {CDoom::Spritenum::SPR_CYBR, 4, 12, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_CYBER_ATK6, 0, 0},                                # S_CYBER_ATK5
+    {CDoom::Spritenum::SPR_CYBR, 5, 12, ->CDoom.a_cyber_attack(Void*, Void*), CDoom::Statenum::S_CYBER_RUN1, 0, 0},                               # S_CYBER_ATK6
+    {CDoom::Spritenum::SPR_CYBR, 6, 10, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_CYBER_RUN1, 0, 0},                                       # S_CYBER_PAIN
+    {CDoom::Spritenum::SPR_CYBR, 7, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE2, 0, 0},        # S_CYBER_DIE1
+    {CDoom::Spritenum::SPR_CYBR, 8, 10, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_CYBER_DIE3, 0, 0},                                     # S_CYBER_DIE2
+    {CDoom::Spritenum::SPR_CYBR, 9, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE4, 0, 0},        # S_CYBER_DIE3
+    {CDoom::Spritenum::SPR_CYBR, 10, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE5, 0, 0},       # S_CYBER_DIE4
+    {CDoom::Spritenum::SPR_CYBR, 11, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE6, 0, 0},       # S_CYBER_DIE5
+    {CDoom::Spritenum::SPR_CYBR, 12, 10, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_CYBER_DIE7, 0, 0},                                      # S_CYBER_DIE6
+    {CDoom::Spritenum::SPR_CYBR, 13, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE8, 0, 0},       # S_CYBER_DIE7
+    {CDoom::Spritenum::SPR_CYBR, 14, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE9, 0, 0},       # S_CYBER_DIE8
+    {CDoom::Spritenum::SPR_CYBR, 15, 30, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_CYBER_DIE10, 0, 0},      # S_CYBER_DIE9
+    {CDoom::Spritenum::SPR_CYBR, 15, -1, ->CDoom.a_boss_death(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                      # S_CYBER_DIE10
+    {CDoom::Spritenum::SPR_PAIN, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_PAIN_STND, 0, 0},                                        # S_PAIN_STND
+    {CDoom::Spritenum::SPR_PAIN, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN2, 0, 0},                                        # S_PAIN_RUN1
+    {CDoom::Spritenum::SPR_PAIN, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN3, 0, 0},                                        # S_PAIN_RUN2
+    {CDoom::Spritenum::SPR_PAIN, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN4, 0, 0},                                        # S_PAIN_RUN3
+    {CDoom::Spritenum::SPR_PAIN, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN5, 0, 0},                                        # S_PAIN_RUN4
+    {CDoom::Spritenum::SPR_PAIN, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN6, 0, 0},                                        # S_PAIN_RUN5
+    {CDoom::Spritenum::SPR_PAIN, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_PAIN_RUN1, 0, 0},                                        # S_PAIN_RUN6
+    {CDoom::Spritenum::SPR_PAIN, 3, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_PAIN_ATK2, 0, 0},                                  # S_PAIN_ATK1
+    {CDoom::Spritenum::SPR_PAIN, 4, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_PAIN_ATK3, 0, 0},                                  # S_PAIN_ATK2
+    {CDoom::Spritenum::SPR_PAIN, 32773, 5, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_PAIN_ATK4, 0, 0},                              # S_PAIN_ATK3
+    {CDoom::Spritenum::SPR_PAIN, 32773, 0, ->CDoom.a_pain_attack(Void*, Void*), CDoom::Statenum::S_PAIN_RUN1, 0, 0},                              # S_PAIN_ATK4
+    {CDoom::Spritenum::SPR_PAIN, 6, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_PAIN2, 0, 0},         # S_PAIN_PAIN
+    {CDoom::Spritenum::SPR_PAIN, 6, 6, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_PAIN_RUN1, 0, 0},                                         # S_PAIN_PAIN2
+    {CDoom::Spritenum::SPR_PAIN, 32775, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_DIE2, 0, 0},      # S_PAIN_DIE1
+    {CDoom::Spritenum::SPR_PAIN, 32776, 8, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_PAIN_DIE3, 0, 0},                                   # S_PAIN_DIE2
+    {CDoom::Spritenum::SPR_PAIN, 32777, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_DIE4, 0, 0},      # S_PAIN_DIE3
+    {CDoom::Spritenum::SPR_PAIN, 32778, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_DIE5, 0, 0},      # S_PAIN_DIE4
+    {CDoom::Spritenum::SPR_PAIN, 32779, 8, ->CDoom.a_pain_die(Void*, Void*), CDoom::Statenum::S_PAIN_DIE6, 0, 0},                                 # S_PAIN_DIE5
+    {CDoom::Spritenum::SPR_PAIN, 32780, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},           # S_PAIN_DIE6
+    {CDoom::Spritenum::SPR_PAIN, 12, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RAISE2, 0, 0},       # S_PAIN_RAISE1
+    {CDoom::Spritenum::SPR_PAIN, 11, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RAISE3, 0, 0},       # S_PAIN_RAISE2
+    {CDoom::Spritenum::SPR_PAIN, 10, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RAISE4, 0, 0},       # S_PAIN_RAISE3
+    {CDoom::Spritenum::SPR_PAIN, 9, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RAISE5, 0, 0},        # S_PAIN_RAISE4
+    {CDoom::Spritenum::SPR_PAIN, 8, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RAISE6, 0, 0},        # S_PAIN_RAISE5
+    {CDoom::Spritenum::SPR_PAIN, 7, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PAIN_RUN1, 0, 0},          # S_PAIN_RAISE6
+    {CDoom::Spritenum::SPR_SSWV, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SSWV_STND2, 0, 0},                                       # S_SSWV_STND
+    {CDoom::Spritenum::SPR_SSWV, 1, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_SSWV_STND, 0, 0},                                        # S_SSWV_STND2
+    {CDoom::Spritenum::SPR_SSWV, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN2, 0, 0},                                        # S_SSWV_RUN1
+    {CDoom::Spritenum::SPR_SSWV, 0, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN3, 0, 0},                                        # S_SSWV_RUN2
+    {CDoom::Spritenum::SPR_SSWV, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN4, 0, 0},                                        # S_SSWV_RUN3
+    {CDoom::Spritenum::SPR_SSWV, 1, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN5, 0, 0},                                        # S_SSWV_RUN4
+    {CDoom::Spritenum::SPR_SSWV, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN6, 0, 0},                                        # S_SSWV_RUN5
+    {CDoom::Spritenum::SPR_SSWV, 2, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN7, 0, 0},                                        # S_SSWV_RUN6
+    {CDoom::Spritenum::SPR_SSWV, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN8, 0, 0},                                        # S_SSWV_RUN7
+    {CDoom::Spritenum::SPR_SSWV, 3, 3, ->CDoom.a_chase(Void*, Void*), CDoom::Statenum::S_SSWV_RUN1, 0, 0},                                        # S_SSWV_RUN8
+    {CDoom::Spritenum::SPR_SSWV, 4, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SSWV_ATK2, 0, 0},                                 # S_SSWV_ATK1
+    {CDoom::Spritenum::SPR_SSWV, 5, 10, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SSWV_ATK3, 0, 0},                                 # S_SSWV_ATK2
+    {CDoom::Spritenum::SPR_SSWV, 32774, 4, ->CDoom.a_cpos_attack(Void*, Void*), CDoom::Statenum::S_SSWV_ATK4, 0, 0},                              # S_SSWV_ATK3
+    {CDoom::Spritenum::SPR_SSWV, 5, 6, ->CDoom.a_face_target(Void*, Void*), CDoom::Statenum::S_SSWV_ATK5, 0, 0},                                  # S_SSWV_ATK4
+    {CDoom::Spritenum::SPR_SSWV, 32774, 4, ->CDoom.a_cpos_attack(Void*, Void*), CDoom::Statenum::S_SSWV_ATK6, 0, 0},                              # S_SSWV_ATK5
+    {CDoom::Spritenum::SPR_SSWV, 5, 1, ->CDoom.a_cpos_refire(Void*, Void*), CDoom::Statenum::S_SSWV_ATK2, 0, 0},                                  # S_SSWV_ATK6
+    {CDoom::Spritenum::SPR_SSWV, 7, 3, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_PAIN2, 0, 0},         # S_SSWV_PAIN
+    {CDoom::Spritenum::SPR_SSWV, 7, 3, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_SSWV_RUN1, 0, 0},                                         # S_SSWV_PAIN2
+    {CDoom::Spritenum::SPR_SSWV, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_DIE2, 0, 0},          # S_SSWV_DIE1
+    {CDoom::Spritenum::SPR_SSWV, 9, 5, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_SSWV_DIE3, 0, 0},                                       # S_SSWV_DIE2
+    {CDoom::Spritenum::SPR_SSWV, 10, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SSWV_DIE4, 0, 0},                                        # S_SSWV_DIE3
+    {CDoom::Spritenum::SPR_SSWV, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_DIE5, 0, 0},         # S_SSWV_DIE4
+    {CDoom::Spritenum::SPR_SSWV, 12, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SSWV_DIE5
+    {CDoom::Spritenum::SPR_SSWV, 13, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE2, 0, 0},        # S_SSWV_XDIE1
+    {CDoom::Spritenum::SPR_SSWV, 14, 5, ->CDoom.a_xscream(Void*, Void*), CDoom::Statenum::S_SSWV_XDIE3, 0, 0},                                    # S_SSWV_XDIE2
+    {CDoom::Spritenum::SPR_SSWV, 15, 5, ->CDoom.a_fall(Void*, Void*), CDoom::Statenum::S_SSWV_XDIE4, 0, 0},                                       # S_SSWV_XDIE3
+    {CDoom::Spritenum::SPR_SSWV, 16, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE5, 0, 0},        # S_SSWV_XDIE4
+    {CDoom::Spritenum::SPR_SSWV, 17, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE6, 0, 0},        # S_SSWV_XDIE5
+    {CDoom::Spritenum::SPR_SSWV, 18, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE7, 0, 0},        # S_SSWV_XDIE6
+    {CDoom::Spritenum::SPR_SSWV, 19, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE8, 0, 0},        # S_SSWV_XDIE7
+    {CDoom::Spritenum::SPR_SSWV, 20, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_XDIE9, 0, 0},        # S_SSWV_XDIE8
+    {CDoom::Spritenum::SPR_SSWV, 21, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_SSWV_XDIE9
+    {CDoom::Spritenum::SPR_SSWV, 12, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_RAISE2, 0, 0},       # S_SSWV_RAISE1
+    {CDoom::Spritenum::SPR_SSWV, 11, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_RAISE3, 0, 0},       # S_SSWV_RAISE2
+    {CDoom::Spritenum::SPR_SSWV, 10, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_RAISE4, 0, 0},       # S_SSWV_RAISE3
+    {CDoom::Spritenum::SPR_SSWV, 9, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_RAISE5, 0, 0},        # S_SSWV_RAISE4
+    {CDoom::Spritenum::SPR_SSWV, 8, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SSWV_RUN1, 0, 0},          # S_SSWV_RAISE5
+    {CDoom::Spritenum::SPR_KEEN, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_KEENSTND, 0, 0},          # S_KEENSTND
+    {CDoom::Spritenum::SPR_KEEN, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN2, 0, 0},          # S_COMMKEEN
+    {CDoom::Spritenum::SPR_KEEN, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN3, 0, 0},          # S_COMMKEEN2
+    {CDoom::Spritenum::SPR_KEEN, 2, 6, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_COMMKEEN4, 0, 0},                                       # S_COMMKEEN3
+    {CDoom::Spritenum::SPR_KEEN, 3, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN5, 0, 0},          # S_COMMKEEN4
+    {CDoom::Spritenum::SPR_KEEN, 4, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN6, 0, 0},          # S_COMMKEEN5
+    {CDoom::Spritenum::SPR_KEEN, 5, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN7, 0, 0},          # S_COMMKEEN6
+    {CDoom::Spritenum::SPR_KEEN, 6, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN8, 0, 0},          # S_COMMKEEN7
+    {CDoom::Spritenum::SPR_KEEN, 7, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN9, 0, 0},          # S_COMMKEEN8
+    {CDoom::Spritenum::SPR_KEEN, 8, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN10, 0, 0},         # S_COMMKEEN9
+    {CDoom::Spritenum::SPR_KEEN, 9, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_COMMKEEN11, 0, 0},         # S_COMMKEEN10
+    {CDoom::Spritenum::SPR_KEEN, 10, 6, ->CDoom.a_keen_die(Void*, Void*), CDoom::Statenum::S_COMMKEEN12, 0, 0},                                   # S_COMMKEEN11
+    {CDoom::Spritenum::SPR_KEEN, 11, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_COMMKEEN12
+    {CDoom::Spritenum::SPR_KEEN, 12, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_KEENPAIN2, 0, 0},         # S_KEENPAIN
+    {CDoom::Spritenum::SPR_KEEN, 12, 8, ->CDoom.a_pain(Void*, Void*), CDoom::Statenum::S_KEENSTND, 0, 0},                                         # S_KEENPAIN2
+    {CDoom::Spritenum::SPR_BBRN, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BRAIN
+    {CDoom::Spritenum::SPR_BBRN, 1, 36, ->CDoom.a_brain_pain(Void*, Void*), CDoom::Statenum::S_BRAIN, 0, 0},                                      # S_BRAIN_PAIN
+    {CDoom::Spritenum::SPR_BBRN, 0, 100, ->CDoom.a_brain_scream(Void*, Void*), CDoom::Statenum::S_BRAIN_DIE2, 0, 0},                              # S_BRAIN_DIE1
+    {CDoom::Spritenum::SPR_BBRN, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRAIN_DIE3, 0, 0},        # S_BRAIN_DIE2
+    {CDoom::Spritenum::SPR_BBRN, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRAIN_DIE4, 0, 0},        # S_BRAIN_DIE3
+    {CDoom::Spritenum::SPR_BBRN, 0, -1, ->CDoom.a_brain_die(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                        # S_BRAIN_DIE4
+    {CDoom::Spritenum::SPR_SSWV, 0, 10, ->CDoom.a_look(Void*, Void*), CDoom::Statenum::S_BRAINEYE, 0, 0},                                         # S_BRAINEYE
+    {CDoom::Spritenum::SPR_SSWV, 0, 181, ->CDoom.a_brain_awake(Void*, Void*), CDoom::Statenum::S_BRAINEYE1, 0, 0},                                # S_BRAINEYESEE
+    {CDoom::Spritenum::SPR_SSWV, 0, 150, ->CDoom.a_brain_spit(Void*, Void*), CDoom::Statenum::S_BRAINEYE1, 0, 0},                                 # S_BRAINEYE1
+    {CDoom::Spritenum::SPR_BOSF, 32768, 3, ->CDoom.a_spawn_sound(Void*, Void*), CDoom::Statenum::S_SPAWN2, 0, 0},                                 # S_SPAWN1
+    {CDoom::Spritenum::SPR_BOSF, 32769, 3, ->CDoom.a_spawn_fly(Void*, Void*), CDoom::Statenum::S_SPAWN3, 0, 0},                                   # S_SPAWN2
+    {CDoom::Spritenum::SPR_BOSF, 32770, 3, ->CDoom.a_spawn_fly(Void*, Void*), CDoom::Statenum::S_SPAWN4, 0, 0},                                   # S_SPAWN3
+    {CDoom::Spritenum::SPR_BOSF, 32771, 3, ->CDoom.a_spawn_fly(Void*, Void*), CDoom::Statenum::S_SPAWN1, 0, 0},                                   # S_SPAWN4
+    {CDoom::Spritenum::SPR_FIRE, 32768, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE2, 0, 0},                                    # S_SPAWNFIRE1
+    {CDoom::Spritenum::SPR_FIRE, 32769, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE3, 0, 0},                                    # S_SPAWNFIRE2
+    {CDoom::Spritenum::SPR_FIRE, 32770, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE4, 0, 0},                                    # S_SPAWNFIRE3
+    {CDoom::Spritenum::SPR_FIRE, 32771, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE5, 0, 0},                                    # S_SPAWNFIRE4
+    {CDoom::Spritenum::SPR_FIRE, 32772, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE6, 0, 0},                                    # S_SPAWNFIRE5
+    {CDoom::Spritenum::SPR_FIRE, 32773, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE7, 0, 0},                                    # S_SPAWNFIRE6
+    {CDoom::Spritenum::SPR_FIRE, 32774, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_SPAWNFIRE8, 0, 0},                                    # S_SPAWNFIRE7
+    {CDoom::Spritenum::SPR_FIRE, 32775, 4, ->CDoom.a_fire(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                          # S_SPAWNFIRE8
+    {CDoom::Spritenum::SPR_MISL, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRAINEXPLODE2, 0, 0}, # S_BRAINEXPLODE1
+    {CDoom::Spritenum::SPR_MISL, 32770, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BRAINEXPLODE3, 0, 0}, # S_BRAINEXPLODE2
+    {CDoom::Spritenum::SPR_MISL, 32771, 10, ->CDoom.a_brain_explode(Void*, Void*), CDoom::Statenum::S_NULL, 0, 0},                                # S_BRAINEXPLODE3
+    {CDoom::Spritenum::SPR_ARM1, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARM1A, 0, 0},              # S_ARM1
+    {CDoom::Spritenum::SPR_ARM1, 32769, 7, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARM1, 0, 0},           # S_ARM1A
+    {CDoom::Spritenum::SPR_ARM2, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARM2A, 0, 0},              # S_ARM2
+    {CDoom::Spritenum::SPR_ARM2, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_ARM2, 0, 0},           # S_ARM2A
+    {CDoom::Spritenum::SPR_BAR1, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BAR2, 0, 0},               # S_BAR1
+    {CDoom::Spritenum::SPR_BAR1, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BAR1, 0, 0},               # S_BAR2
+    {CDoom::Spritenum::SPR_BEXP, 32768, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BEXP2, 0, 0},          # S_BEXP
+    {CDoom::Spritenum::SPR_BEXP, 32769, 5, ->CDoom.a_scream(Void*, Void*), CDoom::Statenum::S_BEXP3, 0, 0},                                       # S_BEXP2
+    {CDoom::Spritenum::SPR_BEXP, 32770, 5, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BEXP4, 0, 0},          # S_BEXP3
+    {CDoom::Spritenum::SPR_BEXP, 32771, 10, ->CDoom.a_explode(Void*, Void*), CDoom::Statenum::S_BEXP5, 0, 0},                                     # S_BEXP4
+    {CDoom::Spritenum::SPR_BEXP, 32772, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_BEXP5
+    {CDoom::Spritenum::SPR_FCAN, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BBAR2, 0, 0},          # S_BBAR1
+    {CDoom::Spritenum::SPR_FCAN, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BBAR3, 0, 0},          # S_BBAR2
+    {CDoom::Spritenum::SPR_FCAN, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BBAR1, 0, 0},          # S_BBAR3
+    {CDoom::Spritenum::SPR_BON1, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1A, 0, 0},              # S_BON1
+    {CDoom::Spritenum::SPR_BON1, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1B, 0, 0},              # S_BON1A
+    {CDoom::Spritenum::SPR_BON1, 2, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1C, 0, 0},              # S_BON1B
+    {CDoom::Spritenum::SPR_BON1, 3, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1D, 0, 0},              # S_BON1C
+    {CDoom::Spritenum::SPR_BON1, 2, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1E, 0, 0},              # S_BON1D
+    {CDoom::Spritenum::SPR_BON1, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON1, 0, 0},               # S_BON1E
+    {CDoom::Spritenum::SPR_BON2, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2A, 0, 0},              # S_BON2
+    {CDoom::Spritenum::SPR_BON2, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2B, 0, 0},              # S_BON2A
+    {CDoom::Spritenum::SPR_BON2, 2, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2C, 0, 0},              # S_BON2B
+    {CDoom::Spritenum::SPR_BON2, 3, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2D, 0, 0},              # S_BON2C
+    {CDoom::Spritenum::SPR_BON2, 2, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2E, 0, 0},              # S_BON2D
+    {CDoom::Spritenum::SPR_BON2, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BON2, 0, 0},               # S_BON2E
+    {CDoom::Spritenum::SPR_BKEY, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BKEY2, 0, 0},             # S_BKEY
+    {CDoom::Spritenum::SPR_BKEY, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BKEY, 0, 0},          # S_BKEY2
+    {CDoom::Spritenum::SPR_RKEY, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RKEY2, 0, 0},             # S_RKEY
+    {CDoom::Spritenum::SPR_RKEY, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RKEY, 0, 0},          # S_RKEY2
+    {CDoom::Spritenum::SPR_YKEY, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_YKEY2, 0, 0},             # S_YKEY
+    {CDoom::Spritenum::SPR_YKEY, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_YKEY, 0, 0},          # S_YKEY2
+    {CDoom::Spritenum::SPR_BSKU, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSKULL2, 0, 0},           # S_BSKULL
+    {CDoom::Spritenum::SPR_BSKU, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BSKULL, 0, 0},        # S_BSKULL2
+    {CDoom::Spritenum::SPR_RSKU, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RSKULL2, 0, 0},           # S_RSKULL
+    {CDoom::Spritenum::SPR_RSKU, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RSKULL, 0, 0},        # S_RSKULL2
+    {CDoom::Spritenum::SPR_YSKU, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_YSKULL2, 0, 0},           # S_YSKULL
+    {CDoom::Spritenum::SPR_YSKU, 32769, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_YSKULL, 0, 0},        # S_YSKULL2
+    {CDoom::Spritenum::SPR_STIM, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_STIM
+    {CDoom::Spritenum::SPR_MEDI, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MEDI
+    {CDoom::Spritenum::SPR_SOUL, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL2, 0, 0},          # S_SOUL
+    {CDoom::Spritenum::SPR_SOUL, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL3, 0, 0},          # S_SOUL2
+    {CDoom::Spritenum::SPR_SOUL, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL4, 0, 0},          # S_SOUL3
+    {CDoom::Spritenum::SPR_SOUL, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL5, 0, 0},          # S_SOUL4
+    {CDoom::Spritenum::SPR_SOUL, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL6, 0, 0},          # S_SOUL5
+    {CDoom::Spritenum::SPR_SOUL, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_SOUL, 0, 0},           # S_SOUL6
+    {CDoom::Spritenum::SPR_PINV, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINV2, 0, 0},          # S_PINV
+    {CDoom::Spritenum::SPR_PINV, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINV3, 0, 0},          # S_PINV2
+    {CDoom::Spritenum::SPR_PINV, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINV4, 0, 0},          # S_PINV3
+    {CDoom::Spritenum::SPR_PINV, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINV, 0, 0},           # S_PINV4
+    {CDoom::Spritenum::SPR_PSTR, 32768, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_PSTR
+    {CDoom::Spritenum::SPR_PINS, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINS2, 0, 0},          # S_PINS
+    {CDoom::Spritenum::SPR_PINS, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINS3, 0, 0},          # S_PINS2
+    {CDoom::Spritenum::SPR_PINS, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINS4, 0, 0},          # S_PINS3
+    {CDoom::Spritenum::SPR_PINS, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PINS, 0, 0},           # S_PINS4
+    {CDoom::Spritenum::SPR_MEGA, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_MEGA2, 0, 0},          # S_MEGA
+    {CDoom::Spritenum::SPR_MEGA, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_MEGA3, 0, 0},          # S_MEGA2
+    {CDoom::Spritenum::SPR_MEGA, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_MEGA4, 0, 0},          # S_MEGA3
+    {CDoom::Spritenum::SPR_MEGA, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_MEGA, 0, 0},           # S_MEGA4
+    {CDoom::Spritenum::SPR_SUIT, 32768, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_SUIT
+    {CDoom::Spritenum::SPR_PMAP, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP2, 0, 0},          # S_PMAP
+    {CDoom::Spritenum::SPR_PMAP, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP3, 0, 0},          # S_PMAP2
+    {CDoom::Spritenum::SPR_PMAP, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP4, 0, 0},          # S_PMAP3
+    {CDoom::Spritenum::SPR_PMAP, 32771, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP5, 0, 0},          # S_PMAP4
+    {CDoom::Spritenum::SPR_PMAP, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP6, 0, 0},          # S_PMAP5
+    {CDoom::Spritenum::SPR_PMAP, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PMAP, 0, 0},           # S_PMAP6
+    {CDoom::Spritenum::SPR_PVIS, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PVIS2, 0, 0},          # S_PVIS
+    {CDoom::Spritenum::SPR_PVIS, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_PVIS, 0, 0},               # S_PVIS2
+    {CDoom::Spritenum::SPR_CLIP, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_CLIP
+    {CDoom::Spritenum::SPR_AMMO, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_AMMO
+    {CDoom::Spritenum::SPR_ROCK, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_ROCK
+    {CDoom::Spritenum::SPR_BROK, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BROK
+    {CDoom::Spritenum::SPR_CELL, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_CELL
+    {CDoom::Spritenum::SPR_CELP, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_CELP
+    {CDoom::Spritenum::SPR_SHEL, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SHEL
+    {CDoom::Spritenum::SPR_SBOX, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SBOX
+    {CDoom::Spritenum::SPR_BPAK, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BPAK
+    {CDoom::Spritenum::SPR_BFUG, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BFUG
+    {CDoom::Spritenum::SPR_MGUN, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MGUN
+    {CDoom::Spritenum::SPR_CSAW, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_CSAW
+    {CDoom::Spritenum::SPR_LAUN, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_LAUN
+    {CDoom::Spritenum::SPR_PLAS, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_PLAS
+    {CDoom::Spritenum::SPR_SHOT, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SHOT
+    {CDoom::Spritenum::SPR_SGN2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SHOT2
+    {CDoom::Spritenum::SPR_COLU, 32768, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_COLU
+    {CDoom::Spritenum::SPR_SMT2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_STALAG
+    {CDoom::Spritenum::SPR_GOR1, 0, 10, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOODYTWITCH2, 0, 0},     # S_BLOODYTWITCH
+    {CDoom::Spritenum::SPR_GOR1, 1, 15, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOODYTWITCH3, 0, 0},     # S_BLOODYTWITCH2
+    {CDoom::Spritenum::SPR_GOR1, 2, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOODYTWITCH4, 0, 0},      # S_BLOODYTWITCH3
+    {CDoom::Spritenum::SPR_GOR1, 1, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLOODYTWITCH, 0, 0},       # S_BLOODYTWITCH4
+    {CDoom::Spritenum::SPR_PLAY, 13, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_DEADTORSO
+    {CDoom::Spritenum::SPR_PLAY, 18, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},             # S_DEADBOTTOM
+    {CDoom::Spritenum::SPR_POL2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HEADSONSTICK
+    {CDoom::Spritenum::SPR_POL5, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_GIBS
+    {CDoom::Spritenum::SPR_POL4, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HEADONASTICK
+    {CDoom::Spritenum::SPR_POL3, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEADCANDLES2, 0, 0},   # S_HEADCANDLES
+    {CDoom::Spritenum::SPR_POL3, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEADCANDLES, 0, 0},    # S_HEADCANDLES2
+    {CDoom::Spritenum::SPR_POL1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_DEADSTICK
+    {CDoom::Spritenum::SPR_POL6, 0, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_LIVESTICK2, 0, 0},         # S_LIVESTICK
+    {CDoom::Spritenum::SPR_POL6, 1, 8, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_LIVESTICK, 0, 0},          # S_LIVESTICK2
+    {CDoom::Spritenum::SPR_GOR2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MEAT2
+    {CDoom::Spritenum::SPR_GOR3, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MEAT3
+    {CDoom::Spritenum::SPR_GOR4, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MEAT4
+    {CDoom::Spritenum::SPR_GOR5, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_MEAT5
+    {CDoom::Spritenum::SPR_SMIT, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_STALAGTITE
+    {CDoom::Spritenum::SPR_COL1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_TALLGRNCOL
+    {CDoom::Spritenum::SPR_COL2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SHRTGRNCOL
+    {CDoom::Spritenum::SPR_COL3, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_TALLREDCOL
+    {CDoom::Spritenum::SPR_COL4, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SHRTREDCOL
+    {CDoom::Spritenum::SPR_CAND, 32768, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_CANDLESTIK
+    {CDoom::Spritenum::SPR_CBRA, 32768, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},          # S_CANDELABRA
+    {CDoom::Spritenum::SPR_COL6, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SKULLCOL
+    {CDoom::Spritenum::SPR_TRE1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_TORCHTREE
+    {CDoom::Spritenum::SPR_TRE2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BIGTREE
+    {CDoom::Spritenum::SPR_ELEC, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_TECHPILLAR
+    {CDoom::Spritenum::SPR_CEYE, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_EVILEYE2, 0, 0},       # S_EVILEYE
+    {CDoom::Spritenum::SPR_CEYE, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_EVILEYE3, 0, 0},       # S_EVILEYE2
+    {CDoom::Spritenum::SPR_CEYE, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_EVILEYE4, 0, 0},       # S_EVILEYE3
+    {CDoom::Spritenum::SPR_CEYE, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_EVILEYE, 0, 0},        # S_EVILEYE4
+    {CDoom::Spritenum::SPR_FSKU, 32768, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FLOATSKULL2, 0, 0},    # S_FLOATSKULL
+    {CDoom::Spritenum::SPR_FSKU, 32769, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FLOATSKULL3, 0, 0},    # S_FLOATSKULL2
+    {CDoom::Spritenum::SPR_FSKU, 32770, 6, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_FLOATSKULL, 0, 0},     # S_FLOATSKULL3
+    {CDoom::Spritenum::SPR_COL5, 0, 14, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEARTCOL2, 0, 0},         # S_HEARTCOL
+    {CDoom::Spritenum::SPR_COL5, 1, 14, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_HEARTCOL, 0, 0},          # S_HEARTCOL2
+    {CDoom::Spritenum::SPR_TBLU, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLUETORCH2, 0, 0},     # S_BLUETORCH
+    {CDoom::Spritenum::SPR_TBLU, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLUETORCH3, 0, 0},     # S_BLUETORCH2
+    {CDoom::Spritenum::SPR_TBLU, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLUETORCH4, 0, 0},     # S_BLUETORCH3
+    {CDoom::Spritenum::SPR_TBLU, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BLUETORCH, 0, 0},      # S_BLUETORCH4
+    {CDoom::Spritenum::SPR_TGRN, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GREENTORCH2, 0, 0},    # S_GREENTORCH
+    {CDoom::Spritenum::SPR_TGRN, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GREENTORCH3, 0, 0},    # S_GREENTORCH2
+    {CDoom::Spritenum::SPR_TGRN, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GREENTORCH4, 0, 0},    # S_GREENTORCH3
+    {CDoom::Spritenum::SPR_TGRN, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GREENTORCH, 0, 0},     # S_GREENTORCH4
+    {CDoom::Spritenum::SPR_TRED, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_REDTORCH2, 0, 0},      # S_REDTORCH
+    {CDoom::Spritenum::SPR_TRED, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_REDTORCH3, 0, 0},      # S_REDTORCH2
+    {CDoom::Spritenum::SPR_TRED, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_REDTORCH4, 0, 0},      # S_REDTORCH3
+    {CDoom::Spritenum::SPR_TRED, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_REDTORCH, 0, 0},       # S_REDTORCH4
+    {CDoom::Spritenum::SPR_SMBT, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BTORCHSHRT2, 0, 0},    # S_BTORCHSHRT
+    {CDoom::Spritenum::SPR_SMBT, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BTORCHSHRT3, 0, 0},    # S_BTORCHSHRT2
+    {CDoom::Spritenum::SPR_SMBT, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BTORCHSHRT4, 0, 0},    # S_BTORCHSHRT3
+    {CDoom::Spritenum::SPR_SMBT, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_BTORCHSHRT, 0, 0},     # S_BTORCHSHRT4
+    {CDoom::Spritenum::SPR_SMGT, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GTORCHSHRT2, 0, 0},    # S_GTORCHSHRT
+    {CDoom::Spritenum::SPR_SMGT, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GTORCHSHRT3, 0, 0},    # S_GTORCHSHRT2
+    {CDoom::Spritenum::SPR_SMGT, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GTORCHSHRT4, 0, 0},    # S_GTORCHSHRT3
+    {CDoom::Spritenum::SPR_SMGT, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_GTORCHSHRT, 0, 0},     # S_GTORCHSHRT4
+    {CDoom::Spritenum::SPR_SMRT, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RTORCHSHRT2, 0, 0},    # S_RTORCHSHRT
+    {CDoom::Spritenum::SPR_SMRT, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RTORCHSHRT3, 0, 0},    # S_RTORCHSHRT2
+    {CDoom::Spritenum::SPR_SMRT, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RTORCHSHRT4, 0, 0},    # S_RTORCHSHRT3
+    {CDoom::Spritenum::SPR_SMRT, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_RTORCHSHRT, 0, 0},     # S_RTORCHSHRT4
+    {CDoom::Spritenum::SPR_HDB1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGNOGUTS
+    {CDoom::Spritenum::SPR_HDB2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGBNOBRAIN
+    {CDoom::Spritenum::SPR_HDB3, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGTLOOKDN
+    {CDoom::Spritenum::SPR_HDB4, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGTSKULL
+    {CDoom::Spritenum::SPR_HDB5, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGTLOOKUP
+    {CDoom::Spritenum::SPR_HDB6, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_HANGTNOBRAIN
+    {CDoom::Spritenum::SPR_POB1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_COLONGIBS
+    {CDoom::Spritenum::SPR_POB2, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_SMALLPOOL
+    {CDoom::Spritenum::SPR_BRS1, 0, -1, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_NULL, 0, 0},              # S_BRAINSTEM
+    {CDoom::Spritenum::SPR_TLMP, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECHLAMP2, 0, 0},      # S_TECHLAMP
+    {CDoom::Spritenum::SPR_TLMP, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECHLAMP3, 0, 0},      # S_TECHLAMP2
+    {CDoom::Spritenum::SPR_TLMP, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECHLAMP4, 0, 0},      # S_TECHLAMP3
+    {CDoom::Spritenum::SPR_TLMP, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECHLAMP, 0, 0},       # S_TECHLAMP4
+    {CDoom::Spritenum::SPR_TLP2, 32768, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECH2LAMP2, 0, 0},     # S_TECH2LAMP
+    {CDoom::Spritenum::SPR_TLP2, 32769, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECH2LAMP3, 0, 0},     # S_TECH2LAMP2
+    {CDoom::Spritenum::SPR_TLP2, 32770, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECH2LAMP4, 0, 0},     # S_TECH2LAMP3
+    {CDoom::Spritenum::SPR_TLP2, 32771, 4, CDoom::ActionfV.new(Pointer(Void).null, Pointer(Void).null), CDoom::Statenum::S_TECH2LAMP, 0, 0},      # S_TECH2LAMP4
+  ]
   @@states : Array(CDoom::State) = Array.new(CDoom::Statenum::NUMSTATES.value, CDoom::State.new)
- @@statedata.each_with_index do |elm, i|
+  @@statedata.each_with_index do |elm, i|
     (@@states.to_unsafe + i).value.sprite = elm[0]
     (@@states.to_unsafe + i).value.frame = elm[1]
     (@@states.to_unsafe + i).value.tics = elm[2]
@@ -1981,10 +1981,261 @@ module LibDoom
     (@@states.to_unsafe + i).value.misc2 = elm[6]
   end
 
-  pp @@states[1]
-
   CDoom.states = @@states.to_unsafe
 
+  c_array_strings(CDoom.gammamsg,
+    CDoom::GAMMALVL0,
+    CDoom::GAMMALVL1,
+    CDoom::GAMMALVL2,
+    CDoom::GAMMALVL3,
+    CDoom::GAMMALVL4)
+
+  c_array_strings(CDoom.skull_name,
+    "M_SKULL1",
+    "M_SKULL2")
+
+  c_array(CDoom.menu_custom_texts,
+    CDoom::MenuCustomText.new(name: "TXT_MMOV".to_unsafe,
+      segs: StaticArray[
+        CDoom::MenuCustomTextSeg.new(lump: "M_MSENS", x: 0, w: 74, offx: 0, offy: 0),                   # Mouse
+        CDoom::MenuCustomTextSeg.new(lump: "M_MSENS", x: 0, w: 31, offx: 83, offy: 0),                  # Mo
+        CDoom::MenuCustomTextSeg.new(lump: "M_MSENS", x: 160, w: 14, offx: 83 + 31, offy: 0),           # v
+        CDoom::MenuCustomTextSeg.new(lump: "M_MSENS", x: 60, w: 14, offx: 83 + 31 + 14, offy: 0),       # e
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 169, w: 5, offx: 83 + 31 + 14 + 14, offy: 0), # :
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+      ]),
+    CDoom::MenuCustomText.new(name: "TXT_MOPT".to_unsafe,
+      segs: StaticArray[
+        CDoom::MenuCustomTextSeg.new(lump: "M_MSENS", x: 0, w: 74, offx: 0, offy: 0),       # Mouse
+        CDoom::MenuCustomTextSeg.new(lump: "M_OPTION", x: 0, w: 92, offx: 74 + 9, offy: 0), # Options
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+      ]),
+    CDoom::MenuCustomText.new(name: "TXT_CROS".to_unsafe,
+      segs: StaticArray[
+        CDoom::MenuCustomTextSeg.new(lump: "M_SKILL", x: 0, w: 16, offx: 0, offy: 0),                                  # C
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 14, w: 15, offx: 16, offy: 0),                               # r
+        CDoom::MenuCustomTextSeg.new(lump: "M_SKILL", x: 46, w: 30, offx: 16 + 15, offy: 0),                           # os
+        CDoom::MenuCustomTextSeg.new(lump: "M_SKILL", x: 62, w: 14, offx: 16 + 15 + 30, offy: 0),                      # s
+        CDoom::MenuCustomTextSeg.new(lump: "M_SKILL", x: 16, w: 15, offx: 16 + 15 + 30 + 14, offy: 0),                 # h
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 140, w: 19, offx: 16 + 15 + 30 + 14 + 15, offy: 0),          # ai
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 14, w: 15, offx: 16 + 15 + 30 + 14 + 15 + 19, offy: 0),      # r
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 169, w: 5, offx: 16 + 15 + 30 + 14 + 15 + 19 + 15, offy: 0), # :
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+      ]),
+    CDoom::MenuCustomText.new(name: "TXT_ARUN".to_unsafe,
+      segs: StaticArray[
+        CDoom::MenuCustomTextSeg.new(lump: "M_SGTTL", x: 90, w: 17, offx: 0, offy: 0),                                          # A
+        CDoom::MenuCustomTextSeg.new(lump: "M_GDLOW", x: 0, w: 10, offx: 17, offy: 3),                                          # l
+        CDoom::MenuCustomTextSeg.new(lump: "M_GDLOW", x: 26, w: 16, offx: 17 + 10, offy: 3),                                    #
+        CDoom::MenuCustomTextSeg.new(lump: "M_DISP", x: 57, w: 30, offx: 17 + 10 + 16, offy: 0),                                # ay
+        CDoom::MenuCustomTextSeg.new(lump: "M_RDTHIS", x: 99, w: 14, offx: 17 + 10 + 16 + 30, offy: 0),                         # s
+        CDoom::MenuCustomTextSeg.new(lump: "M_RDTHIS", x: 0, w: 16, offx: 17 + 10 + 16 + 30 + 14 + 7, offy: 0),                 # R
+        CDoom::MenuCustomTextSeg.new(lump: "M_SFXVOL", x: 90, w: 15, offx: 17 + 10 + 16 + 30 + 14 + 7 + 16, offy: 0),           # u
+        CDoom::MenuCustomTextSeg.new(lump: "M_OPTION", x: 62, w: 15, offx: 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15, offy: 0),      # n
+        CDoom::MenuCustomTextSeg.new(lump: "M_DETAIL", x: 169, w: 5, offx: 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15 + 15, offy: 0), # :
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+        CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new, CDoom::MenuCustomTextSeg.new,
+      ])
+  )
+
+  CDoom.custom_texts_count = sizeof(typeof(CDoom.menu_custom_texts)) // sizeof(CDoom::MenuCustomText)
+
+  c_array_strings(CDoom.detail_names,
+    "M_GDHIGH", "M_GDLOW")
+  c_array_strings(CDoom.msg_names,
+    "M_MSGOFF", "M_MSGON")
+
+  c_array(CDoom.quitsounds,
+    CDoom::Sfxenum::SFX_pldeth.value,
+    CDoom::Sfxenum::SFX_dmpain.value,
+    CDoom::Sfxenum::SFX_popain.value,
+    CDoom::Sfxenum::SFX_slop.value,
+    CDoom::Sfxenum::SFX_telept.value,
+    CDoom::Sfxenum::SFX_posit1.value,
+    CDoom::Sfxenum::SFX_posit3.value,
+    CDoom::Sfxenum::SFX_sgtatk.value)
+
+  c_array(CDoom.quitsounds2,
+    CDoom::Sfxenum::SFX_vilact.value,
+    CDoom::Sfxenum::SFX_getpow.value,
+    CDoom::Sfxenum::SFX_boscub.value,
+    CDoom::Sfxenum::SFX_slop.value,
+    CDoom::Sfxenum::SFX_skeswg.value,
+    CDoom::Sfxenum::SFX_kntdth.value,
+    CDoom::Sfxenum::SFX_bspact.value,
+    CDoom::Sfxenum::SFX_sgtatk.value)
+
+  c_array(CDoom.mainmenu,
+    CDoom::Menuitem.new(status: 1, name: "M_NGAME".to_unsafe, routine: ->CDoom.m_new_game(Int32), alpha_key: 'n'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_OPTION".to_unsafe, routine: ->CDoom.m_options(Int32), alpha_key: 'o'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_LOADG".to_unsafe, routine: ->CDoom.m_load_game(Int32), alpha_key: 'l'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_SAVEG".to_unsafe, routine: ->CDoom.m_save_game(Int32), alpha_key: 's'.ord),
+    # Another hickup with Special edition.
+    CDoom::Menuitem.new(status: 1, name: "M_RDTHIS".to_unsafe, routine: ->CDoom.m_readthis(Int32), alpha_key: 'r'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_QUITG".to_unsafe, routine: ->CDoom.m_quitdoom(Int32), alpha_key: 'q'.ord),
+  )
+
+  pointerof(CDoom.maindef).value = CDoom::Menu.new(
+    numitems: CDoom::Mainenum::MainEnd.value,
+    prev_menu: Pointer(CDoom::Menu).null,
+    menuitems: CDoom.mainmenu.to_unsafe,
+    routine: ->CDoom.m_draw_mainmenu,
+    x: 97, y: 64,
+    last_on: 0
+  )
+
+  c_array(CDoom.episodemenu,
+    CDoom::Menuitem.new(status: 1, name: "M_EPI1".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'k'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI2".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI3".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 'i'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_EPI4".to_unsafe, routine: ->CDoom.m_episode(Int32), alpha_key: 't'.ord),
+  )
+
+  pointerof(CDoom.epidef).value = CDoom::Menu.new(
+    numitems: CDoom::Episodesenum::EpEnd.value,
+    prev_menu: pointerof(CDoom.maindef),
+    menuitems: CDoom.episodemenu.to_unsafe,
+    routine: ->CDoom.m_draw_episode,
+    x: 48, y: 63,
+    last_on: CDoom::Episodesenum::Ep1.value
+  )
+
+  c_array(CDoom.newgame_menu,
+    CDoom::Menuitem.new(status: 1, name: "M_JKILL".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'i'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_ROUGH".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_HURT".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'h'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_ULTRA".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'u'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_NMARE".to_unsafe, routine: ->CDoom.m_choose_skill(Int32), alpha_key: 'n'.ord),
+  )
+
+  pointerof(CDoom.newdef).value = CDoom::Menu.new(
+    numitems: CDoom::NewgameEnum::NewgEnd.value,
+    prev_menu: pointerof(CDoom.epidef),
+    menuitems: CDoom.newgame_menu.to_unsafe,
+    routine: ->CDoom.m_draw_newgame,
+    x: 48, y: 63,
+    last_on: CDoom::NewgameEnum::Hurtme.value
+  )
+
+  c_array(CDoom.options_menu,
+    CDoom::Menuitem.new(status: 1, name: "M_ENDGAM".to_unsafe, routine: ->CDoom.m_endgame(Int32), alpha_key: 'e'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_MESSG".to_unsafe, routine: ->CDoom.m_change_messages(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: 1, name: "TXT_CROS".to_unsafe, routine: ->CDoom.m_change_crosshair(Int32), alpha_key: 'c'.ord),
+    CDoom::Menuitem.new(status: 1, name: "TXT_ARUN".to_unsafe, routine: ->CDoom.m_change_alwaysrun(Int32), alpha_key: 'r'.ord),
+    # CDoom::Menuitem.new(status: 1, name: "M_DETAIL".to_unsafe, routine: ->CDoom.m_change_detail(Int32), alpha_key: 'g'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_SCRNSZ".to_unsafe, routine: ->CDoom.m_size_display(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe),
+    CDoom::Menuitem.new(status: 1, name: "TXT_MOPT".to_unsafe, routine: ->CDoom.m_mouse_options(Int32), alpha_key: 'f'.ord),
+    CDoom::Menuitem.new(status: 1, name: "M_SVOL".to_unsafe, routine: ->CDoom.m_sound(Int32), alpha_key: 's'.ord),
+  )
+
+  pointerof(CDoom.optionsdef).value = CDoom::Menu.new(
+    numitems: CDoom::OptionsEnum::OptEnd.value,
+    prev_menu: pointerof(CDoom.maindef),
+    menuitems: CDoom.options_menu.to_unsafe,
+    routine: ->CDoom.m_draw_options,
+    x: 60, y: 37,
+    last_on: 0
+  )
+
+  c_array(CDoom.mouse_options_menu,
+    CDoom::Menuitem.new(status: 1, name: "TXT_MMOV".to_unsafe, routine: ->CDoom.m_mouse_move(Int32), alpha_key: 'f'.ord),
+    CDoom::Menuitem.new(status: 2, name: "M_MSENS".to_unsafe, routine: ->CDoom.m_change_sensitivity(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe)
+  )
+
+  pointerof(CDoom.mouseoptionsdef).value = CDoom::Menu.new(
+    numitems: CDoom::MouseoptionsEnum::MouseOptEnd.value,
+    prev_menu: pointerof(CDoom.optionsdef),
+    menuitems: CDoom.mouse_options_menu.to_unsafe,
+    routine: ->CDoom.m_draw_mouse_options,
+    x: 60, y: 70,
+    last_on: 0
+  )
+
+  c_array(CDoom.readmenu1,
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_readthis2(Int32))
+  )
+
+  pointerof(CDoom.readdef1).value = CDoom::Menu.new(
+    numitems: CDoom::Readenum::Read1End.value,
+    prev_menu: pointerof(CDoom.maindef),
+    menuitems: CDoom.readmenu1.to_unsafe,
+    routine: ->CDoom.m_draw_readthis1,
+    x: 280, y: 185,
+    last_on: 0
+  )
+
+  c_array(CDoom.readmenu2,
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_finish_readthis(Int32))
+  )
+
+  pointerof(CDoom.readdef2).value = CDoom::Menu.new(
+    numitems: CDoom::Read2enum::Read2End.value,
+    prev_menu: pointerof(CDoom.readdef1),
+    menuitems: CDoom.readmenu2.to_unsafe,
+    routine: ->CDoom.m_draw_readthis2,
+    x: 330, y: 175,
+    last_on: 0
+  )
+
+  c_array(CDoom.soundmenu,
+    CDoom::Menuitem.new(status: 2, name: "M_SFXVOL".to_unsafe, routine: ->CDoom.m_sfxvol(Int32), alpha_key: 's'.ord),
+    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
+    CDoom::Menuitem.new(status: 2, name: "M_MUSVOL".to_unsafe, routine: ->CDoom.m_musicvol(Int32), alpha_key: 'm'.ord),
+    CDoom::Menuitem.new(status: -1, name: "".to_unsafe),
+  )
+
+  pointerof(CDoom.sounddef).value = CDoom::Menu.new(
+    numitems: CDoom::Soundenum::SoundEnd.value,
+    prev_menu: pointerof(CDoom.optionsdef),
+    menuitems: CDoom.soundmenu.to_unsafe,
+    routine: ->CDoom.m_draw_sound,
+    x: 80, y: 64,
+    last_on: 0
+  )
+
+  c_array(CDoom.loadmenu,
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '1'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '2'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '3'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '4'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '5'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_load_select(Int32), alpha_key: '6'.ord),
+  )
+
+  pointerof(CDoom.loaddef).value = CDoom::Menu.new(
+    numitems: CDoom::Loadenum::LoadEnd.value,
+    prev_menu: pointerof(CDoom.maindef),
+    menuitems: CDoom.loadmenu.to_unsafe,
+    routine: ->CDoom.m_draw_load,
+    x: 80, y: 54,
+    last_on: 0
+  )
+
+  c_array(CDoom.savemenu,
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '1'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '2'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '3'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '4'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '5'.ord),
+    CDoom::Menuitem.new(status: 1, name: "".to_unsafe, routine: ->CDoom.m_save_select(Int32), alpha_key: '6'.ord),
+  )
+
+  pointerof(CDoom.savedef).value = CDoom::Menu.new(
+    numitems: CDoom::Loadenum::LoadEnd.value,
+    prev_menu: pointerof(CDoom.maindef),
+    menuitems: CDoom.savemenu.to_unsafe,
+    routine: ->CDoom.m_draw_save,
+    x: 80, y: 54,
+    last_on: 0
+  )
 
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
@@ -5475,15 +5726,15 @@ module LibDoom
       end
     end
 
-    forward += CDoom.mousey if CDoom.mousemove != 0
+    forward += @@mousey if CDoom.mousemove != 0
     if strafe != 0
-      side += CDoom.mousex * 2
+      side += @@mousex * 2
     else
-      cmd.value.angleturn = cmd.value.angleturn - CDoom.mousex * 0x8
+      cmd.value.angleturn = cmd.value.angleturn - @@mousex * 0x8
     end
 
-    CDoom.mousex = 0
-    CDoom.mousey = 0
+    @@mousex = 0
+    @@mousey = 0
 
     if forward > CDoom::MAXPLMOVE
       forward = CDoom::MAXPLMOVE
@@ -5558,8 +5809,8 @@ module LibDoom
     CDoom.doom_memset(CDoom.gamekeydown, 0, sizeof(typeof(CDoom.gamekeydown)))
     CDoom.joyxmove = 0
     CDoom.joyymove = 0
-    CDoom.mousex = 0
-    CDoom.mousey = 0
+    @@mousex = 0
+    @@mousey = 0
     CDoom.sendpause = 0
     CDoom.sendsave = 0
     CDoom.paused = 0
@@ -5624,8 +5875,8 @@ module LibDoom
       CDoom.mousebuttons[0] = ev.value.data1 & 1
       CDoom.mousebuttons[1] = ev.value.data1 & 2
       CDoom.mousebuttons[2] = ev.value.data1 & 4
-      CDoom.mousex = ev.value.data2 * (CDoom.mouse_sensitivity + 5) // 10
-      CDoom.mousey = ev.value.data3 * (CDoom.mouse_sensitivity + 5) // 10
+      @@mousex = ev.value.data2 * (CDoom.mouse_sensitivity + 5) // 10
+      @@mousey = ev.value.data3 * (CDoom.mouse_sensitivity + 5) // 10
       return 1 # eat events
     when CDoom::Evtype::Joystick
       CDoom.joybuttons[0] = ev.value.data1 & 1
@@ -7908,9 +8159,9 @@ module LibDoom
     256.times do |i|
       CDoom.screen_palette[i*3] = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
       palette += 1
-      CDoom.screen_palette[i*3+1] = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      CDoom.screen_palette[i*3 + 1] = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
       palette += 1
-      CDoom.screen_palette[i*3+2] = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
+      CDoom.screen_palette[i*3 + 2] = CDoom.gammatable[CDoom.usegamma][palette.value] & ~3
       palette += 1
     end
   end
@@ -7930,5 +8181,1195 @@ module LibDoom
     Raylib.unload_image(image)
     Raylib.set_texture_filter(@@screen_texture.not_nil!, Raylib::TextureFilter::Point)
   end
+
+  #
+  # m_check_parm
+  # Checks for the given parameter
+  # in the program's command line arguments.
+  # Returns the argument number (1 to argc-1)
+  # or 0 if not present
+  def self.m_check_parm(check : UInt8*) : Int32
+    i = 1
+    while i < CDoom.myargc
+      return i if CDoom.doom_strcasecmp(check, CDoom.myargv[i]) == 0
+      i += 1
+    end
+
+    return 0
+  end
+
+  def self.m_clear_box(box : CDoom::Fixed*)
+    (box + CDoom::BOXTOP).value = Int32::MIN
+    (box + CDoom::BOXRIGHT).value = Int32::MIN
+    (box + CDoom::BOXLEFT).value = Int32::MAX
+    (box + CDoom::BOXBOTTOM).value = Int32::MAX
+  end
+
+  def self.m_add_to_box(box : CDoom::Fixed*, x : CDoom::Fixed, y : CDoom::Fixed)
+    if x < box[CDoom::BOXLEFT]
+      (box + CDoom::BOXLEFT).value = x
+    elsif x > box[CDoom::BOXRIGHT]
+      (box + CDoom::BOXRIGHT).value = x
+    end
+    if y < box[CDoom::BOXBOTTOM]
+      (box + CDoom::BOXBOTTOM).value = y
+    elsif y > box[CDoom::BOXTOP]
+      (box + CDoom::BOXTOP).value = y
+    end
+  end
+
+  @@firsttime = 1
+  @@cheat_xlate_table = uninitialized StaticArray(UInt8, 256)
+
+  def self.cht_check_cheat(cht : CDoom::Cheatseq*, key : LibC::Char) : LibC::Int
+    rc = 0
+
+    if @@firsttime != 0
+      @@firsttime = 0
+      256.times { |i| @@cheat_xlate_table[i] = (scramble(i)).to_u8 }
+    end
+
+    if cht.value.p.null?
+      cht.value.p = cht.value.sequence # initialize if first time
+    end
+
+    if cht.value.p.value == 0
+      cht.value.p.value = key
+      cht.value.p = cht.value.p + 1
+    elsif @@cheat_xlate_table[key.to_u8!] == cht.value.p.value
+      cht.value.p = cht.value.p + 1
+    else
+      cht.value.p = cht.value.sequence
+    end
+
+    if cht.value.p.value == 1
+      cht.value.p = cht.value.p + 1
+    elsif cht.value.p.value == 0xff # end of sequence character
+      cht.value.p = cht.value.sequence
+      rc = 1
+    end
+
+    return rc
+  end
+
+  def self.cht_get_param(cht : CDoom::Cheatseq*, buffer : LibC::Char*)
+    p = cht.value.sequence
+    while p.value != 1
+      p += 1
+    end
+    p += 1
+
+    c = 0
+
+    loop do
+      c = p.value
+      buffer.value = c
+      buffer += 1
+      p.value = 0
+      p += 1
+
+      break unless c != 0 && p.value != 0xff
+    end
+
+    buffer.value = 0 if p.value == 0xff
+  end
+
+  def self.fixed_mul(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+    return ((a.to_i64 * b.to_i64) >> CDoom::FRACBITS).to_i32!
+  end
+
+  def self.fixed_div(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+    return (a ^ b) < 0 ? Int32::MIN : Int32::MAX if (doom_abs(a) >> 14) >= doom_abs(b)
+    return CDoom.fixed_div2(a, b)
+  end
+
+  def self.fixed_div2(a : CDoom::Fixed, b : CDoom::Fixed) : CDoom::Fixed
+    c = (a.to_f64 / b.to_f64) * CDoom::FRACUNIT
+
+    CDoom.i_error("Error: fixed_div: divide by zero") if c >= 2147483648.0 || c < -2147483648.0
+    return c.to_i32!
+  end
+
+  #
+  # m_draw_custom_menu_text
+  #  Draw several segments of patches to make up new text
+  #
+  def self.m_draw_custom_menu_text(name : LibC::Char*, x : LibC::Int, y : LibC::Int)
+    CDoom.custom_texts_count.times do |i|
+      custom_text = CDoom.menu_custom_texts.to_unsafe + i
+      if CDoom.doom_strcmp(custom_text.value.name, name) == 0
+        seg = custom_text.value.segs.to_unsafe
+        while !seg.value.lump.null?
+          lump = CDoom.w_cache_lump_name(seg.value.lump, CDoom::PU_CACHE).as(CDoom::Patch*)
+          CDoom.v_draw_patch_rect_direct(x + seg.value.offx, y, 0, lump, seg.value.x, seg.value.w)
+          seg += 1
+        end
+        break
+      end
+    end
+  end
+
+  #
+  # m_read_save_strings
+  # read the strings from the savegame files
+  #
+  def self.m_read_save_strings
+    name = uninitialized StaticArray(UInt8, 256)
+
+    CDoom::Loadenum::LoadEnd.value.times do |i|
+      # if CDoom.m_check_parm("-cdrom") != 0
+      #  doom_sprintf(name, "c:\\doomdata\\" + CDoom::SAVEGAMENAME + i + ".dsg")
+      # else
+      CDoom.doom_strcpy(name, CDoom::SAVEGAMENAME)
+      CDoom.doom_concat(name, CDoom.doom_itoa(i, 10))
+      CDoom.doom_concat(name, ".dsg")
+
+      handle = CDoom.doom_open.call(name.to_unsafe, "r".to_unsafe)
+      if handle.null?
+        CDoom.doom_strcpy((CDoom.savegamestrings.to_unsafe + i).value.to_unsafe, CDoom::EMPTYSTRING)
+        (CDoom.loadmenu.to_unsafe + i).value.status = 0
+        next
+      end
+      count = CDoom.doom_read.call(handle, (CDoom.savegamestrings.to_unsafe + i).as(Void*), CDoom::SAVESTRINGSIZE)
+      CDoom.doom_close.call(handle)
+      (CDoom.loadmenu.to_unsafe + i).value.status = 1
+    end
+  end
+
+
+  # m_draw_load & Cie
+  def self.m_draw_load
+    CDoom.v_draw_patch_direct(72, 28, 0, CDoom.w_cache_lump_name("M_LOADG", CDoom::PU_CACHE).as(CDoom::Patch*))
+    CDoom::Loadenum::LoadEnd.value.times do |i|
+      CDoom.m_draw_save_load_border(CDoom.loaddef.x, CDoom.loaddef.y + CDoom::LINEHEIGHT * i)
+      CDoom.m_write_text(CDoom.loaddef.x, CDoom.loaddef.y + CDoom::LINEHEIGHT * i, CDoom.savegamestrings[i])
+    end
+  end
+
+  #
+  # Draw border for the savegame description
+  #
+  def self.m_draw_save_load_border(x : Int32, y : Int32)
+    CDoom.v_draw_patch_direct(x - 8, y + 7, 0, CDoom.w_cache_lump_name("M_LSLEFT", CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    24.times do |i|
+      CDoom.v_draw_patch_direct(x, y + 7, 0, CDoom.w_cache_lump_name("M_LSCNTR", CDoom::PU_CACHE).as(CDoom::Patch*))
+      x += 8
+    end
+
+    CDoom.v_draw_patch_direct(x, y + 7, 0, CDoom.w_cache_lump_name("M_LSRGHT", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  #
+  # User wants to load this game
+  #
+  def self.m_load_select(choice : Int32)
+    name = uninitialized StaticArray(UInt8, 256)
+
+    # if CDoom.m_check_parm("-cdrom")
+    #  CDoom.doom_sprintf(name, "c:\\doomdata\\#{CDoom::SAVEGAMENAME}#{choice}.dsg")
+    # else
+    CDoom.doom_strcpy(name, CDoom::SAVEGAMENAME)
+    CDoom.doom_concat(name, CDoom.doom_itoa(choice, 10))
+    CDoom.doom_concat(name, ".dsg")
+
+    CDoom.g_load_game(name)
+    CDoom.m_clear_menus
+  end
+
+  #
+  # Selected from DOOM menu
+  #
+  def self.m_load_game(choice : Int32)
+    if CDoom.netgame != 0
+      CDoom.m_start_message(CDoom::LOADNET, NULL_PROC, 0)
+      return
+    end
+
+    CDoom.m_setup_next_menu(pointerof(CDoom.loaddef))
+    CDoom.m_read_save_strings
+  end
+
+  #
+  #  m_save_game & Cie.
+  #
+  def self.m_draw_save
+    CDoom.v_draw_patch_direct(72, 28, 0, CDoom.w_cache_lump_name("M_SAVEG", CDoom::PU_CACHE).as(CDoom::Patch*))
+    CDoom::Loadenum::LoadEnd.value.times do |i|
+      CDoom.m_draw_save_load_border(CDoom.loaddef.x, CDoom.loaddef.y + CDoom::LINEHEIGHT * i)
+      CDoom.m_write_text(CDoom.loaddef.x, CDoom.loaddef.y + CDoom::LINEHEIGHT * i, CDoom.savegamestrings[i])
+    end
+
+    if CDoom.save_string_enter != 0
+      i = CDoom.m_string_width(CDoom.savegamestrings[CDoom.save_slot])
+      CDoom.m_write_text(CDoom.loaddef.x + i, CDoom.loaddef.y + CDoom::LINEHEIGHT * CDoom.save_slot, "_")
+    end
+  end
+
+  #
+  # m_responder calls this when user is finished
+  #
+  def self.m_do_save(slot : Int32)
+    CDoom.g_save_game(slot, CDoom.savegamestrings[slot])
+    CDoom.m_clear_menus
+
+    # PICK QUICKSAVE SLOT YET?
+    CDoom.quick_save_slot = slot if CDoom.quick_save_slot == -2
+  end
+
+  #
+  # User wants to save. Start string input for m_responder
+  #
+  def self.m_save_select(choice : Int32)
+    # we are going to be intercepting all chars
+    CDoom.save_string_enter = 1
+
+    CDoom.save_slot = choice
+    CDoom.doom_strcpy(CDoom.save_old_string, CDoom.savegamestrings[choice])
+    if CDoom.doom_strcmp(CDoom.savegamestrings[choice], CDoom::EMPTYSTRING) == 0
+      (CDoom.savegamestrings.to_unsafe + choice).value.to_unsafe.value = 0
+    end
+    CDoom.save_char_index = CDoom.doom_strlen(CDoom.savegamestrings[choice]).to_i32!
+  end
+
+  #
+  # Selected from DOOM menu
+  #
+  def self.m_save_game(choice : Int32)
+    if CDoom.usergame == 0
+      CDoom.m_start_message(CDoom::SAVEDEAD, NULL_PROC, 0)
+      return
+    end
+
+    return if CDoom.gamestate != CDoom::Gamestate::Level
+
+    CDoom.m_setup_next_menu(pointerof(CDoom.savedef))
+    CDoom.m_read_save_strings    
+  end
+
+  #
+  # m_quicksave
+  #
+  def self.m_quicksave_response(ch : Int32)
+    if ch == 'y'.ord
+      CDoom.m_do_save(CDoom.quick_save_slot)
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
+    end
+  end
+
+  def self.m_quicksave
+    if CDoom.usergame == 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+      return
+    end
+
+    return if CDoom.gamestate != CDoom::Gamestate::Level
+
+    if CDoom.quick_save_slot < 0
+      CDoom.m_start_control_panel
+      CDoom.m_read_save_strings
+      CDoom.m_setup_next_menu(pointerof(CDoom.savedef))
+      CDoom.quick_save_slot = -2 # means to pick a slot now
+      return
+    end
+    CDoom.doom_strcpy(CDoom.tempstring, CDoom::QSPROMPT_1)
+    CDoom.doom_concat(CDoom.tempstring, CDoom.savegamestrings[CDoom.quick_save_slot])
+    CDoom.doom_concat(CDoom.tempstring, CDoom::QSPROMPT_2)
+    CDoom.m_start_message(CDoom.tempstring, ->CDoom.m_quicksave_response(Int32), 1)
+  end
+
+  #
+  # m_quickload
+  #
+  def self.m_quickload_response(ch : Int32)
+    if ch == 'y'.ord
+      CDoom.m_load_select(CDoom.quick_save_slot)
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
+    end
+  end
+
+  def self.m_quickload
+    if CDoom.netgame != 0
+      CDoom.m_start_message(CDoom::QLOADNET, NULL_PROC, 0)
+      return
+    end
+
+    if CDoom.quick_save_slot < 0
+      CDoom.m_start_message(CDoom::QSAVESPOT, NULL_PROC, 0)
+      return
+    end
+    CDoom.doom_strcpy(CDoom.tempstring, CDoom::QLPROMPT_1)
+    CDoom.doom_concat(CDoom.tempstring, CDoom.savegamestrings[CDoom.quick_save_slot])
+    CDoom.doom_concat(CDoom.tempstring, CDoom::QLPROMPT_2)
+    CDoom.m_start_message(CDoom.tempstring, ->CDoom.m_quickload_response(Int32), 1)
+  end
+
+  #
+  # Read This Menus
+  # Had a "quick hack to fix romero bug"
+  #
+  def self.m_draw_readthis1
+    CDoom.inhelpscreens = 1
+    case CDoom.gamemode
+    when CDoom::GameMode::Commercial
+      CDoom.v_draw_patch_direct(0, 0, 0, CDoom.w_cache_lump_name("HELP", CDoom::PU_CACHE).as(CDoom::Patch*))
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
+      CDoom.v_draw_patch_direct(0, 0, 0, CDoom.w_cache_lump_name("HELP1", CDoom::PU_CACHE).as(CDoom::Patch*))
+    end
+  end
+
+  #
+  # Read This Menus - optional second page.
+  #
+  def self.m_draw_readthis2
+    CDoom.inhelpscreens = 1
+    case CDoom.gamemode
+    when CDoom::GameMode::Retail, CDoom::GameMode::Commercial
+      # This hack keeps us from having to change menus.
+      CDoom.v_draw_patch_direct(0, 0, 0, CDoom.w_cache_lump_name("CREDIT", CDoom::PU_CACHE).as(CDoom::Patch*))
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered
+      CDoom.v_draw_patch_direct(0, 0, 0, CDoom.w_cache_lump_name("HELP2", CDoom::PU_CACHE).as(CDoom::Patch*))
+    end
+  end
+
+  #
+  # Change Sfx & Music volumes
+  #
+  def self.m_draw_sound
+    CDoom.v_draw_patch_direct(60, 38, 0, CDoom.w_cache_lump_name("M_SVOL", CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.m_draw_thermo(CDoom.sounddef.x, CDoom.sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Sfxvol.value + 1),
+    16, CDoom.snd_sfx_volume)
+
+    CDoom.m_draw_thermo(CDoom.sounddef.x, CDoom.sounddef.y + CDoom::LINEHEIGHT * (CDoom::Soundenum::Musicvol.value + 1),
+    16, CDoom.snd_music_volume)
+  end
+
+  def self.m_sound(choice : Int32)
+    CDoom.m_setup_next_menu(pointerof(CDoom.sounddef))
+  end
+
+  def self.m_mouse_options(choice : Int32)
+    CDoom.m_setup_next_menu(pointerof(CDoom.mouseoptionsdef))
+  end
+
+  def self.m_sfxvol(choice : Int32)
+    case choice
+    when 0
+      CDoom.snd_sfx_volume -= 1 if CDoom.snd_sfx_volume > 0
+    when 1
+      CDoom.snd_sfx_volume += 1 if CDoom.snd_sfx_volume < 15
+    end
+
+    CDoom.s_set_sfx_volume(CDoom.snd_sfx_volume)
+  end
+
+  def self.m_musicvol(choice : Int32)
+    case choice
+    when 0
+      CDoom.snd_music_volume -= 1 if CDoom.snd_music_volume > 0
+    when 1
+      CDoom.snd_music_volume += 1 if CDoom.snd_music_volume < 15
+    end
+
+    CDoom.s_set_sfx_volume(CDoom.snd_music_volume)
+  end
+
+
+  #
+  # m_draw_mainmenu
+  #
+  def self.m_draw_mainmenu
+    CDoom.v_draw_patch_direct(94, 2, 0, CDoom.w_cache_lump_name("M_DOOM", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  #
+  # m_newgame
+  #
+  def self.m_draw_newgame
+    CDoom.v_draw_patch_direct(96, 14, 0, CDoom.w_cache_lump_name("M_NEWG", CDoom::PU_CACHE).as(CDoom::Patch*))
+    CDoom.v_draw_patch_direct(54, 38, 0, CDoom.w_cache_lump_name("M_SKILL", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_new_game(choice : Int32)
+    if CDoom.netgame != 0 && CDoom.demoplayback == 0
+      CDoom.m_start_message(CDoom::NEWGAME, NULL_PROC, 0)
+      return
+    end
+
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      CDoom.m_setup_next_menu(pointerof(CDoom.newdef))
+    else
+      CDoom.m_setup_next_menu(pointerof(CDoom.epidef))
+    end
+  end
+
+  #
+  # m_episode
+  #
+  def self.m_draw_episode
+    CDoom.v_draw_patch_direct(54, 38, 0, CDoom.w_cache_lump_name("M_EPISOD", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_verify_nightmare(ch : Int32)
+    return if ch != 'y'.ord
+
+    CDoom.g_defered_init_new(CDoom::Skill::Nightmare, CDoom.epi + 1, 1)
+    CDoom.m_clear_menus
+  end
+
+  def self.m_choose_skill(choice : Int32)
+    if choice == CDoom::Skill::Nightmare.value
+      CDoom.m_start_message(CDoom::NIGHTMARE, ->CDoom.m_verify_nightmare(Int32), 1)
+      return
+    end
+
+    CDoom.g_defered_init_new(CDoom::Skill.new(choice), CDoom.epi + 1, 1)
+    CDoom.m_clear_menus
+  end
+
+  def self.m_episode(choice : Int32)
+    if CDoom.gamemode == CDoom::GameMode::Shareware && choice != 0
+      CDoom.m_start_message(CDoom::SWSTRING, NULL_PROC, 0)
+      CDoom.m_setup_next_menu(pointerof(CDoom.readdef1))
+      return
+    end
+
+    # Yet another hack...
+    if CDoom.gamemode == CDoom::GameMode::Registered && choice > 2
+      CDoom.doom_print.call("m_episode: 4th episode requires Ultimate DOOM\n".to_unsafe)
+      choice = 0
+    end
+
+    CDoom.epi = choice
+    CDoom.m_setup_next_menu(pointerof(CDoom.newdef))
+  end
+
+  #
+  # m_options
+  #
+  def self.m_draw_options
+    CDoom.v_draw_patch_direct(108, 15, 0, CDoom.w_cache_lump_name("M_OPTTTL", CDoom::PU_CACHE).as(CDoom::Patch*))
+    
+    CDoom.v_draw_patch_direct(CDoom.optionsdef.x + 120, CDoom.optionsdef.y + CDoom::LINEHEIGHT * CDoom::OptionsEnum::Messages.value, 0, CDoom.w_cache_lump_name(CDoom.msg_names[CDoom.show_messages], CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.v_draw_patch_direct(CDoom.optionsdef.x + 131, CDoom.optionsdef.y + CDoom::LINEHEIGHT * CDoom::OptionsEnum::Crosshairopt.value, 0, CDoom.w_cache_lump_name(CDoom.msg_names[CDoom.crosshair], CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.v_draw_patch_direct(CDoom.optionsdef.x + 147, CDoom.optionsdef.y + CDoom::LINEHEIGHT * CDoom::OptionsEnum::Alwaysrunopt.value, 0, CDoom.w_cache_lump_name(CDoom.msg_names[CDoom.always_run], CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.m_draw_thermo(CDoom.optionsdef.x, CDoom.optionsdef.y + CDoom::LINEHEIGHT * (CDoom::OptionsEnum::Scrnsize.value + 1),
+    9, CDoom.screen_size)
+  end
+
+  def self.m_draw_mouse_options
+    CDoom.m_draw_custom_menu_text("TXT_MOPT", 74, 45)
+
+    CDoom.v_draw_patch_direct(CDoom.mouseoptionsdef.x + 149, CDoom.mouseoptionsdef.y + CDoom::LINEHEIGHT * CDoom::MouseoptionsEnum::Mousemov.value, 0, CDoom.w_cache_lump_name(CDoom.msg_names[CDoom.mousemove], CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.m_draw_thermo(CDoom.mouseoptionsdef.x, CDoom.mouseoptionsdef.y + CDoom::LINEHEIGHT * (CDoom::MouseoptionsEnum::Mousesens.value + 1),
+    10, CDoom.mouse_sensitivity)
+  end
+
+  def self.m_options(choice : Int32)
+    CDoom.m_setup_next_menu(pointerof(CDoom.optionsdef))
+  end
+
+  #
+  # Toggle messages on/off
+  #
+  def self.m_change_messages(choice : Int32)
+    # warning: unused parameter `choice : Int32'
+    choice = 0
+    CDoom.show_messages = 1 - CDoom.show_messages
+
+    if CDoom.show_messages == 0
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::MSGOFF
+    else
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::MSGON
+    end
+
+    CDoom.message_dontfuckwithme = 1
+  end
+
+
+  #
+  # Toggle crosshair on/off
+  #
+  def self.m_change_crosshair(choice : Int32)
+    # warning: unused parameter `choice : Int32'
+    choice = 0
+    CDoom.crosshair = 1 - CDoom.crosshair
+
+    if CDoom.crosshair == 0
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::CROSSOFF
+    else
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::CROSSON
+    end
+
+    CDoom.message_dontfuckwithme = 1
+  end
+
+
+  #
+  # Toggle always-run on/off
+  #
+  def self.m_change_alwaysrun(choice : Int32)
+    # warning: unused parameter `choice : Int32'
+    choice = 0
+    CDoom.always_run = 1 - CDoom.always_run
+
+    if CDoom.always_run == 0
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::ALWAYSRUNOFF
+    else
+      (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom::ALWAYSRUNON
+    end
+
+    CDoom.message_dontfuckwithme = 1
+  end
+
+
+  #
+  # m_endgame
+  #
+  def self.m_endgame_response(ch : Int32)
+    return if ch != 'y'.ord
+
+    CDoom.current_menu.value.last_on = CDoom.item_on
+    CDoom.m_clear_menus
+    CDoom.d_start_title
+  end
+
+  def self.m_endgame(choice : Int32)
+    choice = 0
+    if CDoom.usergame == 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_oof)
+      return
+    end
+
+    if CDoom.netgame != 0
+      CDoom.m_start_message(CDoom::NETEND, NULL_PROC, 0)
+      return
+    end
+
+    CDoom.m_start_message(CDoom::ENDGAME, ->CDoom.m_endgame_response(Int32), 1)
+  end
+
+
+  #
+  # m_readthis
+  #
+  def self.m_readthis(choice : Int32)
+    choice = 0
+    CDoom.m_setup_next_menu(pointerof(CDoom.readdef1))
+  end
+
+  def self.m_readthis2(choice : Int32)
+    choice = 0
+    CDoom.m_setup_next_menu(pointerof(CDoom.readdef2))
+  end
+
+  def self.m_finish_readthis(choice : Int32)
+    choice = 0
+    CDoom.m_setup_next_menu(pointerof(CDoom.maindef))
+  end
+
+
+  #
+  # m_quitdoom
+  #
+  def self.m_quit_response(ch : Int32)
+    return if ch != 'y'.ord
+    if CDoom.netgame == 0
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.s_start_sound(Pointer(Void).null, CDoom.quitsounds2[(CDoom.gametic >> 2) & 7])
+      else
+        CDoom.s_start_sound(Pointer(Void).null, CDoom.quitsounds[(CDoom.gametic >> 2) & 7])
+      end
+      CDoom.i_wait_vbl(105)
+    end
+    CDoom.i_quit
+  end
+
+  def self.m_quitdoom(choice : Int32)
+    # We pick index 0 which is language sensitive,
+    #  or one at random, between 1 and maximum number.
+    if CDoom.language != CDoom::Language::English
+      CDoom.doom_strcpy(CDoom.endstring, CDoom.doom1_endmsg[0])
+    else
+      if CDoom.gamemode == CDoom::GameMode::Commercial
+        CDoom.doom_strcpy(CDoom.endstring, CDoom.doom2_endmsg[CDoom.gametic % (sizeof(typeof(CDoom.doom2_endmsg)) // sizeof(UInt8*) - 1) + 1])
+      else
+        CDoom.doom_strcpy(CDoom.endstring, CDoom.doom1_endmsg[CDoom.gametic % (sizeof(typeof(CDoom.doom1_endmsg)) // sizeof(UInt8*) - 1) + 1])
+      end
+    end
+    CDoom.doom_concat(CDoom.endstring, "\n\n" + CDoom::DOSY)
+
+    CDoom.m_start_message(CDoom.endstring, ->CDoom.m_quit_response(Int32), 1)
+  end
+
+
+  def self.m_change_sensitivity(choice : Int32)
+    case choice
+    when 0
+      CDoom.mouse_sensitivity -= 1 if CDoom.mouse_sensitivity > 0
+    when 1
+      CDoom.mouse_sensitivity += 1 if CDoom.mouse_sensitivity < 9
+    end
+  end
+
+  def self.m_mouse_move(choice : Int32)
+    choice = 0
+    CDoom.mousemove = 1 - CDoom.mousemove
+  end
+
+  def self.m_size_display(choice : Int32)
+    case choice
+    when 0
+      if CDoom.screen_size > 0
+        CDoom.screenblocks -= 1
+        CDoom.screen_size -= 1
+      end
+    when 1
+      if CDoom.screen_size < 8
+        CDoom.screenblocks += 1
+        CDoom.screen_size += 1
+      end
+    end
+
+    CDoom.r_set_view_size(CDoom.screenblocks, CDoom.detail_level)
+  end
+
+
+  #
+  # Menu Methods
+  #
+  def self.m_draw_thermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
+    xx = x
+    CDoom.v_draw_patch_direct(xx, y, 0, CDoom.w_cache_lump_name("M_THERML", CDoom::PU_CACHE).as(CDoom::Patch*))
+    xx += 8
+    therm_width.times do |i|
+    CDoom.v_draw_patch_direct(xx, y, 0, CDoom.w_cache_lump_name("M_THERMM", CDoom::PU_CACHE).as(CDoom::Patch*))
+      xx += 8
+    end
+    CDoom.v_draw_patch_direct(xx, y, 0, CDoom.w_cache_lump_name("M_THERMR", CDoom::PU_CACHE).as(CDoom::Patch*))
+
+    CDoom.v_draw_patch_direct((x + 8) + therm_dot * 8, y, 0, CDoom.w_cache_lump_name("M_THERMO", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_draw_empty_cell(menu : CDoom::Menu*, item : Int32)
+    CDoom.v_draw_patch_direct(menu.value.x - 10, menu.value.y + item * CDoom::LINEHEIGHT - 1, 0, 
+    CDoom.w_cache_lump_name("M_CELL1", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_draw_selcell(menu : CDoom::Menu*, item : Int32)
+    CDoom.v_draw_patch_direct(menu.value.x - 10, menu.value.y + item * CDoom::LINEHEIGHT - 1, 0, 
+    CDoom.w_cache_lump_name("M_CELL2", CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_start_message(string : LibC::Char*, routine : Proc(Int32, Nil), input : CDoom::DoomBool)
+    CDoom.message_last_menu_active = CDoom.menuactive
+    CDoom.message_to_print = 1
+    CDoom.message_string = string
+    CDoom.message_routine = routine
+    CDoom.message_needs_input = input
+    CDoom.menuactive = 1
+  end
+
+  def self.m_stop_message
+    CDoom.menuactive = CDoom.message_last_menu_active
+    CDoom.message_to_print = 0
+  end
+
+
+  #
+  # Find string width from hu_font chars
+  #
+  def self.m_string_width(string : UInt8*) : Int32
+    w = 0
+
+    CDoom.doom_strlen(string).times do |i|
+      c = CDoom.doom_toupper(string[i]) - CDoom::HU_FONTSTART
+      if c < 0 || c >= CDoom::HU_FONTSIZE
+        w += 4
+      else
+        w += CDoom.hu_font[c].value.width.to_i16!
+      end
+    end
+
+    return w
+  end
+
+  #
+  # Find string height from hu_font chars
+  #
+  def self.m_string_height(string : UInt8*) : Int32
+    height = CDoom.hu_font[0].value.height.to_i16!.to_i32
+
+    h = height
+    CDoom.doom_strlen(string).times do |i|
+      h += height if string[i] == '\n'.ord
+    end
+
+    return h
+  end
+
+  #
+  # Write a string using the hu_font
+  #
+  def self.m_write_text(x : Int32, y : Int32, string : UInt8*)
+    ch = string
+    cx = x
+    cy = y
+
+    while true
+      c = ch.value
+      ch += 1
+      break if c == 0
+      if c == '\n'.ord
+        cx = x
+        cy += 12
+        next
+      end
+
+      c = doom_toupper(c) - CDoom::HU_FONTSTART
+      if c < 0 || c >= CDoom::HU_FONTSIZE
+        cx += 4
+        next
+      end
+
+      w = CDoom.hu_font[c].value.width.to_i16!
+      break if cx + w > CDoom::SCREENWIDTH
+      CDoom.v_draw_patch_direct(cx, cy, 0, CDoom.hu_font[c])
+      cx += w
+    end
+  end
+
+  @@joywait = 0
+  @@mousewait = 0
+  @@mousey = 0
+  @@lasty = 0
+  @@mousex = 0
+  @@lastx = 0
+  #
+  # m_responder
+  #
+  def self.m_responder(ev : CDoom::Event*) : CDoom::DoomBool
+    ch = -1
+
+    if ev.value.type == CDoom::Evtype::Joystick && @@joywait < CDoom.i_get_time
+      if ev.value.data3 == -1
+        ch = CDoom::KEY_UPARROW
+        @@joywait = CDoom.i_get_time + 5
+      elsif ev.value.data3 == 1
+        ch = CDoom::KEY_DOWNARROW
+        @@joywait = CDoom.i_get_time + 5
+      end
+
+      if ev.value.data2 == -1
+        ch = CDoom::KEY_LEFTARROW
+        @@joywait = CDoom.i_get_time + 2
+      elsif ev.value.data2 == 1
+        ch = CDoom::KEY_RIGHTARROW
+        @@joywait = CDoom.i_get_time + 2
+      end
+
+      if ev.value.data1 & 1 != 0
+        ch = CDoom::KEY_ENTER
+                @@joywait = CDoom.i_get_time + 5
+      end
+      if ev.value.data1 & 2 != 0
+        ch = CDoom::KEY_BACKSPACE
+        @@joywait = CDoom.i_get_time + 5
+      end
+    else
+      if ev.value.type == CDoom::Evtype::Mouse && @@mousewait < CDoom.i_get_time
+        @@mousey += ev.value.data3
+        if @@mousey < @@lasty - 30
+          ch = CDoom::KEY_DOWNARROW
+          @@mousewait = CDoom.i_get_time + 5
+          @@lasty -= 30
+          @@mousey = @@lasty
+        elsif @@mousey > @@lasty + 30
+          ch = CDoom::KEY_UPARROW
+          @@mousewait = CDoom.i_get_time + 5
+          @@lasty += 30
+          @@mousey = @@lasty
+        end
+
+        @@mousex += ev.value.data2
+        if @@mousex < @@lastx - 30
+          ch = CDoom::KEY_LEFTARROW
+          @@mousewait = CDoom.i_get_time + 5
+          @@lastx -= 30
+          @@mousex = @@lastx
+        elsif @@mousex > @@lastx + 30
+          ch = CDoom::KEY_RIGHTARROW
+          @@mousewait = CDoom.i_get_time + 5
+          @@lastx += 30
+          @@mousex = @@lastx
+        end
+
+        if ev.value.data1 & 1 != 0
+          ch = CDoom::KEY_ENTER
+          @@mousewait = CDoom.i_get_time + 15
+        end
+
+        if ev.value.data1 & 2 != 0
+          ch = CDoom::KEY_BACKSPACE
+          @@mousewait = CDoom.i_get_time + 15
+        end
+      else
+        ch = ev.value.data1 if ev.value.type == CDoom::Evtype::Keydown
+      end
+    end
+
+    return 0 if ch == -1
+
+    # Save Game string input
+    if CDoom.save_string_enter != 0
+      case ch
+      when CDoom::KEY_BACKSPACE
+        if CDoom.save_char_index > 0
+          CDoom.save_char_index -= 1
+          ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = 0
+        end
+      when CDoom::KEY_ESCAPE
+        CDoom.save_string_enter = 0
+        CDoom.doom_strcpy(CDoom.savegamestrings[CDoom.save_slot].to_unsafe, CDoom.save_old_string)
+      when CDoom::KEY_ENTER
+        CDoom.save_string_enter = 0
+        CDoom.m_do_save(CDoom.save_slot) if CDoom.savegamestrings[CDoom.save_slot][0] != 0
+      else
+        ch = CDoom.doom_toupper(ch)
+        unless ch != 32 && (ch - CDoom::HU_FONTSTART < 0 || ch - CDoom::HU_FONTSTART >= CDoom::HU_FONTSIZE)
+            if ch >= 32 && ch <= 127 && 
+              CDoom.save_char_index < CDoom::SAVESTRINGSIZE - 1 &&
+              CDoom.m_string_width(CDoom.savegamestrings[CDoom.save_slot]) <
+              (CDoom::SAVESTRINGSIZE - 2) * 8
+              ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = ch.to_u8!
+              CDoom.save_char_index += 1
+              ((CDoom.savegamestrings.to_unsafe + CDoom.save_slot).value.to_unsafe + CDoom.save_char_index).value = 0
+            end
+        end
+      end
+
+      return 1
+    end
+
+    # Take care of any messages that need input
+    if CDoom.message_to_print != 0
+      return 0 if CDoom.message_needs_input != 0 &&
+      !(ch == ' '.ord || ch == 'n'.ord || ch =='y'.ord || ch == CDoom::KEY_ESCAPE)
+
+      CDoom.menuactive = CDoom.message_last_menu_active
+      CDoom.message_to_print = 0
+      CDoom.message_routine.call(ch) unless CDoom.message_routine.pointer.null?
+
+      CDoom.menuactive = 0
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
+      return 1
+    end
+
+    if CDoom.devparm != 0 && ch == CDoom::KEY_F1
+      CDoom.g_screenshot
+      return 1
+    end
+
+
+    # F-Keys
+    if CDoom.menuactive == 0
+      case ch
+      when CDoom::KEY_MINUS # Screen size down
+        return 0 if CDoom.automapactive != 0 || CDoom.chat_on != 0
+        CDoom.m_size_display(0)
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
+        return 1
+      when CDoom::KEY_EQUALS # Screen size up
+        return 0 if CDoom.automapactive != 0 || CDoom.chat_on != 0
+        CDoom.m_size_display(1)
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
+        return 1
+      when CDoom::KEY_F1 # Help key
+        CDoom.m_start_control_panel
+
+        if CDoom.gamemode == CDoom::GameMode::Retail
+          CDoom.current_menu = pointerof(CDoom.readdef2)
+        else
+          CDoom.current_menu = pointerof(CDoom.readdef1)
+        end
+
+        CDoom.item_on = 0
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        return 1
+      when CDoom::KEY_F2 # Save
+        CDoom.m_start_control_panel
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_save_game(0)
+        return 1
+      when CDoom::KEY_F3 # Load
+        CDoom.m_start_control_panel
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_load_game(0)
+        return 1
+      when CDoom::KEY_F4 # Sound Volume
+        CDoom.m_start_control_panel
+        CDoom.current_menu = pointerof(CDoom.sounddef)
+        CDoom.item_on = CDoom::Soundenum::Sfxvol
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        return 1
+      when CDoom::KEY_F5
+        CDoom.m_change_crosshair(0)
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        return 1
+      when CDoom::KEY_F6 # Quicksave
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_quicksave
+        return 1
+      when CDoom::KEY_F7 # End game
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_endgame(0)
+        return 1
+      when CDoom::KEY_F8 # Toggle messages
+        CDoom.m_change_messages(0)
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        return 1
+      when CDoom::KEY_F9 # Quickload
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_quickload
+        return 1
+      when CDoom::KEY_F10 # Quit DOOM
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+        CDoom.m_quitdoom(0)
+        return 1
+      when CDoom::KEY_F11 # gamma toggle
+        CDoom.usegamma += 1
+        CDoom.usegamma = 0 if CDoom.usegamma > 4
+        (CDoom.players.to_unsafe + CDoom.consoleplayer).value.message = CDoom.gammamsg[CDoom.usegamma]
+        CDoom.i_set_palette(CDoom.w_cache_lump_name("PLAYPAL", CDoom::PU_CACHE).as(UInt8*))
+        return 1
+      end
+    end
+
+    # Pop-up menu?
+    if CDoom.menuactive == 0
+      if ch == CDoom::KEY_ESCAPE
+      CDoom.m_start_control_panel
+              CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+      return 1
+      end
+      return 0
+    end
+
+    # Keys usable within menu
+    case ch
+    when CDoom::KEY_DOWNARROW
+      loop do
+        CDoom.item_on = CDoom.item_on + 1 > CDoom.current_menu.value.numitems - 1 ? 0 : CDoom.item_on + 1
+              CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
+        break unless CDoom.current_menu.value.menuitems[CDoom.item_on].status == -1
+      end
+      return 1
+    when CDoom::KEY_UPARROW
+      loop do
+        CDoom.item_on = CDoom.item_on == 0 ? CDoom.current_menu.value.numitems - 1 : CDoom.item_on - 1
+              CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
+        break unless CDoom.current_menu.value.menuitems[CDoom.item_on].status == -1
+      end
+      return 1
+    when CDoom::KEY_LEFTARROW
+      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
+        CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
+              CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
+              CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(0)
+      end
+      return 1
+    when CDoom::KEY_RIGHTARROW
+      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
+        CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
+              CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
+              CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(1)
+      end
+      return 1
+    when CDoom::KEY_ENTER
+      if !CDoom.current_menu.value.menuitems[CDoom.item_on].routine.pointer.null? &&
+        CDoom.current_menu.value.menuitems[CDoom.item_on].status != 0
+        CDoom.current_menu.value.last_on = CDoom.item_on
+        if CDoom.current_menu.value.menuitems[CDoom.item_on].status == 2
+          CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(1)
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_stnmov)
+        else
+          CDoom.current_menu.value.menuitems[CDoom.item_on].routine.call(CDoom.item_on.to_i32)
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pistol)
+        end
+      end
+      return 1
+    when CDoom::KEY_ESCAPE
+      CDoom.current_menu.value.last_on = CDoom.item_on
+      CDoom.m_clear_menus
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchx)
+      return 1
+    when CDoom::KEY_BACKSPACE
+      CDoom.current_menu.value.last_on = CDoom.item_on
+      if !CDoom.current_menu.value.prev_menu.null?
+        CDoom.current_menu = CDoom.current_menu.value.prev_menu
+        CDoom.item_on = CDoom.current_menu.value.last_on
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_swtchn)
+      end
+      return 1
+    else
+      i = CDoom.item_on + 1
+      while i < CDoom.current_menu.value.numitems
+        if CDoom.current_menu.value.menuitems[i].alpha_key == ch
+          CDoom.item_on = i
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
+          return 1
+        end
+        i += 1
+      end
+      (CDoom.item_on + 1).times do |i|
+        if CDoom.current_menu.value.menuitems[i].alpha_key == ch
+          CDoom.item_on = i
+          CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_pstop)
+          return 1
+        end
+      end
+    end
+    
+    return 0
+  end
+
+
+  def self.m_start_control_panel
+     # intro might call this repeatedly
+     return if CDoom.menuactive != 0
+
+     CDoom.menuactive = 1
+     CDoom.current_menu = pointerof(CDoom.maindef) # JDC
+     CDoom.item_on = CDoom.current_menu.value.last_on # JDC
+  end
+
+  @@x = 0
+  @@y = 0
+  #
+  # m_drawer
+  # Called after the view has been rendered,
+  # but before it has been blitted.
+  #
+  def self.m_drawer
+    string = uninitialized StaticArray(UInt8, 40)
+    i = 0
+    CDoom.inhelpscreens = 0
+
+    # Horiz. & Vertically center string and print it.
+    if CDoom.message_to_print != 0
+      start = 0
+      @@y = 100 - CDoom.m_string_height(CDoom.message_string) // 2
+      while (CDoom.message_string + start).value != 0
+        i = 0
+        while i < CDoom.doom_strlen(CDoom.message_string + start)
+          if (CDoom.message_string + start + i).value == '\n'.ord
+            CDoom.doom_memset(string, 0, 40)
+            CDoom.doom_strncpy(string, CDoom.message_string + start, i)
+            start += i + 1
+            break
+          end
+          i += 1
+        end
+
+        if i == CDoom.doom_strlen(CDoom.message_string + start)
+          CDoom.doom_strcpy(string, CDoom.message_string + start)
+          start += i
+        end
+
+        @@x = 160 - CDoom.m_string_width(string) // 2
+        CDoom.m_write_text(@@x, @@y, string)
+        @@y += CDoom.hu_font[0].value.height.to_i16!
+      end
+      return
+    end
+
+    return if CDoom.menuactive == 0
+
+    # Darken background so the menu is more readable.
+    CDoom.current_menu.value.routine.call unless CDoom.current_menu.value.routine.pointer.null?
+
+    # DRAW MENU
+    @@x = CDoom.current_menu.value.x.to_i32
+    @@y = CDoom.current_menu.value.y.to_i32
+    max = CDoom.current_menu.value.numitems
+
+    max.times do |i|
+      menuitem = (CDoom.current_menu.value.menuitems + i)
+      if menuitem.value.name[0] != 0
+        if CDoom.doom_strncmp(menuitem.value.name, "TXT_", 4) == 0
+          CDoom.m_draw_custom_menu_text(menuitem.value.name, @@x, @@y)
+        else
+          CDoom.v_draw_patch_direct(@@x, @@y, 0, CDoom.w_cache_lump_name(menuitem.value.name, CDoom::PU_CACHE).as(CDoom::Patch*))
+        end
+      end
+      @@y += CDoom::LINEHEIGHT
+    end
+
+    # DRAW SKULL
+    CDoom.v_draw_patch_direct(@@x + CDoom::SKULLXOFF, CDoom.current_menu.value.y - 5 + CDoom.item_on * CDoom::LINEHEIGHT, 0, 
+    CDoom.w_cache_lump_name(CDoom.skull_name[CDoom.which_skull], CDoom::PU_CACHE).as(CDoom::Patch*))
+  end
+
+  def self.m_clear_menus
+    CDoom.menuactive = 0
+  end
+
+  def self.m_setup_next_menu(menudef : CDoom::Menu*)
+    CDoom.current_menu = menudef
+    CDoom.item_on = CDoom.current_menu.value.last_on
+  end
+
+  def self.m_ticker
+    CDoom.skull_anim_counter &-= 1
+    if CDoom.skull_anim_counter <= 0
+      CDoom.which_skull ^= 1
+      CDoom.skull_anim_counter = 8
+    end
+  end
+
+  def self.m_init
+    CDoom.current_menu = pointerof(CDoom.maindef)
+    CDoom.menuactive = 0
+    CDoom.item_on = CDoom.current_menu.value.last_on
+    CDoom.which_skull = 0
+    CDoom.skull_anim_counter = 10
+    CDoom.screen_size = CDoom.screenblocks - 3
+    CDoom.message_to_print = 0
+    CDoom.message_string = Pointer(UInt8).null
+    CDoom.message_last_menu_active = CDoom.menuactive
+    CDoom.quick_save_slot = -1
+
+    # Here we could catch other version dependencies,
+    #  like HELP1/2, and four episodes.
+
+    case CDoom.gamemode
+    when CDoom::GameMode::Commercial
+      # This is used because DOOM 2 had only one HELP
+            #  page. I use CREDIT as second page now, but
+            #  kept this hack for educational purposes.
+            (CDoom.mainmenu.to_unsafe + CDoom::Mainenum::Readthis.value).value = CDoom.mainmenu[CDoom::Mainenum::Quitdoom.value]
+            CDoom.maindef.numitems = CDoom.maindef.numitems - 1
+            CDoom.maindef.y = CDoom.maindef.y + 8
+            CDoom.newdef.prev_menu = pointerof(CDoom.maindef)
+            CDoom.readdef1.routine = ->CDoom.m_draw_readthis1
+            CDoom.readdef1.x = 330
+            CDoom.readdef1.y = 165
+            CDoom.readmenu1.to_unsafe.value.routine = ->CDoom.m_finish_readthis(Int32)
+    when CDoom::GameMode::Shareware, CDoom::GameMode::Registered
+      # Episode 2 and 3 are handled,
+      #  branching to an ad screen.
+      #
+      # We need to remove the fourth episode.
+      CDoom.epidef.numitems = CDoom.epidef.numitems - 1
+    when CDoom::GameMode::Retail
+      # We are fine.
+    end
+  end
+
   
 end

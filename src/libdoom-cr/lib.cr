@@ -54,7 +54,6 @@ macro c_array_strings(array, *objs)
   {% end %}
 end
 
-
 @[Link(ldflags: "-L#{__DIR__}/../.. -lpuredoom")]
 lib CDoom
   # Sample rate of sound samples from doom
@@ -1042,7 +1041,6 @@ lib CDoom
   enum Skill
     Baby
     Easy
-    Normal
     Medium
     Hard
     Nightmare
@@ -5997,7 +5995,6 @@ lib CDoom
   $itoa_buf : LibC::Char[20]
 
   $error_buf : LibC::Char[260]
-  $doom_flags : LibC::Int
   $doom_print : DoomPrintFn
   $doom_malloc : DoomMallocFn
   $doom_free : DoomFreeFn
@@ -6668,10 +6665,6 @@ lib CDoom
   $mousearray : DoomBool[4]
   $mousebuttons : DoomBool* # allow [-1]
 
-  # mouse values are used once
-  $mousex : LibC::Int
-  $mousey : LibC::Int
-
   $dclicktime : LibC::Int
   $dclickstate : LibC::Int
   $dclicks : LibC::Int
@@ -6917,83 +6910,407 @@ lib CDoom
 
   fun i_get_heap_size = I_GetHeapSize : LibC::Int
 
-    SPRNAMES_SIZE = Spritenum::NUMSPRITES + 1
-    $sprnames : LibC::Char**
+  SPRNAMES_SIZE = Spritenum::NUMSPRITES + 1
+  $sprnames : LibC::Char**
 
-    fun a_light0 = A_Light0(Void*, Void*)
-fun a_weapon_ready = A_WeaponReady(Void*, Void*)
-fun a_lower= A_Lower(Void*, Void*)
-fun a_raise =A_Raise(Void*, Void*)
-fun a_punch= A_Punch(Void*, Void*)
-fun a_refire= A_ReFire(Void*, Void*)
-fun a_fire_pistol=A_FirePistol(Void*, Void*)
-fun a_light1=A_Light1(Void*, Void*)
-fun a_fire_shotgun=A_FireShotgun(Void*, Void*)
-fun a_light2=A_Light2(Void*, Void*)
-fun a_fire_shotgun2=A_FireShotgun2(Void*, Void*)
-fun a_check_reload=A_CheckReload(Void*, Void*)
-fun a_open_shotgun2=A_OpenShotgun2(Void*, Void*)
-fun a_load_shotgun2=A_LoadShotgun2(Void*, Void*)
-fun a_close_shotgun2=A_CloseShotgun2(Void*, Void*)
-fun a_fire_cgun=A_FireCGun(Void*, Void*)
-fun a_gun_flash=A_GunFlash(Void*, Void*)
-fun a_fire_missile=A_FireMissile(Void*, Void*)
-fun a_saw=A_Saw(Void*, Void*)
-fun a_fire_plasma=A_FirePlasma(Void*, Void*)
-fun a_bfg_sound=A_BFGsound(Void*, Void*)
-fun a_fire_bfg=A_FireBFG(Void*, Void*)
-fun a_bfg_spray=A_BFGSpray(Void*, Void*)
-fun a_explode=A_Explode(Void*, Void*)
-fun a_pain=A_Pain(Void*, Void*)
-fun a_player_scream=A_PlayerScream(Void*, Void*)
-fun a_fall=A_Fall(Void*, Void*)
-fun a_xscream=A_XScream(Void*, Void*)
-fun a_look=A_Look(Void*, Void*)
-fun a_chase=A_Chase(Void*, Void*)
-fun a_face_target=A_FaceTarget(Void*, Void*)
-fun a_pos_attack=A_PosAttack(Void*, Void*)
-fun a_scream=A_Scream(Void*, Void*)
-fun a_spos_attack=A_SPosAttack(Void*, Void*)
-fun a_vile_chase=A_VileChase(Void*, Void*)
-fun a_vile_start=A_VileStart(Void*, Void*)
-fun a_vile_target=A_VileTarget(Void*, Void*)
-fun a_vile_attack=A_VileAttack(Void*, Void*)
-fun a_start_fire=A_StartFire(Void*, Void*)
-fun a_fire=A_Fire(Void*, Void*)
-fun a_fire_crackle=A_FireCrackle(Void*, Void*)
-fun a_tracer=A_Tracer(Void*, Void*)
-fun a_skel_whoosh=A_SkelWhoosh(Void*, Void*)
-fun a_skel_fist=A_SkelFist(Void*, Void*)
-fun a_skel_missile=A_SkelMissile(Void*, Void*)
-fun a_fat_raise=A_FatRaise(Void*, Void*)
-fun a_fat_attack1=A_FatAttack1(Void*, Void*)
-fun a_fat_attack2=A_FatAttack2(Void*, Void*)
-fun a_fat_attack3=A_FatAttack3(Void*, Void*)
-fun a_boss_death=A_BossDeath(Void*, Void*)
-fun a_cpos_attack=A_CPosAttack(Void*, Void*)
-fun a_cpos_refire=A_CPosRefire(Void*, Void*)
-fun a_troop_attack=A_TroopAttack(Void*, Void*)
-fun a_sarg_attack=A_SargAttack(Void*, Void*)
-fun a_head_attack=A_HeadAttack(Void*, Void*)
-fun a_bruis_attack=A_BruisAttack(Void*, Void*)
-fun a_skull_attack=A_SkullAttack(Void*, Void*)
-fun a_metal=A_Metal(Void*, Void*)
-fun a_spid_refire=A_SpidRefire(Void*, Void*)
-fun a_baby_metal=A_BabyMetal(Void*, Void*)
-fun a_bspi_attack=A_BspiAttack(Void*, Void*)
-fun a_hoof=A_Hoof(Void*, Void*)
-fun a_cyber_attack=A_CyberAttack(Void*, Void*)
-fun a_pain_attack=A_PainAttack(Void*, Void*)
-fun a_pain_die=A_PainDie(Void*, Void*)
-fun a_keen_die=A_KeenDie(Void*, Void*)
-fun a_brain_pain=A_BrainPain(Void*, Void*)
-fun a_brain_scream=A_BrainScream(Void*, Void*)
-fun a_brain_die=A_BrainDie(Void*, Void*)
-fun a_brain_awake=A_BrainAwake(Void*, Void*)
-fun a_brain_spit=A_BrainSpit(Void*, Void*)
-fun a_spawn_sound=A_SpawnSound(Void*, Void*)
-fun a_spawn_fly=A_SpawnFly(Void*, Void*)
-fun a_brain_explode=A_BrainExplode(Void*, Void*)
+  fun a_light0 = A_Light0(Void*, Void*)
+  fun a_weapon_ready = A_WeaponReady(Void*, Void*)
+  fun a_lower = A_Lower(Void*, Void*)
+  fun a_raise = A_Raise(Void*, Void*)
+  fun a_punch = A_Punch(Void*, Void*)
+  fun a_refire = A_ReFire(Void*, Void*)
+  fun a_fire_pistol = A_FirePistol(Void*, Void*)
+  fun a_light1 = A_Light1(Void*, Void*)
+  fun a_fire_shotgun = A_FireShotgun(Void*, Void*)
+  fun a_light2 = A_Light2(Void*, Void*)
+  fun a_fire_shotgun2 = A_FireShotgun2(Void*, Void*)
+  fun a_check_reload = A_CheckReload(Void*, Void*)
+  fun a_open_shotgun2 = A_OpenShotgun2(Void*, Void*)
+  fun a_load_shotgun2 = A_LoadShotgun2(Void*, Void*)
+  fun a_close_shotgun2 = A_CloseShotgun2(Void*, Void*)
+  fun a_fire_cgun = A_FireCGun(Void*, Void*)
+  fun a_gun_flash = A_GunFlash(Void*, Void*)
+  fun a_fire_missile = A_FireMissile(Void*, Void*)
+  fun a_saw = A_Saw(Void*, Void*)
+  fun a_fire_plasma = A_FirePlasma(Void*, Void*)
+  fun a_bfg_sound = A_BFGsound(Void*, Void*)
+  fun a_fire_bfg = A_FireBFG(Void*, Void*)
+  fun a_bfg_spray = A_BFGSpray(Void*, Void*)
+  fun a_explode = A_Explode(Void*, Void*)
+  fun a_pain = A_Pain(Void*, Void*)
+  fun a_player_scream = A_PlayerScream(Void*, Void*)
+  fun a_fall = A_Fall(Void*, Void*)
+  fun a_xscream = A_XScream(Void*, Void*)
+  fun a_look = A_Look(Void*, Void*)
+  fun a_chase = A_Chase(Void*, Void*)
+  fun a_face_target = A_FaceTarget(Void*, Void*)
+  fun a_pos_attack = A_PosAttack(Void*, Void*)
+  fun a_scream = A_Scream(Void*, Void*)
+  fun a_spos_attack = A_SPosAttack(Void*, Void*)
+  fun a_vile_chase = A_VileChase(Void*, Void*)
+  fun a_vile_start = A_VileStart(Void*, Void*)
+  fun a_vile_target = A_VileTarget(Void*, Void*)
+  fun a_vile_attack = A_VileAttack(Void*, Void*)
+  fun a_start_fire = A_StartFire(Void*, Void*)
+  fun a_fire = A_Fire(Void*, Void*)
+  fun a_fire_crackle = A_FireCrackle(Void*, Void*)
+  fun a_tracer = A_Tracer(Void*, Void*)
+  fun a_skel_whoosh = A_SkelWhoosh(Void*, Void*)
+  fun a_skel_fist = A_SkelFist(Void*, Void*)
+  fun a_skel_missile = A_SkelMissile(Void*, Void*)
+  fun a_fat_raise = A_FatRaise(Void*, Void*)
+  fun a_fat_attack1 = A_FatAttack1(Void*, Void*)
+  fun a_fat_attack2 = A_FatAttack2(Void*, Void*)
+  fun a_fat_attack3 = A_FatAttack3(Void*, Void*)
+  fun a_boss_death = A_BossDeath(Void*, Void*)
+  fun a_cpos_attack = A_CPosAttack(Void*, Void*)
+  fun a_cpos_refire = A_CPosRefire(Void*, Void*)
+  fun a_troop_attack = A_TroopAttack(Void*, Void*)
+  fun a_sarg_attack = A_SargAttack(Void*, Void*)
+  fun a_head_attack = A_HeadAttack(Void*, Void*)
+  fun a_bruis_attack = A_BruisAttack(Void*, Void*)
+  fun a_skull_attack = A_SkullAttack(Void*, Void*)
+  fun a_metal = A_Metal(Void*, Void*)
+  fun a_spid_refire = A_SpidRefire(Void*, Void*)
+  fun a_baby_metal = A_BabyMetal(Void*, Void*)
+  fun a_bspi_attack = A_BspiAttack(Void*, Void*)
+  fun a_hoof = A_Hoof(Void*, Void*)
+  fun a_cyber_attack = A_CyberAttack(Void*, Void*)
+  fun a_pain_attack = A_PainAttack(Void*, Void*)
+  fun a_pain_die = A_PainDie(Void*, Void*)
+  fun a_keen_die = A_KeenDie(Void*, Void*)
+  fun a_brain_pain = A_BrainPain(Void*, Void*)
+  fun a_brain_scream = A_BrainScream(Void*, Void*)
+  fun a_brain_die = A_BrainDie(Void*, Void*)
+  fun a_brain_awake = A_BrainAwake(Void*, Void*)
+  fun a_brain_spit = A_BrainSpit(Void*, Void*)
+  fun a_spawn_sound = A_SpawnSound(Void*, Void*)
+  fun a_spawn_fly = A_SpawnFly(Void*, Void*)
+  fun a_brain_explode = A_BrainExplode(Void*, Void*)
 
   $states : State[Statenum::NUMSTATES]
+
+  SKULLXOFF  = -32
+  LINEHEIGHT =  16
+
+  #
+  # MENU TYPEDEFS
+  #
+  struct Menuitem
+    # 0 = no cursor here, 1 = ok, 2 = arrows ok
+    status : LibC::Short
+
+    name : LibC::Char*
+
+    # choice = menu item #.
+    # if status = 2,
+    #   choice=0:leftarrow,1:rightarrow
+    routine : Proc(LibC::Int, Nil)
+
+    # hotkey in menu
+    alpha_key : LibC::Char
+  end
+
+  struct Menu
+    numitems : LibC::Short # # of menu items
+    prev_menu : Menu*      # previous menu
+    menuitems : Menuitem*  # menu items
+    routine : Proc(Nil)    # draw routine
+    x : LibC::Short
+    y : LibC::Short       # x,y of menu
+    last_on : LibC::Short # last item user was on in menu
+  end
+
+  struct MenuCustomTextSeg
+    lump : LibC::Char*
+    x : LibC::Int
+    w : LibC::Int
+    offx : LibC::Int
+    offy : LibC::Int
+  end
+
+  struct MenuCustomText
+    name : LibC::Char*
+    segs : MenuCustomTextSeg[16]
+  end
+
+  # Blocky mode, has default, 0 = high, 1 = normal
+  $detail_level = detailLevel : LibC::Int
+  $screenblocks : LibC::Int # has default
+
+  # temp for screenblocks (0-9)
+  $screen_size = screenSize : LibC::Int
+
+  # -1 = no quicksave slot picked!
+  $quick_save_slot = quickSaveSlot : LibC::Int
+
+  # 1 = message to be printed
+  $message_to_print = messageToPrint : LibC::Int
+  # ...and here is the message string!
+  $message_string = messageString : LibC::Char*
+
+  # message x & y
+  $messx : LibC::Int
+  $messy : LibC::Int
+  $message_last_menu_active = messageLastMenuActive : LibC::Int
+
+  # timed message = no input from user
+  $message_needs_input = messageNeedsInput : DoomBool
+
+  $message_routine = messageRoutine : Proc(LibC::Int, Nil)
+
+  $gammamsg : LibC::Char*[5]
+
+  # we are going to be entering a savegame string
+  $save_string_enter = saveStringEnter : LibC::Int
+  $save_slot = saveSlot : LibC::Int            # which slot to save in
+  $save_char_index = saveCharIndex : LibC::Int # which char we're editing
+  # old save description before edit
+  $save_old_string = saveOldString : LibC::Char[SAVESTRINGSIZE]
+
+  $savegamestrings : LibC::Char[SAVESTRINGSIZE][10]
+
+  $endstring : LibC::Char[160]
+
+  $item_on = itemOn : LibC::Short                      # menu item skull is on
+  $skull_anim_counter = skullAnimCounter : LibC::Short # skull animation counter
+  $which_skull = whichSkull : LibC::Short              # which skull to draw
+
+  # graphic name of skulls
+  # warning: initializer-string for array of chars is too long
+  $skull_name = skullName : LibC::Char*[2]
+
+  # current menudef
+  $current_menu = currentMenu : Menu*
+
+  # We create new menu text by cutting into existing graphics and pasting them to create the new text.
+  # This way we don't ship code with embeded graphics that come from WAD files.
+  $menu_custom_texts : MenuCustomText[4]
+
+  $custom_texts_count : LibC::Int
+
+  $tempstring : LibC::Char[80]
+  $epi : LibC::Int
+  $detail_names = detailNames : LibC::Char*[2]
+  $msg_names = msgNames : LibC::Char*[2]
+
+  $quitsounds : LibC::Int[8]
+
+  $quitsounds2 : LibC::Int[8]
+
+  fun m_new_game = M_NewGame(choice : LibC::Int)
+  fun m_episode = M_Episode(choice : LibC::Int)
+  fun m_choose_skill = M_ChooseSkill(choice : LibC::Int)
+  fun m_load_game = M_LoadGame(choice : LibC::Int)
+  fun m_save_game = M_SaveGame(choice : LibC::Int)
+  fun m_options = M_Options(choice : LibC::Int)
+  fun m_endgame = M_EndGame(choice : LibC::Int)
+  fun m_readthis = M_ReadThis(choice : LibC::Int)
+  fun m_readthis2 = M_ReadThis2(choice : LibC::Int)
+  fun m_quitdoom = M_QuitDOOM(choice : LibC::Int)
+
+  fun m_change_messages = M_ChangeMessages(choice : LibC::Int)
+  fun m_sfxvol = M_SfxVol(choice : LibC::Int)
+  fun m_musicvol = M_MusicVol(choice : LibC::Int)
+  fun m_mouse_options = M_MouseOptions(choice : LibC::Int)
+  fun m_size_display = M_SizeDisplay(choice : LibC::Int)
+  fun m_startgame = M_StartGame(choice : LibC::Int)
+  fun m_sound = M_Sound(choice : LibC::Int)
+  fun m_change_crosshair = M_ChangeCrosshair(choice : LibC::Int)
+  fun m_change_alwaysrun = M_ChangeAlwaysRun(choice : LibC::Int)
+
+  fun m_mouse_move = M_MouseMove(choice : LibC::Int)
+  fun m_change_sensitivity = M_ChangeSensitivity(choice : LibC::Int)
+
+  fun m_finish_readthis = M_FinishReadThis(choice : LibC::Int)
+  fun m_load_select = M_LoadSelect(choice : LibC::Int)
+  fun m_save_select = M_SaveSelect(choice : LibC::Int)
+  fun m_read_save_strings = M_ReadSaveStrings
+  fun m_quicksave = M_QuickSave
+  fun m_quickload = M_QuickLoad
+
+  fun m_draw_mainmenu = M_DrawMainMenu
+  fun m_draw_readthis1 = M_DrawReadThis1
+  fun m_draw_readthis2 = M_DrawReadThis2
+  fun m_draw_newgame = M_DrawNewGame
+  fun m_draw_episode = M_DrawEpisode
+  fun m_draw_options = M_DrawOptions
+  fun m_draw_sound = M_DrawSound
+  fun m_draw_load = M_DrawLoad
+  fun m_draw_save = M_DrawSave
+
+  fun m_draw_save_load_border = M_DrawSaveLoadBorder(x : LibC::Int, y : LibC::Int)
+  fun m_setup_next_menu = M_SetupNextMenu(menudef : Menu*)
+  fun m_draw_thermo = M_DrawThermo(x : LibC::Int, y : LibC::Int, therm_width : LibC::Int, therm_dot : LibC::Int)
+  fun m_draw_empty_cell = M_DrawEmptyCell(menu : Menu*, item : LibC::Int)
+  fun m_draw_selcell = M_DrawSelCell(menu : Menu*, item : LibC::Int)
+  fun m_write_text = M_WriteText(x : LibC::Int, y : LibC::Int, string : LibC::Char*)
+  fun m_string_width = M_StringWidth(string : LibC::Char*) : LibC::Int
+  fun m_string_height = M_StringHeight(string : LibC::Char*) : LibC::Int
+  fun m_start_control_panel = M_StartControlPanel
+  fun m_start_message = M_StartMessage(string : LibC::Char*, routine : Proc(Int32, Nil), input : DoomBool)
+  fun m_stop_message = M_StopMessage
+  fun m_clear_menus = M_ClearMenus
+  fun m_draw_mouse_options = M_DrawMouseOptions
+
+  #
+  # DOOM MENU
+  #
+  enum Mainenum
+    Newgame
+    Options
+    Loadgame
+    Savegame
+    Readthis
+    Quitdoom
+    MainEnd
+  end
+
+  $mainmenu = MainMenu : Menuitem[6]
+
+  $maindef = MainDef : Menu
+
+  #
+  # EPISODE SELECT
+  #
+  enum Episodesenum
+    Ep1
+    Ep2
+    Ep3
+    Ep4
+    EpEnd
+  end
+
+  $episodemenu = EpisodeMenu : Menuitem[4]
+
+  $epidef = EpiDef : Menu
+
+  #
+  # NEW GAME
+  #
+  enum NewgameEnum
+    Killthings
+    Toorough
+    Hurtme
+    Violence
+    Nightmare
+    NewgEnd
+  end
+
+  $newgame_menu = NewGameMenu : Menuitem[5]
+
+  $newdef = NewDef : Menu
+
+  #
+  # OPTIONS MENU
+  #
+  enum OptionsEnum
+    Endgame
+    Messages
+    Crosshairopt
+    Alwaysrunopt
+    # Detail, # Details do nothing?
+    Scrnsize
+    Optionempty1
+    Mouseoptions
+    Soundvol
+    OptEnd
+  end
+
+  $options_menu = OptionsMenuFull : Menuitem[8]
+
+  $optionsdef = OptionsDef : Menu
+
+  #
+  # MOUSE OPTIONS
+  #
+  enum MouseoptionsEnum
+    Mousemov
+    Mousesens
+    Mouseoptionempty1
+    MouseOptEnd
+  end
+
+  $mouse_options_menu = MouseOptionsMenu : Menuitem[3]
+
+  $mouseoptionsdef = MouseOptionsDef : Menu
+
+  #
+  # Read This! MENU 1 & 2
+  #
+  enum Readenum
+    Rdthsempty1
+    Read1End
+  end
+
+  $readmenu1 = ReadMenu1 : Menuitem[1]
+
+  $readdef1 = ReadDef1 : Menu
+
+  enum Read2enum
+    Rdthsempty2
+    Read2End
+  end
+
+  $readmenu2 = ReadMenu2 : Menuitem[1]
+
+  $readdef2 = ReadDef2 : Menu
+
+  #
+  # SOUND VOLUME MENU
+  #
+  enum Soundenum
+    Sfxvol
+    Sfxempty1
+    Musicvol
+    Sfxempty2
+    SoundEnd
+  end
+
+  $soundmenu = SoundMenuFull : Menuitem[4]
+
+  $sounddef = SoundDef : Menu
+
+  #
+  # LOAD GAME MENU
+  #
+  enum Loadenum
+    Load1
+    Load2
+    Load3
+    Load4
+    Load5
+    Load6
+    LoadEnd
+  end
+
+  $loadmenu = DOOM_LoadMenu : Menuitem[6]
+
+  $loaddef = LoadDef : Menu
+
+  #
+  # SAVE GAME MENU
+  #
+  $savemenu = SaveMenu : Menuitem[6]
+
+  $savedef = SaveDef : Menu
+
+  fun m_draw_custom_menu_text = M_DrawCustomMenuText(name : LibC::Char*, x : LibC::Int, y : LibC::Int)
+
+  fun m_do_save = M_DoSave(slot : LibC::Int)
+
+    fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
+
+    fun m_quickload_response = M_QuickLoadResponse(ch : LibC::Int)
+
+      fun m_verify_nightmare = M_VerifyNightmare(ch : LibC::Int)
+
+        fun m_endgame_response = M_EndGameResponse(ch : LibC::Int)
+
+          fun m_quit_response = M_QuitResponse(ch : LibC::Int)
+
+            fun m_responder = M_Responder(ev : Event*) : DoomBool
+
+              
+
 end

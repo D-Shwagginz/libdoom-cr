@@ -15,7 +15,7 @@ add plutonia tnt pack detection for version printing and stuff
   mus_delay = mus_delay * 128 + delay_byte & 0b01111111;
   Fixes into
   mus_delay = mus_delay * 128 + (delay_byte & 0b01111111);
--- Fixed using strcpy instead of concat for M_QuickSave tempstring
+-- Fixed using strcpy instead of concat for M_QuickSave and M_QuickLoad tempstring
 -- Fixed quitting not playing sound (i_wait_vbl)
 -- Reworked some of the i_(sound) stuff to make positional sound actually track and sounds stop when they should (like DOS doom)
 -- Moved return if singletics in net_update to the start to avoid input delay (linuxdoom is so scuffed compared to dos lmao)
