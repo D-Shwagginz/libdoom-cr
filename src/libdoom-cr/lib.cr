@@ -5984,7 +5984,7 @@ lib CDoom
   SCREEN_PALETTE_SIZE = 256 * 3
   $screen_palette : LibC::UChar[SCREEN_PALETTE_SIZE]
   $is_wiping_screen : DoomBool
-  $defaults : Default[1]
+  $defaults : Default[40]
   $numdefaults : LibC::Int
   $mixbuffer : LibC::Short[2048]
 
@@ -7299,18 +7299,60 @@ lib CDoom
 
   fun m_do_save = M_DoSave(slot : LibC::Int)
 
-    fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
+  fun m_quicksave_response = M_QuickSaveResponse(ch : LibC::Int)
 
-    fun m_quickload_response = M_QuickLoadResponse(ch : LibC::Int)
+  fun m_quickload_response = M_QuickLoadResponse(ch : LibC::Int)
 
-      fun m_verify_nightmare = M_VerifyNightmare(ch : LibC::Int)
+  fun m_verify_nightmare = M_VerifyNightmare(ch : LibC::Int)
 
-        fun m_endgame_response = M_EndGameResponse(ch : LibC::Int)
+  fun m_endgame_response = M_EndGameResponse(ch : LibC::Int)
 
-          fun m_quit_response = M_QuitResponse(ch : LibC::Int)
+  fun m_quit_response = M_QuitResponse(ch : LibC::Int)
 
-            fun m_responder = M_Responder(ev : Event*) : DoomBool
+  fun m_responder = M_Responder(ev : Event*) : DoomBool
 
-              
+  STRING_VALUE = 0xffff
 
+  #
+  # SCREEN SHOTS
+  #
+  struct PCX
+    manufacturer : LibC::Char
+    version : LibC::Char
+    encoding : LibC::Char
+    bits_per_pixel : LibC::Char
+
+    xmin : LibC::UShort
+    ymin : LibC::UShort
+    xmax : LibC::UShort
+    ymax : LibC::UShort
+
+    hres : LibC::UShort
+    vres : LibC::UShort
+
+    palette : LibC::Char[48]
+
+    reserved : LibC::Char
+    color_planes : LibC::Char
+    bytes_per_line : LibC::UShort
+    palette_type : LibC::UShort
+
+    filler : LibC::Char[58]
+    data : LibC::Char # unbounded
+  end
+
+  $num_channels = numChannels : LibC::Int
+  $scantokey : Byte[128]
+
+  $numdefaults : LibC::Int
+  $defaultfile : LibC::Char*
+
+  fun write_pcx_file = WritePCXfile(filename : LibC::Char*, data : Byte*, width : LibC::Int, height : LibC::Int, palette : Byte*)
+
+  $rndtable : LibC::Char[256]
+
+  $rndindex : LibC::Int
+  $prndindex : LibC::Int
+
+  fun p_random = P_Random : LibC::Int
 end
