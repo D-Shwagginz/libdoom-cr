@@ -7135,7 +7135,7 @@ module LibDoom
       0, 167 - CDoom.hu_font[0].value.height.to_i16!,
       CDoom.hu_font, CDoom::HU_FONTSTART)
 
-      s = "".to_unsafe
+    s = "".to_unsafe
     case CDoom.gamemode
     when CDoom::GameMode::Shareware, CDoom::GameMode::Registered, CDoom::GameMode::Retail
       s = CDoom.mapnames[(CDoom.gameepisode - 1)*9 + CDoom.gamemap - 1]
@@ -10572,7 +10572,6 @@ module LibDoom
         next
       end
 
-
       mo2 = th.as(CDoom::Mobj*)
       if mo2 != mo &&
          mo2.value.type == mo.value.type &&
@@ -10936,8 +10935,8 @@ module LibDoom
     CDoom.p_spawn_puff(actor.value.x, actor.value.y, actor.value.z)
 
     th = CDoom.p_spawn_mobj(actor.value.x - actor.value.momx,
-    actor.value.y - actor.value.momy,
-    actor.value.z, CDoom::Mobjtype::MT_SMOKE)
+      actor.value.y - actor.value.momy,
+      actor.value.z, CDoom::Mobjtype::MT_SMOKE)
 
     th.value.momz = CDoom::FRACUNIT
     th.value.tics = th.value.tics - (CDoom.p_random & 3)
@@ -10950,9 +10949,9 @@ module LibDoom
 
     # change angle
     exact = CDoom.r_point_to_angle2(actor.value.x,
-    actor.value.y,
-    dest.value.x,
-    dest.value.y)
+      actor.value.y,
+      dest.value.x,
+      dest.value.y)
 
     if exact != actor.value.angle
       if exact &- actor.value.angle > 0x80000000
@@ -10970,8 +10969,8 @@ module LibDoom
 
     # change slope
     dist = CDoom.p_aprox_distance(dest.value.x - actor.value.x,
-    dest.value.y - actor.value.y)
-    
+      dest.value.y - actor.value.y)
+
     dist = dist // actor.value.info.value.speed
 
     dist = 1 if dist < 1
@@ -10983,7 +10982,6 @@ module LibDoom
       actor.value.momz = actor.value.momz + CDoom::FRACUNIT // 8
     end
   end
-
 
   def self.a_skel_whoosh(actor : Void*)
     actor = actor.as(CDoom::Mobj*)
@@ -11011,30 +11009,359 @@ module LibDoom
   #
   # Detect a corpse that could be raised.
   #
-    def self.pit_vile_check(thing : CDoom::Mobj*) : CDoom::DoomBool
-      return 1 if thing.value.flags & CDoom::Mobjflag::MF_CORPSE.value == 0 # not a monster
+  def self.pit_vile_check(thing : CDoom::Mobj*) : CDoom::DoomBool
+    return 1 if thing.value.flags & CDoom::Mobjflag::MF_CORPSE.value == 0 # not a monster
 
-      return 1 if thing.value.tics != -1 # not lying still yet
+    return 1 if thing.value.tics != -1 # not lying still yet
 
-      return 1 if thing.value.info.value.raisestate == CDoom::Statenum::S_NULL.value # monster doesn't have a raise state
+    return 1 if thing.value.info.value.raisestate == CDoom::Statenum::S_NULL.value # monster doesn't have a raise state
 
-      maxdist = thing.value.info.value.radius + CDoom.mobjinfo[CDoom::Mobjtype::MT_VILE.value].radius
+    maxdist = thing.value.info.value.radius + CDoom.mobjinfo[CDoom::Mobjtype::MT_VILE.value].radius
 
-      return 1 if doom_abs(thing.value.x - CDoom.viletryx) > maxdist ||
-        doom_abs(thing.value.y - CDoom.viletryy) > maxdist # not actually touching
+    return 1 if doom_abs(thing.value.x - CDoom.viletryx) > maxdist ||
+                doom_abs(thing.value.y - CDoom.viletryy) > maxdist # not actually touching
 
-      CDoom.corpsehit = thing
-      CDoom.corpsehit.value.momx = 0
-      CDoom.corpsehit.value.momy = 0
-      CDoom.corpsehit.value.height = CDoom.corpsehit.value.height << 2
-      check = CDoom.p_check_position(CDoom.corpsehit, CDoom.corpsehit.value.x, CDoom.corpsehit.value.y)
-      CDoom.corpsehit.value.height = CDoom.corpsehit.value.height >> 2
-      
-      return 1 if check == 0 # doesn't fit here
+    CDoom.corpsehit = thing
+    CDoom.corpsehit.value.momx = 0
+    CDoom.corpsehit.value.momy = 0
+    CDoom.corpsehit.value.height = CDoom.corpsehit.value.height << 2
+    check = CDoom.p_check_position(CDoom.corpsehit, CDoom.corpsehit.value.x, CDoom.corpsehit.value.y)
+    CDoom.corpsehit.value.height = CDoom.corpsehit.value.height >> 2
 
-      return 0 # got one, so stop checking
+    return 1 if check == 0 # doesn't fit here
+
+    return 0 # got one, so stop checking
+  end
+
+  #
+  # Check for ressurecting a body
+  #
+  def self.a_vile_chase(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    if actor.value.movedir != CDoom::Dirtype::NoDir.value
+      # check for corpses to raise
+      CDoom.viletryx =
+        actor.value.x + actor.value.info.value.speed * CDoom.xspeed[actor.value.movedir]
+      CDoom.viletryy =
+        actor.value.y + actor.value.info.value.speed * CDoom.yspeed[actor.value.movedir]
+
+      xl = (CDoom.viletryx - CDoom.bmaporgx - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      xh = (CDoom.viletryx - CDoom.bmaporgx + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      yl = (CDoom.viletryy - CDoom.bmaporgy - CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+      yh = (CDoom.viletryy - CDoom.bmaporgy + CDoom::MAXRADIUS * 2) >> CDoom::MAPBLOCKSHIFT
+
+      vileobj = actor
+      bx = xl
+      while bx <= xh
+        by = yl
+        while by <= yh
+          # Call pit_vile_check to check
+          # whether object is a corpse
+          # that canbe raised.
+          if CDoom.p_block_things_iterator(bx, by, ->CDoom.pit_vile_check) == 0
+            # got one!
+            temp = actor.value.target
+            actor.value.target = CDoom.corpsehit
+            CDoom.a_face_target(actor)
+            actor.value.target = temp
+
+            CDoom.p_set_mobj_state(actor, CDoom::Statenum::S_VILE_HEAL1)
+            CDoom.s_start_sound(CDoom.corpsehit, CDoom::Sfxenum::SFX_slop.value)
+            info = CDoom.corpsehit.value.info
+
+            CDoom.p_set_mobj_state(CDoom.corpsehit, CDoom::Statenum.new(info.value.raisestate))
+            CDoom.corpsehit.value.height = CDoom.corpsehit.value.height << 2
+            CDoom.corpsehit.value.flags = info.value.flags
+            CDoom.corpsehit.value.health = info.value.spawnhealth
+            CDoom.corpsehit.value.target = Pointer(CDoom::Mobj).null
+
+            return
+          end
+
+          by += 1
+        end
+
+        bx += 1
+      end
     end
 
+    # Return to normal attack.
+    CDoom.a_chase(actor)
+  end
 
+  def self.a_vile_start(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_vilatk.value)
+  end
 
+  #
+  # Keep fire in front of player unless out of sight
+  #
+  def self.a_start_fire(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_flamst.value)
+    CDoom.a_fire(actor)
+  end
+
+  def self.a_fire_crackle(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_flame.value)
+    CDoom.a_fire(actor)
+  end
+
+  def self.a_fire(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    dest = actor.value.tracer
+    return if dest.null?
+
+    # don't move it if the vile lost sight
+    return if CDoom.p_check_sight(actor.value.target, dest) == 0
+
+    an = dest.value.angle >> CDoom::ANGLETOFINESHIFT
+
+    CDoom.p_unset_thing_position(actor)
+    actor.value.x = dest.value.x + CDoom.fixed_mul(24 * CDoom::FRACUNIT, CDoom.finecosine[an])
+    actor.value.y = dest.value.y + CDoom.fixed_mul(24 * CDoom::FRACUNIT, CDoom.finesine[an])
+    actor.value.z = dest.value.z
+    CDoom.p_set_thing_position(actor)
+  end
+
+  #
+  # Spawn the hellfire
+  #
+  def self.a_vile_target(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    return if actor.value.target.null?
+
+    CDoom.a_face_target(actor)
+
+    fog = CDoom.p_spawn_mobj(actor.value.target.value.x,
+      actor.value.target.value.y,
+      actor.value.target.value.z, CDoom::Mobjtype::MT_FIRE)
+
+    actor.value.tracer = fog
+    fog.value.target = actor
+    fog.value.tracer = actor.value.target
+    CDoom.a_fire(fog)
+  end
+
+  def self.a_vile_attack(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    return if actor.value.target.null?
+
+    CDoom.a_face_target(actor)
+
+    return if CDoom.p_check_sight(actor, actor.value.target) == 0
+
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_barexp.value)
+    CDoom.p_damage_mobj(actor.value.target, actor, actor, 20)
+    actor.value.target.value.momz = 1000 * CDoom::FRACUNIT // actor.value.target.value.info.value.mass
+
+    an = actor.value.angle >> CDoom::ANGLETOFINESHIFT
+
+    fire = actor.value.tracer
+
+    return if fire.null?
+
+    # move the fire between the vile and the player
+    fire.value.x = actor.value.target.value.x - CDoom.fixed_mul(24 * CDoom::FRACUNIT, CDoom.finecosine[an])
+    fire.value.y = actor.value.target.value.y - CDoom.fixed_mul(24 * CDoom::FRACUNIT, CDoom.finesine[an])
+    CDoom.p_radius_attack(fire, actor, 70)
+  end
+
+  #
+  # firing three missiles (bruisers)
+  # in three different directions?
+  # Doesn't look like it.
+  #
+  def self.a_fat_raise(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    CDoom.a_face_target(actor)
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_manatk.value)
+  end
+
+  def self.a_fat_attack1(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    CDoom.a_face_target(actor)
+    # Change direction  to ...
+    actor.value.angle = actor.value.angle &+ CDoom::FATSPREAD
+    CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+
+    mo = CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+    mo.value.angle = mo.value.angle &+ CDoom::FATSPREAD
+    an = mo.value.angle >> CDoom::ANGLETOFINESHIFT
+    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finesine[an])
+  end
+
+  def self.a_fat_attack2(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    CDoom.a_face_target(actor)
+    # Now here choose opposite deviation.
+    actor.value.angle = actor.value.angle &- CDoom::FATSPREAD
+    CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+
+    mo = CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+    mo.value.angle = mo.value.angle &- CDoom::FATSPREAD * 2
+    an = mo.value.angle >> CDoom::ANGLETOFINESHIFT
+    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finesine[an])
+  end
+
+  def self.a_fat_attack3(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    CDoom.a_face_target(actor)
+
+    mo = CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+    mo.value.angle = mo.value.angle &- CDoom::FATSPREAD // 2
+    an = mo.value.angle >> CDoom::ANGLETOFINESHIFT
+    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finesine[an])
+
+    mo = CDoom.p_spawn_missile(actor, actor.value.target, CDoom::Mobjtype::MT_FATSHOT)
+    mo.value.angle = mo.value.angle &+ CDoom::FATSPREAD // 2
+    an = mo.value.angle >> CDoom::ANGLETOFINESHIFT
+    mo.value.momx = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finecosine[an])
+    mo.value.momy = CDoom.fixed_mul(mo.value.info.value.speed, CDoom.finesine[an])
+  end
+
+  #
+  # Fly at the player like a missile
+  #
+  def self.a_skull_attack(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    return if actor.value.target.null?
+
+    dest = actor.value.target
+    actor.value.flags = actor.value.flags | CDoom::Mobjflag::MF_SKULLFLY.value
+
+    CDoom.s_start_sound(actor, actor.value.info.value.attacksound)
+    CDoom.a_face_target(actor)
+    an = actor.value.angle >> CDoom::ANGLETOFINESHIFT
+    actor.value.momx = CDoom.fixed_mul(CDoom::SKULLSPEED, CDoom.finecosine[an])
+    actor.value.momy = CDoom.fixed_mul(CDoom::SKULLSPEED, CDoom.finesine[an])
+    dist = CDoom.p_aprox_distance(dest.value.x - actor.value.x, dest.value.y - actor.value.y)
+    dist = dist // CDoom::SKULLSPEED
+
+    dist = 1 if dist < 1
+    actor.value.momz = (dest.value.z + (dest.value.height >> 1) - actor.value.z) // dist
+  end
+
+  def self.a_pain_shoot_skull(actor : CDoom::Mobj*, angle : CDoom::Angle)
+    # count total number of skull currently on the level
+    count = 0
+
+    currentthinker = CDoom.thinkercap.next
+    while currentthinker != pointerof(CDoom.thinkercap)
+      if (currentthinker.value.function.acp1.pointer == (->CDoom.p_mobj_thinker).pointer) &&
+         currentthinker.as(CDoom::Mobj*).value.type == CDoom::Mobjtype::MT_SKULL
+        count += 1
+      end
+      currentthinker = currentthinker.value.next
+    end
+
+    # if there are allready 20 skulls on the level,
+    # don't spit another one
+    return if count > 20
+
+    # okay, there's playe for another one
+    an = angle >> CDoom::ANGLETOFINESHIFT
+
+    prestep = 4 * CDoom::FRACUNIT +
+              3 * (actor.value.info.value.radius + CDoom.mobjinfo[CDoom::Mobjtype::MT_SKULL.value].radius) // 2
+
+    x = actor.value.x + CDoom.fixed_mul(prestep, CDoom.finecosine[an])
+    y = actor.value.y + CDoom.fixed_mul(prestep, CDoom.finesine[an])
+    z = actor.value.z + 8 * CDoom::FRACUNIT
+
+    newmobj = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype::MT_SKULL)
+
+    # Check for movements.
+    if CDoom.p_try_move(newmobj, newmobj.value.x, newmobj.value.y) == 0
+      # kill it immediately
+      CDoom.p_damage_mobj(newmobj, actor, actor, 10000)
+      return
+    end
+
+    newmobj.value.target = actor.value.target
+    CDoom.a_skull_attack(newmobj)
+  end
+
+  def self.a_pain_attack(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+
+    return if actor.value.target.null?
+
+    CDoom.a_face_target(actor)
+    CDoom.a_pain_shoot_skull(actor, actor.value.angle)
+  end
+
+  def self.a_pain_die(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    CDoom.a_fall(actor)
+    CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ CDoom::ANG90)
+    CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ CDoom::ANG180)
+    CDoom.a_pain_shoot_skull(actor, actor.value.angle &+ CDoom::ANG270)
+  end
+
+  def self.a_scream(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    sound = 0
+
+    case actor.value.info.value.deathsound
+    when 0
+      return
+    when CDoom::Sfxenum::SFX_podth1.value, CDoom::Sfxenum::SFX_podth2.value, CDoom::Sfxenum::SFX_podth3.value
+      sound = CDoom::Sfxenum::SFX_podth1.value + CDoom.p_random % 3
+    when CDoom::Sfxenum::SFX_bgdth1.value, CDoom::Sfxenum::SFX_bgdth2.value
+      sound = CDoom::Sfxenum::SFX_bgdth1.value + CDoom.p_random % 2
+    else
+      sound = actor.value.info.value.deathsound
+    end
+
+    # Check for bosses.
+    if actor.value.type == CDoom::Mobjtype::MT_SPIDER ||
+       actor.value.type == CDoom::Mobjtype::MT_CYBORG
+      # full volume
+      CDoom.s_start_sound(Pointer(Void).null, sound)
+    else
+      CDoom.s_start_sound(actor, sound)
+    end
+  end
+
+  def self.a_xscream(actor : Void*)
+    CDoom.s_start_sound(actor, CDoom::Sfxenum::SFX_slop.value)
+  end
+
+  def self.a_pain(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    if actor.value.info.value.painsound != 0
+      CDoom.s_start_sound(actor, actor.value.info.value.painsound)
+    end
+  end
+
+  def self.a_fall(actor : Void*)
+    actor = actor.as(CDoom::Mobj*)
+    # actor is on ground, it can be walked over
+    actor.value.flags = actor.value.flags & ~CDoom::Mobjflag::MF_SOLID.value
+
+    #  So change this if corpse objects
+    # are meant to be obstacles.
+  end
+
+  def self.a_explode(thingy : Void*)
+    thingy = thingy.as(CDoom::Mobj*)
+    CDoom.p_radius_attack(thingy, thingy.value.target, 128)
+  end
+
+  
 end

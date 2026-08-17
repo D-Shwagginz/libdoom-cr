@@ -23,6 +23,6 @@ add plutonia tnt pack detection for version printing and stuff
 -- Fixed quit messages to be per game
 -- Fixed idclev not working on doom 2 due to returning if episode < 1 or > 1. (Ignore episode number when Doom 2)
 -- Fixed automap level names not matching for tnt and plutonia
-
+-- Fixed a_vile_target fog using two x's
 
 cast not checking if button is down as well as key (so you can shoot with mouse)

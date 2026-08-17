@@ -1449,18 +1449,98 @@ fun a_skel_missile = A_SkelMissile(actor : Void*)
   LibDoom.a_skel_missile(actor)
 end
 
-  fun a_tracer = A_Tracer(actor : Void*)
-LibDoom.a_tracer(actor)
+fun a_tracer = A_Tracer(actor : Void*)
+  LibDoom.a_tracer(actor)
+end
+
+fun a_skel_whoosh = A_SkelWhoosh(actor : Void*)
+  LibDoom.a_skel_whoosh(actor)
+end
+
+fun a_skel_fist = A_SkelFist(actor : Void*)
+  LibDoom.a_skel_fist(actor)
+end
+
+fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_vile_check(thing)
+end
+
+fun a_vile_chase = A_VileChase(actor : Void*)
+  LibDoom.a_vile_chase(actor)
+end
+
+fun a_vile_start = A_VileStart(actor : Void*)
+  LibDoom.a_vile_start(actor)
+end
+
+fun a_start_fire = A_StartFire(actor : Void*)
+  LibDoom.a_start_fire(actor)
+end
+
+fun a_fire_crackle = A_FireCrackle(actor : Void*)
+  LibDoom.a_fire_crackle(actor)
+end
+
+fun a_fire = A_Fire(actor : Void*)
+  LibDoom.a_fire(actor)
+end
+
+fun a_vile_target = A_VileTarget(actor : Void*)
+  LibDoom.a_vile_target(actor)
+end
+
+fun a_vile_attack = A_VileAttack(actor : Void*)
+  LibDoom.a_vile_attack(actor)
+end
+
+fun a_fat_raise = A_FatRaise(actor : Void*)
+  LibDoom.a_fat_raise(actor)
+end
+
+fun a_fat_attack1 = A_FatAttack1(actor : Void*)
+  LibDoom.a_fat_attack1(actor)
+end
+
+fun a_fat_attack2 = A_FatAttack2(actor : Void*)
+  LibDoom.a_fat_attack2(actor)
+end
+
+fun a_fat_attack3 = A_FatAttack3(actor : Void*)
+  LibDoom.a_fat_attack3(actor)
+end
+
+fun a_skull_attack = A_SkullAttack(actor : Void*)
+  LibDoom.a_skull_attack(actor)
+end
+
+fun a_pain_shoot_skull = A_PainShootSkull(actor : CDoom::Mobj*, angle : CDoom::Angle)
+  LibDoom.a_pain_shoot_skull(actor, angle)
+end
+
+fun a_pain_attack = A_PainAttack(actor : Void*)
+  LibDoom.a_pain_attack(actor)
+end
+
+fun a_pain_die = A_PainDie(actor : Void*)
+  LibDoom.a_pain_die(actor)
+end
+
+fun a_scream = A_Scream(actor : Void*)
+  LibDoom.a_scream(actor)
+end
+
+fun a_xscream = A_XScream(actor : Void*)
+  LibDoom.a_scream(actor)
+end
+
+  fun a_pain = A_Pain(actor : Void*)
+LibDoom.a_pain(actor)
   end
 
-  fun a_skel_whoosh = A_SkelWhoosh(actor : Void*)
-LibDoom.a_skel_whoosh(actor)
+  fun a_fall = A_Fall(actor : Void*)
+LibDoom.a_fall(actor)
   end
 
-  fun a_skel_fist = A_SkelFist(actor : Void*)
-LibDoom.a_skel_fist(actor)
+  fun a_explode = A_Explode(thingy : Void*)
+LibDoom.a_explode(thingy)
   end
-
-    fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
-LibDoom.pit_vile_check(thing)
-    end
