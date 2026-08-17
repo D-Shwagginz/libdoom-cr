@@ -1341,14 +1341,126 @@ fun ev_do_door = EV_DoDoor(line : CDoom::Line*, type : CDoom::Vldoorenum) : LibC
   LibDoom.ev_do_door(line, type)
 end
 
-  fun ev_vertical_door = EV_VerticalDoor(line : CDoom::Line*, thing : CDoom::Mobj*)
-LibDoom.ev_vertical_door(line, thing)
+fun ev_vertical_door = EV_VerticalDoor(line : CDoom::Line*, thing : CDoom::Mobj*)
+  LibDoom.ev_vertical_door(line, thing)
+end
+
+fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : CDoom::Sector*)
+  LibDoom.p_spawn_door_close_in_30(sec)
+end
+
+fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : CDoom::Sector*, secnum : LibC::Int)
+  LibDoom.p_spawn_door_raise_in_5_mins(sec, secnum)
+end
+
+fun p_recursive_sound = P_RecursiveSound(sec : CDoom::Sector*, soundblocks : LibC::Int)
+  LibDoom.p_recursive_sound(sec, soundblocks)
+end
+
+fun p_noise_alert = P_NoiseAlert(target : CDoom::Mobj*, emmiter : CDoom::Mobj*)
+  LibDoom.p_noise_alert(target, emmiter)
+end
+
+fun p_check_melee_range = P_CheckMeleeRange(actor : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_check_melee_range(actor)
+end
+
+fun p_check_missile_range = P_CheckMissileRange(actor : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_check_missile_range(actor)
+end
+
+fun p_move = P_Move(actor : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_move(actor)
+end
+
+fun p_try_walk = P_TryWalk(actor : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_try_walk(actor)
+end
+
+fun p_new_chase_dir = P_NewChaseDir(actor : CDoom::Mobj*)
+  LibDoom.p_new_chase_dir(actor)
+end
+
+fun p_look_for_players = P_LookForPlayers(actor : CDoom::Mobj*, allaround : CDoom::DoomBool) : CDoom::DoomBool
+  LibDoom.p_look_for_players(actor, allaround)
+end
+
+fun a_keen_die = A_KeenDie(mo : Void*)
+  LibDoom.a_keen_die(mo)
+end
+
+fun a_look = A_Look(actor : Void*)
+  LibDoom.a_look(actor)
+end
+
+fun a_chase = A_Chase(actor : Void*)
+  LibDoom.a_chase(actor)
+end
+
+fun a_face_target = A_FaceTarget(actor : Void*)
+  LibDoom.a_face_target(actor)
+end
+
+fun a_pos_attack = A_PosAttack(actor : Void*)
+  LibDoom.a_pos_attack(actor)
+end
+
+fun a_spos_attack = A_SPosAttack(actor : Void*)
+  LibDoom.a_spos_attack(actor)
+end
+
+fun a_cpos_attack = A_CPosAttack(actor : Void*)
+  LibDoom.a_cpos_attack(actor)
+end
+
+fun a_cpos_refire = A_CPosRefire(actor : Void*)
+  LibDoom.a_cpos_refire(actor)
+end
+
+fun a_spid_refire = A_SpidRefire(actor : Void*)
+  LibDoom.a_spid_refire(actor)
+end
+
+fun a_bspi_attack = A_BspiAttack(actor : Void*)
+  LibDoom.a_bspi_attack(actor)
+end
+
+fun a_troop_attack = A_TroopAttack(actor : Void*)
+  LibDoom.a_troop_attack(actor)
+end
+
+fun a_sarg_attack = A_SargAttack(actor : Void*)
+  LibDoom.a_sarg_attack(actor)
+end
+
+fun a_head_attack = A_HeadAttack(actor : Void*)
+  LibDoom.a_head_attack(actor)
+end
+
+fun a_cyber_attack = A_CyberAttack(actor : Void*)
+  LibDoom.a_cyber_attack(actor)
+end
+
+fun a_bruis_attack = A_BruisAttack(actor : Void*)
+  LibDoom.a_bruis_attack(actor)
+end
+
+fun a_skel_missile = A_SkelMissile(actor : Void*)
+  LibDoom.a_skel_missile(actor)
+end
+
+  fun a_tracer = A_Tracer(actor : Void*)
+LibDoom.a_tracer(actor)
   end
 
-  fun p_spawn_door_close_in_30 = P_SpawnDoorCloseIn30(sec : CDoom::Sector*)
-LibDoom.p_spawn_door_close_in_30(sec)
+  fun a_skel_whoosh = A_SkelWhoosh(actor : Void*)
+LibDoom.a_skel_whoosh(actor)
   end
 
-  fun p_spawn_door_raise_in_5_mins = P_SpawnDoorRaiseIn5Mins(sec : CDoom::Sector*, secnum : LibC::Int)
-LibDoom.p_spawn_door_raise_in_5_mins(sec, secnum)
+  fun a_skel_fist = A_SkelFist(actor : Void*)
+LibDoom.a_skel_fist(actor)
   end
+
+    fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
+LibDoom.pit_vile_check(thing)
+    end
