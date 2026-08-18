@@ -1385,79 +1385,79 @@ fun p_look_for_players = P_LookForPlayers(actor : CDoom::Mobj*, allaround : CDoo
   LibDoom.p_look_for_players(actor, allaround)
 end
 
-fun a_keen_die = A_KeenDie(mo : Void*)
+fun a_keen_die = A_KeenDie(mo : CDoom::Mobj*)
   LibDoom.a_keen_die(mo)
 end
 
-fun a_look = A_Look(actor : Void*)
+fun a_look = A_Look(actor : CDoom::Mobj*)
   LibDoom.a_look(actor)
 end
 
-fun a_chase = A_Chase(actor : Void*)
+fun a_chase = A_Chase(actor : CDoom::Mobj*)
   LibDoom.a_chase(actor)
 end
 
-fun a_face_target = A_FaceTarget(actor : Void*)
+fun a_face_target = A_FaceTarget(actor : CDoom::Mobj*)
   LibDoom.a_face_target(actor)
 end
 
-fun a_pos_attack = A_PosAttack(actor : Void*)
+fun a_pos_attack = A_PosAttack(actor : CDoom::Mobj*)
   LibDoom.a_pos_attack(actor)
 end
 
-fun a_spos_attack = A_SPosAttack(actor : Void*)
+fun a_spos_attack = A_SPosAttack(actor : CDoom::Mobj*)
   LibDoom.a_spos_attack(actor)
 end
 
-fun a_cpos_attack = A_CPosAttack(actor : Void*)
+fun a_cpos_attack = A_CPosAttack(actor : CDoom::Mobj*)
   LibDoom.a_cpos_attack(actor)
 end
 
-fun a_cpos_refire = A_CPosRefire(actor : Void*)
+fun a_cpos_refire = A_CPosRefire(actor : CDoom::Mobj*)
   LibDoom.a_cpos_refire(actor)
 end
 
-fun a_spid_refire = A_SpidRefire(actor : Void*)
+fun a_spid_refire = A_SpidRefire(actor : CDoom::Mobj*)
   LibDoom.a_spid_refire(actor)
 end
 
-fun a_bspi_attack = A_BspiAttack(actor : Void*)
+fun a_bspi_attack = A_BspiAttack(actor : CDoom::Mobj*)
   LibDoom.a_bspi_attack(actor)
 end
 
-fun a_troop_attack = A_TroopAttack(actor : Void*)
+fun a_troop_attack = A_TroopAttack(actor : CDoom::Mobj*)
   LibDoom.a_troop_attack(actor)
 end
 
-fun a_sarg_attack = A_SargAttack(actor : Void*)
+fun a_sarg_attack = A_SargAttack(actor : CDoom::Mobj*)
   LibDoom.a_sarg_attack(actor)
 end
 
-fun a_head_attack = A_HeadAttack(actor : Void*)
+fun a_head_attack = A_HeadAttack(actor : CDoom::Mobj*)
   LibDoom.a_head_attack(actor)
 end
 
-fun a_cyber_attack = A_CyberAttack(actor : Void*)
+fun a_cyber_attack = A_CyberAttack(actor : CDoom::Mobj*)
   LibDoom.a_cyber_attack(actor)
 end
 
-fun a_bruis_attack = A_BruisAttack(actor : Void*)
+fun a_bruis_attack = A_BruisAttack(actor : CDoom::Mobj*)
   LibDoom.a_bruis_attack(actor)
 end
 
-fun a_skel_missile = A_SkelMissile(actor : Void*)
+fun a_skel_missile = A_SkelMissile(actor : CDoom::Mobj*)
   LibDoom.a_skel_missile(actor)
 end
 
-fun a_tracer = A_Tracer(actor : Void*)
+fun a_tracer = A_Tracer(actor : CDoom::Mobj*)
   LibDoom.a_tracer(actor)
 end
 
-fun a_skel_whoosh = A_SkelWhoosh(actor : Void*)
+fun a_skel_whoosh = A_SkelWhoosh(actor : CDoom::Mobj*)
   LibDoom.a_skel_whoosh(actor)
 end
 
-fun a_skel_fist = A_SkelFist(actor : Void*)
+fun a_skel_fist = A_SkelFist(actor : CDoom::Mobj*)
   LibDoom.a_skel_fist(actor)
 end
 
@@ -1465,51 +1465,51 @@ fun pit_vile_check = PIT_VileCheck(thing : CDoom::Mobj*) : CDoom::DoomBool
   LibDoom.pit_vile_check(thing)
 end
 
-fun a_vile_chase = A_VileChase(actor : Void*)
+fun a_vile_chase = A_VileChase(actor : CDoom::Mobj*)
   LibDoom.a_vile_chase(actor)
 end
 
-fun a_vile_start = A_VileStart(actor : Void*)
+fun a_vile_start = A_VileStart(actor : CDoom::Mobj*)
   LibDoom.a_vile_start(actor)
 end
 
-fun a_start_fire = A_StartFire(actor : Void*)
+fun a_start_fire = A_StartFire(actor : CDoom::Mobj*)
   LibDoom.a_start_fire(actor)
 end
 
-fun a_fire_crackle = A_FireCrackle(actor : Void*)
+fun a_fire_crackle = A_FireCrackle(actor : CDoom::Mobj*)
   LibDoom.a_fire_crackle(actor)
 end
 
-fun a_fire = A_Fire(actor : Void*)
+fun a_fire = A_Fire(actor : CDoom::Mobj*)
   LibDoom.a_fire(actor)
 end
 
-fun a_vile_target = A_VileTarget(actor : Void*)
+fun a_vile_target = A_VileTarget(actor : CDoom::Mobj*)
   LibDoom.a_vile_target(actor)
 end
 
-fun a_vile_attack = A_VileAttack(actor : Void*)
+fun a_vile_attack = A_VileAttack(actor : CDoom::Mobj*)
   LibDoom.a_vile_attack(actor)
 end
 
-fun a_fat_raise = A_FatRaise(actor : Void*)
+fun a_fat_raise = A_FatRaise(actor : CDoom::Mobj*)
   LibDoom.a_fat_raise(actor)
 end
 
-fun a_fat_attack1 = A_FatAttack1(actor : Void*)
+fun a_fat_attack1 = A_FatAttack1(actor : CDoom::Mobj*)
   LibDoom.a_fat_attack1(actor)
 end
 
-fun a_fat_attack2 = A_FatAttack2(actor : Void*)
+fun a_fat_attack2 = A_FatAttack2(actor : CDoom::Mobj*)
   LibDoom.a_fat_attack2(actor)
 end
 
-fun a_fat_attack3 = A_FatAttack3(actor : Void*)
+fun a_fat_attack3 = A_FatAttack3(actor : CDoom::Mobj*)
   LibDoom.a_fat_attack3(actor)
 end
 
-fun a_skull_attack = A_SkullAttack(actor : Void*)
+fun a_skull_attack = A_SkullAttack(actor : CDoom::Mobj*)
   LibDoom.a_skull_attack(actor)
 end
 
@@ -1517,30 +1517,111 @@ fun a_pain_shoot_skull = A_PainShootSkull(actor : CDoom::Mobj*, angle : CDoom::A
   LibDoom.a_pain_shoot_skull(actor, angle)
 end
 
-fun a_pain_attack = A_PainAttack(actor : Void*)
+fun a_pain_attack = A_PainAttack(actor : CDoom::Mobj*)
   LibDoom.a_pain_attack(actor)
 end
 
-fun a_pain_die = A_PainDie(actor : Void*)
+fun a_pain_die = A_PainDie(actor : CDoom::Mobj*)
   LibDoom.a_pain_die(actor)
 end
 
-fun a_scream = A_Scream(actor : Void*)
+fun a_scream = A_Scream(actor : CDoom::Mobj*)
   LibDoom.a_scream(actor)
 end
 
-fun a_xscream = A_XScream(actor : Void*)
+fun a_xscream = A_XScream(actor : CDoom::Mobj*)
   LibDoom.a_scream(actor)
 end
 
-  fun a_pain = A_Pain(actor : Void*)
-LibDoom.a_pain(actor)
+fun a_pain = A_Pain(actor : CDoom::Mobj*)
+  LibDoom.a_pain(actor)
+end
+
+fun a_fall = A_Fall(actor : CDoom::Mobj*)
+  LibDoom.a_fall(actor)
+end
+
+fun a_explode = A_Explode(thingy : CDoom::Mobj*)
+  LibDoom.a_explode(thingy)
+end
+
+fun a_boss_death = A_BossDeath(mo : CDoom::Mobj*)
+  LibDoom.a_boss_death(mo)
+end
+
+fun a_hoof = A_Hoof(mo : CDoom::Mobj*)
+  LibDoom.a_hoof(mo)
+end
+
+fun a_metal = A_Metal(mo : CDoom::Mobj*)
+  LibDoom.a_metal(mo)
+end
+
+fun a_baby_metal = A_BabyMetal(mo : CDoom::Mobj*)
+  LibDoom.a_baby_metal(mo)
+end
+
+fun a_open_shotgun2 = A_OpenShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_open_shotgun2(player, psp)
+end
+
+fun a_load_shotgun2 = A_LoadShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_load_shotgun2(player, psp)
+end
+
+fun a_close_shotgun2 = A_CloseShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_close_shotgun2(player, psp)
+end
+
+fun a_brain_awake = A_BrainAwake(mo : CDoom::Mobj*)
+  LibDoom.a_brain_awake(mo)
+end
+
+fun a_brain_pain = A_BrainPain(mo : CDoom::Mobj*)
+  LibDoom.a_brain_pain(mo)
+end
+
+fun a_brain_scream = A_BrainScream(mo : CDoom::Mobj*)
+  LibDoom.a_brain_scream(mo)
+end
+
+fun a_brain_explode = A_BrainExplode(mo : CDoom::Mobj*)
+  LibDoom.a_brain_explode(mo)
+end
+
+fun a_brain_spit = A_BrainSpit(mo : CDoom::Mobj*)
+  LibDoom.a_brain_spit(mo)
+end
+
+fun a_spawn_sound = A_SpawnSound(mo : CDoom::Mobj*)
+  LibDoom.a_spawn_sound(mo)
+end
+
+fun a_spawn_fly = A_SpawnFly(mo : CDoom::Mobj*)
+  LibDoom.a_spawn_fly(mo)
+end
+
+fun a_player_scream = A_PlayerScream(mo : CDoom::Mobj*)
+  LibDoom.a_player_scream(mo)
+end
+
+fun t_move_plane = T_MovePlane(sector : CDoom::Sector*, speed : CDoom::Fixed, dest : CDoom::Fixed, crush : CDoom::DoomBool, floor_or_ceiling : LibC::Int, direction : LibC::Int) : CDoom::Result
+  LibDoom.t_move_plane(sector, speed, dest, crush, floor_or_ceiling, direction)
+end
+
+fun t_move_floor = T_MoveFloor(floor : CDoom::Floormove*)
+  LibDoom.t_move_floor(floor)
+end
+
+fun ev_do_floor = EV_DoFloor(line : CDoom::Line*, floortype : CDoom::Floorenum) : LibC::Int
+  LibDoom.ev_do_floor(line, floortype)
+end
+
+  fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : CDoom::Stairenum) : LibC::Int
+LibDoom.ev_build_stairs(line, type)
   end
 
-  fun a_fall = A_Fall(actor : Void*)
-LibDoom.a_fall(actor)
-  end
+    fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
+      LibDoom.p_give_ammo(player ,ammo, num)
+    end
 
-  fun a_explode = A_Explode(thingy : Void*)
-LibDoom.a_explode(thingy)
-  end

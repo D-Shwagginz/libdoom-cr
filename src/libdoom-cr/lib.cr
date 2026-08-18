@@ -249,7 +249,7 @@ lib CDoom
 
   QSPROMPT_1 = "quicksave over your game named\n\n'"
   QSPROMPT_2 = "'?\n\n" + PRESSYN
-  QLPROMPT_1 = "do you want to quickload the game named\n\n'%s"
+  QLPROMPT_1 = "do you want to quickload the game named\n\n'"
   QLPROMPT_2 = "'?\n\n" + PRESSYN
 
   NEWGAME = \
@@ -2810,7 +2810,7 @@ lib CDoom
     sprite : Spritenum
     frame : LibC::Long
     tics : LibC::Long
-    action : Actionf
+    action : Void*
     nextstate : Statenum
     misc1 : LibC::Long
     misc2 : LibC::Long
@@ -6914,16 +6914,16 @@ lib CDoom
   fun a_lower = A_Lower(Void*)
   fun a_raise = A_Raise(Void*)
   fun a_punch = A_Punch(Void*)
-  fun a_refire = A_ReFire(Void*)
+  fun a_refire = A_ReFire(player : Player*, psp : Pspdef*)
   fun a_fire_pistol = A_FirePistol(Void*)
   fun a_light1 = A_Light1(Void*)
   fun a_fire_shotgun = A_FireShotgun(Void*)
   fun a_light2 = A_Light2(Void*)
   fun a_fire_shotgun2 = A_FireShotgun2(Void*)
   fun a_check_reload = A_CheckReload(Void*)
-  fun a_open_shotgun2 = A_OpenShotgun2(Void*)
-  fun a_load_shotgun2 = A_LoadShotgun2(Void*)
-  fun a_close_shotgun2 = A_CloseShotgun2(Void*)
+  fun a_open_shotgun2 = A_OpenShotgun2(player : Player*, psp : Pspdef*)
+  fun a_load_shotgun2 = A_LoadShotgun2(player : Player*, psp : Pspdef*)
+  fun a_close_shotgun2 = A_CloseShotgun2(player : Player*, psp : Pspdef*)
   fun a_fire_cgun = A_FireCGun(Void*)
   fun a_gun_flash = A_GunFlash(Void*)
   fun a_fire_missile = A_FireMissile(Void*)
@@ -6932,57 +6932,57 @@ lib CDoom
   fun a_bfg_sound = A_BFGsound(Void*)
   fun a_fire_bfg = A_FireBFG(Void*)
   fun a_bfg_spray = A_BFGSpray(Void*)
-  fun a_explode = A_Explode(thingy : Void*)
-  fun a_pain = A_Pain(actor : Void*)
-  fun a_player_scream = A_PlayerScream(Void*)
-  fun a_fall = A_Fall(actor : Void*)
-  fun a_xscream = A_XScream(actor : Void*)
-  fun a_look = A_Look(actor : Void*)
-  fun a_chase = A_Chase(actor : Void*)
-  fun a_face_target = A_FaceTarget(actor : Void*)
-  fun a_pos_attack = A_PosAttack(actor : Void*)
-  fun a_scream = A_Scream(actor : Void*)
-  fun a_spos_attack = A_SPosAttack(actor : Void*)
-  fun a_vile_chase = A_VileChase(actor : Void*)
-  fun a_vile_start = A_VileStart(actor : Void*)
-  fun a_vile_target = A_VileTarget(actor : Void*)
-  fun a_vile_attack = A_VileAttack(actor : Void*)
-  fun a_start_fire = A_StartFire(actor : Void*)
-  fun a_fire = A_Fire(actor : Void*)
-  fun a_fire_crackle = A_FireCrackle(actor : Void*)
-  fun a_tracer = A_Tracer(actor : Void*)
-  fun a_skel_whoosh = A_SkelWhoosh(actor : Void*)
-  fun a_skel_fist = A_SkelFist(actor : Void*)
-  fun a_skel_missile = A_SkelMissile(actor : Void*)
-  fun a_fat_raise = A_FatRaise(actor : Void*)
-  fun a_fat_attack1 = A_FatAttack1(actor : Void*)
-  fun a_fat_attack2 = A_FatAttack2(actor : Void*)
-  fun a_fat_attack3 = A_FatAttack3(actor : Void*)
-  fun a_boss_death = A_BossDeath(Void*)
-  fun a_cpos_attack = A_CPosAttack(actor : Void*)
-  fun a_cpos_refire = A_CPosRefire(actor : Void*)
-  fun a_troop_attack = A_TroopAttack(actor : Void*)
-  fun a_sarg_attack = A_SargAttack(actor : Void*)
-  fun a_head_attack = A_HeadAttack(actor : Void*)
-  fun a_bruis_attack = A_BruisAttack(actor : Void*)
-  fun a_skull_attack = A_SkullAttack(actor : Void*)
-  fun a_metal = A_Metal(Void*)
-  fun a_spid_refire = A_SpidRefire(actor : Void*)
-  fun a_baby_metal = A_BabyMetal(Void*)
-  fun a_bspi_attack = A_BspiAttack(actor : Void*)
-  fun a_hoof = A_Hoof(Void*)
-  fun a_cyber_attack = A_CyberAttack(actor : Void*)
-  fun a_pain_attack = A_PainAttack(actor : Void*)
-  fun a_pain_die = A_PainDie(actor : Void*)
-  fun a_keen_die = A_KeenDie(mo : Void*)
-  fun a_brain_pain = A_BrainPain(Void*)
-  fun a_brain_scream = A_BrainScream(Void*)
+  fun a_explode = A_Explode(thingy : Mobj*)
+  fun a_pain = A_Pain(actor : Mobj*)
+  fun a_player_scream = A_PlayerScream(mo : Mobj*)
+  fun a_fall = A_Fall(actor : Mobj*)
+  fun a_xscream = A_XScream(actor : Mobj*)
+  fun a_look = A_Look(actor : Mobj*)
+  fun a_chase = A_Chase(actor : Mobj*)
+  fun a_face_target = A_FaceTarget(actor : Mobj*)
+  fun a_pos_attack = A_PosAttack(actor : Mobj*)
+  fun a_scream = A_Scream(actor : Mobj*)
+  fun a_spos_attack = A_SPosAttack(actor : Mobj*)
+  fun a_vile_chase = A_VileChase(actor : Mobj*)
+  fun a_vile_start = A_VileStart(actor : Mobj*)
+  fun a_vile_target = A_VileTarget(actor : Mobj*)
+  fun a_vile_attack = A_VileAttack(actor : Mobj*)
+  fun a_start_fire = A_StartFire(actor : Mobj*)
+  fun a_fire = A_Fire(actor : Mobj*)
+  fun a_fire_crackle = A_FireCrackle(actor : Mobj*)
+  fun a_tracer = A_Tracer(actor : Mobj*)
+  fun a_skel_whoosh = A_SkelWhoosh(actor : Mobj*)
+  fun a_skel_fist = A_SkelFist(actor : Mobj*)
+  fun a_skel_missile = A_SkelMissile(actor : Mobj*)
+  fun a_fat_raise = A_FatRaise(actor : Mobj*)
+  fun a_fat_attack1 = A_FatAttack1(actor : Mobj*)
+  fun a_fat_attack2 = A_FatAttack2(actor : Mobj*)
+  fun a_fat_attack3 = A_FatAttack3(actor : Mobj*)
+  fun a_boss_death = A_BossDeath(mo : Mobj*)
+  fun a_cpos_attack = A_CPosAttack(actor : Mobj*)
+  fun a_cpos_refire = A_CPosRefire(actor : Mobj*)
+  fun a_troop_attack = A_TroopAttack(actor : Mobj*)
+  fun a_sarg_attack = A_SargAttack(actor : Mobj*)
+  fun a_head_attack = A_HeadAttack(actor : Mobj*)
+  fun a_bruis_attack = A_BruisAttack(actor : Mobj*)
+  fun a_skull_attack = A_SkullAttack(actor : Mobj*)
+  fun a_metal = A_Metal(mo : Mobj*)
+  fun a_spid_refire = A_SpidRefire(actor : Mobj*)
+  fun a_baby_metal = A_BabyMetal(mo : Mobj*)
+  fun a_bspi_attack = A_BspiAttack(actor : Mobj*)
+  fun a_hoof = A_Hoof(mo : Mobj*)
+  fun a_cyber_attack = A_CyberAttack(actor : Mobj*)
+  fun a_pain_attack = A_PainAttack(actor : Mobj*)
+  fun a_pain_die = A_PainDie(actor : Mobj*)
+  fun a_keen_die = A_KeenDie(mo : Mobj*)
+  fun a_brain_pain = A_BrainPain(mo : Mobj*)
+  fun a_brain_scream = A_BrainScream(mo : Mobj*)
   fun a_brain_die = A_BrainDie(Void*)
-  fun a_brain_awake = A_BrainAwake(Void*)
-  fun a_brain_spit = A_BrainSpit(Void*)
-  fun a_spawn_sound = A_SpawnSound(Void*)
-  fun a_spawn_fly = A_SpawnFly(Void*)
-  fun a_brain_explode = A_BrainExplode(Void*)
+  fun a_brain_awake = A_BrainAwake(mo : Mobj*)
+  fun a_brain_spit = A_BrainSpit(mo : Mobj*)
+  fun a_spawn_sound = A_SpawnSound(mo : Mobj*)
+  fun a_spawn_fly = A_SpawnFly(mo : Mobj*)
+  fun a_brain_explode = A_BrainExplode(mo : Mobj*)
 
   SKULLXOFF  = -32
   LINEHEIGHT =  16
@@ -7402,4 +7402,8 @@ lib CDoom
   fun pit_vile_check = PIT_VileCheck(thing : Mobj*) : DoomBool
 
   fun a_pain_shoot_skull = A_PainShootSkull(actor : Mobj*, angle : Angle)
+
+    BONUSADD = 6
+    
+    fun p_give_ammo = P_GiveAmmo(player : Player*, ammo : Ammotype, num : LibC::Int) : DoomBool
 end
