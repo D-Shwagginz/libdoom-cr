@@ -1617,11 +1617,158 @@ fun ev_do_floor = EV_DoFloor(line : CDoom::Line*, floortype : CDoom::Floorenum) 
   LibDoom.ev_do_floor(line, floortype)
 end
 
-  fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : CDoom::Stairenum) : LibC::Int
-LibDoom.ev_build_stairs(line, type)
+fun ev_build_stairs = EV_BuildStairs(line : CDoom::Line*, type : CDoom::Stairenum) : LibC::Int
+  LibDoom.ev_build_stairs(line, type)
+end
+
+fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_give_ammo(player, ammo, num)
+end
+
+fun p_give_weapon = P_GiveWeapon(player : CDoom::Player*, weapon : CDoom::Weapontype, dropped : CDoom::DoomBool) : CDoom::DoomBool
+  LibDoom.p_give_weapon(player, weapon, dropped)
+end
+
+fun p_give_body = P_GiveBody(player : CDoom::Player*, num : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_give_body(player, num)
+end
+
+fun p_give_armor = P_GiveArmor(player : CDoom::Player*, armortype : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_give_armor(player, armortype)
+end
+
+fun p_give_card = P_GiveCard(player : CDoom::Player*, card : CDoom::Card)
+  LibDoom.p_give_card(player, card)
+end
+
+fun p_give_power = P_GivePower(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_give_power(player, power)
+end
+
+fun p_touch_special_thing = P_TouchSpecialThing(special : CDoom::Mobj*, toucher : CDoom::Mobj*)
+  LibDoom.p_touch_special_thing(special, toucher)
+end
+
+fun p_kill_mobj = P_KillMobj(source : CDoom::Mobj*, target : CDoom::Mobj*)
+  LibDoom.p_kill_mobj(source, target)
+end
+
+fun p_damage_mobj = P_DamageMobj(target : CDoom::Mobj*, inflictor : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+  LibDoom.p_damage_mobj(target, inflictor, source, damage)
+end
+
+fun t_fire_flicker = T_FireFlicker(flick : CDoom::Fireflicker*)
+  LibDoom.t_fire_flicker(flick)
+end
+
+fun p_spawn_fire_flicker = P_SpawnFireFlicker(sector : CDoom::Sector*)
+  LibDoom.p_spawn_fire_flicker(sector)
+end
+
+fun t_light_flash = T_LightFlash(flash : CDoom::Lightflash*)
+  LibDoom.t_light_flash(flash)
+end
+
+fun p_spawn_light_flash = P_SpawnLightFlash(sector : CDoom::Sector*)
+  LibDoom.p_spawn_light_flash(sector)
+end
+
+fun t_strobe_flash = T_StrobeFlash(flash : CDoom::Strobe*)
+  LibDoom.t_strobe_flash(flash)
+end
+
+fun p_spawn_strobe_flash = P_SpawnStrobeFlash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
+  LibDoom.p_spawn_strobe_flash(sector, fast_or_slow, in_sync)
+end
+
+fun ev_start_light_strobing = EV_StartLightStrobing(line : CDoom::Line*)
+  LibDoom.ev_start_light_strobing(line)
+end
+
+fun ev_turn_tag_lights_off = EV_TurnTagLightsOff(line : CDoom::Line*)
+  LibDoom.ev_turn_tag_lights_off(line)
+end
+
+fun ev_light_turn_on = EV_LightTurnOn(line : CDoom::Line*, bright : LibC::Int)
+  LibDoom.ev_light_turn_on(line, bright)
+end
+
+fun t_glow = T_Glow(g : CDoom::Glow*)
+  LibDoom.t_glow(g)
+end
+
+fun p_spawn_glowing_light = P_SpawnGlowingLight(sector : CDoom::Sector*)
+  LibDoom.p_spawn_glowing_light(sector)
+end
+
+fun pit_stomp_thing = PIT_StompThing(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_stomp_thing(thing)
+end
+
+fun p_teleport_move = P_TeleportMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+  LibDoom.p_teleport_move(thing, x, y)
+end
+
+fun pit_check_line = PIT_CheckLine(ld : CDoom::Line*) : CDoom::DoomBool
+  LibDoom.pit_check_line(ld)
+end
+
+fun pit_check_thing = PIT_CheckThing(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_check_thing(thing)
+end
+
+fun p_check_position = P_CheckPosition(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+  LibDoom.p_check_position(thing, x, y)
+end
+
+fun p_try_move = P_TryMove(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+  LibDoom.p_try_move(thing, x, y)
+end
+
+fun p_thing_height_clip = P_ThingHeightClip(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_thing_height_clip(thing)
+end
+
+fun p_hit_slide_line = P_HitSlideLine(ld : CDoom::Line*)
+  LibDoom.p_hit_slide_line(ld)
+end
+
+fun ptr_slide_traverse = PTR_SlideTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+  LibDoom.ptr_slide_traverse(int)
+end
+
+fun p_slide_move = P_SlideMove(mo : CDoom::Mobj*)
+  LibDoom.p_slide_move(mo)
+end
+
+fun ptr_aim_traverse = PTR_AimTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+  LibDoom.ptr_aim_traverse(int)
+end
+
+fun ptr_shoot_traverse = PTR_ShootTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+  LibDoom.ptr_shoot_traverse(int)
+end
+
+fun p_aim_line_attack = P_AimLineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed) : CDoom::Fixed
+  LibDoom.p_aim_line_attack(t1, angle, distance)
+end
+
+fun p_line_attack = P_LineAttack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed, slope : CDoom::Fixed, damage : LibC::Int)
+  LibDoom.p_line_attack(t1, angle, distance, slope, damage)
+end
+
+fun ptr_use_traverse = PTR_UseTraverse(int : CDoom::Intercept*) : CDoom::DoomBool
+  LibDoom.ptr_use_traverse(int)
+end
+
+fun p_use_lines = P_UseLines(player : CDoom::Player*)
+  LibDoom.p_use_lines(player)
+end
+
+fun pit_radius_attack = PIT_RadiusAttack(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_radius_attack(thing)
+end
+
+  fun p_radius_attack = P_RadiusAttack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+LibDoom.p_radius_attack(spot, source, damage)
   end
-
-    fun p_give_ammo = P_GiveAmmo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
-      LibDoom.p_give_ammo(player ,ammo, num)
-    end
-

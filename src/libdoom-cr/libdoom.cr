@@ -2307,7 +2307,7 @@ module LibDoom
   CDoom.prndindex = 0
 
   # a weapon is found with two clip loads,
-# a big item has five clip loads
+  # a big item has five clip loads
   c_array(CDoom.maxammo, 200, 50, 300, 50)
   c_array(CDoom.clipammo, 10, 4, 20, 1)
 
@@ -4550,7 +4550,7 @@ module LibDoom
   # h_get_packet
   # Returns false if no packet is waiting
   #
-  def self.h_get_packet
+  def self.h_get_packet : CDoom::DoomBool
     if CDoom.reboundpacket != 0
       CDoom.netbuffer.value = CDoom.reboundstore
       CDoom.doomcom.value.remotenode = 0
@@ -6058,8 +6058,7 @@ module LibDoom
 
     # check for special buttons
     CDoom::MAXPLAYERS.times do |i|
-      if CDoom.playeringame[i]
-        !+0
+      if CDoom.playeringame[i] != 0
         if CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
           case CDoom::Buttoncode.new(CDoom.players[i].cmd.buttons & CDoom::Buttoncode::BT_SPECIALMASK.value)
           when CDoom::Buttoncode::BTS_PAUSE
@@ -6288,6 +6287,7 @@ module LibDoom
       when 8
         # victory
         CDoom.gameaction = CDoom::Gameaction::Victory
+        return
       when 9
         # exit secret level
         CDoom::MAXPLAYERS.times do |i|
@@ -9722,12 +9722,12 @@ module LibDoom
   end
 
   # Which one is deterministic?
-  def self.p_random
+  def self.p_random : Int32
     CDoom.prndindex = (CDoom.prndindex + 1) & 0xff
     return CDoom.rndtable[CDoom.prndindex].to_i32
   end
 
-  def self.m_random
+  def self.m_random : Int32
     CDoom.rndindex = (CDoom.rndindex + 1) & 0xff
     return CDoom.rndtable[CDoom.rndindex].to_i32
   end
@@ -11861,7 +11861,6 @@ module LibDoom
     return rtn
   end
 
-
   #
   # BUILD A STAIRCASE!
   #
@@ -11898,44 +11897,44 @@ module LibDoom
 
       texture = sec.value.floorpic
       # Find next sector to raise
-        # 1.        Find 2-sided line with same sector side[0]
-        # 2.        Other side is the next sector to raise
-        loop do
-          ok = 0
-          sec.value.linecount.times do |i|
-            next if ((sec.value.lines[i]).value.flags & CDoom::ML_TWOSIDED) == 0
+      # 1.        Find 2-sided line with same sector side[0]
+      # 2.        Other side is the next sector to raise
+      loop do
+        ok = 0
+        sec.value.linecount.times do |i|
+          next if ((sec.value.lines[i]).value.flags & CDoom::ML_TWOSIDED) == 0
 
-            tsec = (sec.value.lines[i]).value.frontsector
-            newsecnum = (tsec - CDoom.sectors).to_i32!
+          tsec = (sec.value.lines[i]).value.frontsector
+          newsecnum = (tsec - CDoom.sectors).to_i32!
 
-            next if secnum != newsecnum
+          next if secnum != newsecnum
 
-            tsec = (sec.value.lines[i]).value.backsector
-            newsecnum = (tsec - CDoom.sectors).to_i32!
+          tsec = (sec.value.lines[i]).value.backsector
+          newsecnum = (tsec - CDoom.sectors).to_i32!
 
-            next if tsec.value.floorpic != texture
+          next if tsec.value.floorpic != texture
 
-            height += stairsize
+          height += stairsize
 
-            next unless tsec.value.specialdata.null?
+          next unless tsec.value.specialdata.null?
 
-            sec = tsec
-            secnum = newsecnum
-            floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
+          sec = tsec
+          secnum = newsecnum
+          floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
 
-            CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+          CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
 
-            sec.value.specialdata = floor
-            (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_move_floor(p.as(CDoom::Floormove*)) }
-            floor.value.direction = 1
-            floor.value.sector = sec
-            floor.value.speed = speed
-            floor.value.floordestheight = height
-            ok = 1
-            break
-          end
-          break if ok != 0
+          sec.value.specialdata = floor
+          (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_move_floor(p.as(CDoom::Floormove*)) }
+          floor.value.direction = 1
+          floor.value.sector = sec
+          floor.value.speed = speed
+          floor.value.floordestheight = height
+          ok = 1
+          break
         end
+        break if ok != 0
+      end
     end
     return rtn
   end
@@ -11946,41 +11945,40 @@ module LibDoom
 
   #
   # Num is the number of clip loads,
-# not the individual count (0= 1/2 clip).
-# Returns false if the ammo can't be picked up at all
-#
-    def self.p_give_ammo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
-      return 0 if ammo == CDoom::Ammotype::Noammo
+  # not the individual count (0= 1/2 clip).
+  # Returns false if the ammo can't be picked up at all
+  #
+  def self.p_give_ammo(player : CDoom::Player*, ammo : CDoom::Ammotype, num : LibC::Int) : CDoom::DoomBool
+    return 0 if ammo == CDoom::Ammotype::Noammo
 
-      if ammo.value < 0 || ammo.value > CDoom::Ammotype::NUMAMMO.value
-        CDoom.doom_strcpy(CDoom.error_buf, "p_give_ammo: bad type ")
-        CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(ammo, 10))
-        CDoom.i_error(CDoom.error_buf)
-      end
+    if ammo.value < 0 || ammo.value > CDoom::Ammotype::NUMAMMO.value
+      CDoom.doom_strcpy(CDoom.error_buf, "p_give_ammo: bad type ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(ammo, 10))
+      CDoom.i_error(CDoom.error_buf)
+    end
 
-      return 0 if player.value.ammo[ammo.value] == player.value.maxammo[ammo.value]
+    return 0 if player.value.ammo[ammo.value] == player.value.maxammo[ammo.value]
 
-      if num != 0
-        num *= CDoom.clipammo[ammo.value]
-      else
-        num = CDoom.clipammo[ammo.value] // 2
-      end
+    if num != 0
+      num *= CDoom.clipammo[ammo.value]
+    else
+      num = CDoom.clipammo[ammo.value] // 2
+    end
 
-      if CDoom.gameskill == CDoom::Skill::Baby ||
-        CDoom.gameskill == CDoom::Skill::Nightmare
-        # give double ammo in trainer mode,
-        # you'll need in nightmare
-        num <<= 1
-      end
+    if CDoom.gameskill == CDoom::Skill::Baby ||
+       CDoom.gameskill == CDoom::Skill::Nightmare
+      # give double ammo in trainer mode,
+      # you'll need in nightmare
+      num <<= 1
+    end
 
-      oldammo = player.value.ammo[ammo.value]
-      (player.value.ammo.to_unsafe + ammo.value).value = player.value.ammo[ammo.value] + num
+    oldammo = player.value.ammo[ammo.value]
+    (player.value.ammo.to_unsafe + ammo.value).value = player.value.ammo[ammo.value] + num
 
-      (player.value.ammo.to_unsafe + ammo.value).value = player.value.maxammo[ammo.value] if 
-      player.value.ammo[ammo.value] > player.value.maxammo[ammo.value]
+    (player.value.ammo.to_unsafe + ammo.value).value = player.value.maxammo[ammo.value] if player.value.ammo[ammo.value] > player.value.maxammo[ammo.value]
 
-      # If non zero ammo,
-      # don't change up weapons,
+    # If non zero ammo,
+    # don't change up weapons,
     # player was lower on purpose.
     return 1 if oldammo != 0
 
@@ -11996,23 +11994,20 @@ module LibDoom
           player.value.pendingweapon = CDoom::Weapontype::Pistol
         end
       end
-
     when CDoom::Ammotype::Shell
       if player.value.readyweapon == CDoom::Weapontype::Fist ||
-        player.value.readyweapon == CDoom::Weapontype::Pistol
+         player.value.readyweapon == CDoom::Weapontype::Pistol
         if player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Shotgun
         end
       end
-
     when CDoom::Ammotype::Cell
       if player.value.readyweapon == CDoom::Weapontype::Fist ||
-        player.value.readyweapon == CDoom::Weapontype::Pistol
+         player.value.readyweapon == CDoom::Weapontype::Pistol
         if player.value.weaponowned[CDoom::Weapontype::Plasma.value] != 0
           player.value.pendingweapon = CDoom::Weapontype::Plasma
         end
       end
-
     when CDoom::Ammotype::Misl
       if player.value.readyweapon == CDoom::Weapontype::Fist
         if player.value.weaponowned[CDoom::Weapontype::Missile.value] != 0
@@ -12021,9 +12016,1593 @@ module LibDoom
       end
     end
     return 1
+  end
 
+  #
+  # The weapon name may have a MF_DROPPED flag ored in.
+  #
+  def self.p_give_weapon(player : CDoom::Player*, weapon : CDoom::Weapontype, dropped : CDoom::DoomBool) : CDoom::DoomBool
+    gaveammo = 0
+    gaveweapon = 0
+
+    if CDoom.netgame != 0 &&
+       CDoom.deathmatch != 2 &&
+       dropped == 0
+      # leave placed weapons forever on net games
+      return 0 if player.value.weaponowned[weapon.value] != 0
+
+      player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
+      player.value.weaponowned[weapon.value] = 1
+
+      if CDoom.deathmatch != 0
+        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 5)
+      else
+        CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
+      end
+      player.value.pendingweapon = weapon
+
+      if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+        CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_wpnup)
+      end
+      return 0
     end
 
-    
+    if CDoom.weaponinfo[weapon.value].ammo != CDoom::Ammotype::Noammo
+      # give one clip with a dropped weapon,
+      # two clips with a found weapon
+      if dropped != 0
+        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 1)
+      else
+        gaveammo = CDoom.p_give_ammo(player, CDoom.weaponinfo[weapon.value].ammo, 2)
+      end
+    else
+      gaveammo = 0
+    end
+
+    if player.value.weaponowned[weapon.value] != 0
+      gaveweapon = 0
+    else
+      gaveweapon = 1
+      player.value.weaponowned[weapon.value] = 1
+      player.value.pendingweapon = weapon
+    end
+
+    return (gaveweapon != 0 || gaveammo != 0).to_unsafe
+  end
+
+  #
+  # Returns false if the body isn't needed at all
+  #
+  def self.p_give_body(player : CDoom::Player*, num : LibC::Int) : CDoom::DoomBool
+    return 0 if player.value.health >= CDoom::MAXHEALTH
+
+    player.value.health = player.value.health + num
+    player.value.health = CDoom::MAXHEALTH if player.value.health > CDoom::MAXHEALTH
+    player.value.mo.value.health = player.value.health
+
+    return 1
+  end
+
+  #
+  # Returns false if the armor is worse
+  # than the current armor.
+  #
+  def self.p_give_armor(player : CDoom::Player*, armortype : LibC::Int) : CDoom::DoomBool
+    hits = armortype*100
+    return 0 if player.value.armorpoints >= hits # don't pick up
+    player.value.armortype = armortype
+    player.value.armorpoints = hits
+
+    return 1
+  end
+
+  def self.p_give_card(player : CDoom::Player*, card : CDoom::Card)
+    return if player.value.cards[card.value] != 0
+
+    player.value.bonuscount = CDoom::BONUSADD
+    player.value.cards[card.value] = 1
+  end
+
+  def self.p_give_power(player : CDoom::Player*, power : LibC::Int) : CDoom::DoomBool
+    if power == CDoom::Powertype::Invulnerability.value
+      player.value.powers[power] = CDoom::Powerduration::INVULNTICS.value
+      return 1
+    end
+
+    if power == CDoom::Powertype::Invisibility.value
+      player.value.powers[power] = CDoom::Powerduration::INVISTICS.value
+      player.value.mo.value.flags = player.value.mo.value.flags | CDoom::Mobjflag::MF_SHADOW.value
+      return 1
+    end
+
+    if power == CDoom::Powertype::Infrared.value
+      player.value.powers[power] = CDoom::Powerduration::INFRATICS.value
+      return 1
+    end
+
+    if power == CDoom::Powertype::Ironfeet.value
+      player.value.powers[power] = CDoom::Powerduration::IRONTICS.value
+      return 1
+    end
+
+    if power == CDoom::Powertype::Strength.value
+      CDoom.p_give_body(player, 100)
+      player.value.powers[power] = 1
+      return 1
+    end
+
+    return 0 if player.value.powers[power] != 0 # already got it
+
+    player.value.powers[power] = 1
+    return 1
+  end
+
+  def self.p_touch_special_thing(special : CDoom::Mobj*, toucher : CDoom::Mobj*)
+    delta = special.value.z - toucher.value.z
+
+    if delta > toucher.value.height ||
+       delta < -8*CDoom::FRACUNIT
+      # out of reach
+      return
+    end
+
+    sound = CDoom::Sfxenum::SFX_itemup
+    player = toucher.value.player
+
+    # Dead thing touching.
+    # Can happen with a sliding player corpse.
+    return if toucher.value.health <= 0
+
+    # Identify by sprite
+    case special.value.sprite
+    # armor
+    when CDoom::Spritenum::SPR_ARM1
+      return if CDoom.p_give_armor(player, 1) == 0
+      player.value.message = CDoom::GOTARMOR
+    when CDoom::Spritenum::SPR_ARM2
+      return if CDoom.p_give_armor(player, 2) == 0
+      player.value.message = CDoom::GOTMEGA
+
+      # bonus items
+    when CDoom::Spritenum::SPR_BON1
+      player.value.health = player.value.health + 1 # can go over 100%
+      player.value.health = 200 if player.value.health > 200
+      player.value.mo.value.health = player.value.health
+      player.value.message = CDoom::GOTHTHBONUS
+    when CDoom::Spritenum::SPR_BON2
+      player.value.armorpoints = player.value.armorpoints + 1 # can go over 100%
+      player.value.armorpoints = 200 if player.value.armorpoints > 200
+      player.value.armortype = 1 if player.value.armortype == 0
+      player.value.message = CDoom::GOTARMBONUS
+    when CDoom::Spritenum::SPR_SOUL
+      player.value.health = player.value.health + 100
+      player.value.health = 200 if player.value.health > 200
+      player.value.mo.value.health = player.value.health
+      player.value.message = CDoom::GOTSUPER
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_MEGA
+      return if CDoom.gamemode != CDoom::GameMode::Commercial
+      player.value.health = 200
+      player.value.mo.value.health = player.value.health
+      CDoom.p_give_armor(player, 2)
+      player.value.message = CDoom::GOTMSPHERE
+      sound = CDoom::Sfxenum::SFX_getpow
+
+      # card
+      # leave cards for everyone
+    when CDoom::Spritenum::SPR_BKEY
+      if player.value.cards[CDoom::Card::Bluecard.value] == 0
+        player.value.message = CDoom::GOTBLUECARD
+      end
+      CDoom.p_give_card(player, CDoom::Card::Bluecard)
+      return if CDoom.netgame != 0
+    when CDoom::Spritenum::SPR_YKEY
+      if player.value.cards[CDoom::Card::Yellowcard.value] == 0
+        player.value.message = CDoom::GOTYELWCARD
+      end
+      CDoom.p_give_card(player, CDoom::Card::Yellowcard)
+      return if CDoom.netgame != 0
+    when CDoom::Spritenum::SPR_RKEY
+      if player.value.cards[CDoom::Card::Redcard.value] == 0
+        player.value.message = CDoom::GOTREDCARD
+      end
+      CDoom.p_give_card(player, CDoom::Card::Redcard)
+      return if CDoom.netgame != 0
+    when CDoom::Spritenum::SPR_BSKU
+      if player.value.cards[CDoom::Card::Blueskull.value] == 0
+        player.value.message = CDoom::GOTBLUESKUL
+      end
+      CDoom.p_give_card(player, CDoom::Card::Blueskull)
+      return if CDoom.netgame != 0
+    when CDoom::Spritenum::SPR_RSKU
+      if player.value.cards[CDoom::Card::Redskull.value] == 0
+        player.value.message = CDoom::GOTREDSKULL
+      end
+      CDoom.p_give_card(player, CDoom::Card::Redskull)
+      return if CDoom.netgame != 0
+    when CDoom::Spritenum::SPR_YSKU
+      if player.value.cards[CDoom::Card::Yellowskull.value] == 0
+        player.value.message = CDoom::GOTYELWSKUL
+      end
+      CDoom.p_give_card(player, CDoom::Card::Yellowskull)
+      return if CDoom.netgame != 0
+
+      # medikits, heals
+    when CDoom::Spritenum::SPR_STIM
+      return if CDoom.p_give_body(player, 10) == 0
+      player.value.message = CDoom::GOTSTIM
+    when CDoom::Spritenum::SPR_MEDI
+      return if CDoom.p_give_body(player, 25) == 0
+
+      if player.value.health < 25
+        player.value.message = CDoom::GOTMEDINEED
+      else
+        player.value.message = CDoom::GOTMEDIKIT
+      end
+    when CDoom::Spritenum::SPR_PINV
+      return if CDoom.p_give_power(player, CDoom::Powertype::Invulnerability.value) == 0
+      player.value.message = CDoom::GOTINVUL
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_PSTR
+      return if CDoom.p_give_power(player, CDoom::Powertype::Strength.value) == 0
+      player.value.message = CDoom::GOTBERSERK
+      player.value.pendingweapon = CDoom::Weapontype::Fist if player.value.readyweapon != CDoom::Weapontype::Fist
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_PINS
+      return if CDoom.p_give_power(player, CDoom::Powertype::Invisibility.value) == 0
+      player.value.message = CDoom::GOTINVIS
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_SUIT
+      return if CDoom.p_give_power(player, CDoom::Powertype::Ironfeet.value) == 0
+      player.value.message = CDoom::GOTSUIT
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_PMAP
+      return if CDoom.p_give_power(player, CDoom::Powertype::Allmap.value) == 0
+      player.value.message = CDoom::GOTMAP
+      sound = CDoom::Sfxenum::SFX_getpow
+    when CDoom::Spritenum::SPR_PVIS
+      return if CDoom.p_give_power(player, CDoom::Powertype::Infrared.value) == 0
+      player.value.message = CDoom::GOTVISOR
+      sound = CDoom::Sfxenum::SFX_getpow
+
+      # ammo
+    when CDoom::Spritenum::SPR_CLIP
+      if special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0
+        return if CDoom.p_give_ammo(player, CDoom::Ammotype::Clip, 0) == 0
+      else
+        return if CDoom.p_give_ammo(player, CDoom::Ammotype::Clip, 1) == 0
+      end
+      player.value.message = CDoom::GOTCLIP
+    when CDoom::Spritenum::SPR_AMMO
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Clip, 5) == 0
+      player.value.message = CDoom::GOTCLIPBOX
+    when CDoom::Spritenum::SPR_ROCK
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Misl, 1) == 0
+      player.value.message = CDoom::GOTROCKET
+    when CDoom::Spritenum::SPR_BROK
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Misl, 5) == 0
+      player.value.message = CDoom::GOTROCKBOX
+    when CDoom::Spritenum::SPR_CELL
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Cell, 1) == 0
+      player.value.message = CDoom::GOTCELL
+    when CDoom::Spritenum::SPR_CELP
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Cell, 5) == 0
+      player.value.message = CDoom::GOTCELLBOX
+    when CDoom::Spritenum::SPR_SHEL
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Shell, 1) == 0
+      player.value.message = CDoom::GOTSHELLS
+    when CDoom::Spritenum::SPR_SBOX
+      return if CDoom.p_give_ammo(player, CDoom::Ammotype::Shell, 5) == 0
+      player.value.message = CDoom::GOTSHELLBOX
+    when CDoom::Spritenum::SPR_BPAK
+      if player.value.backpack == 0
+        CDoom::Ammotype::NUMAMMO.value.times do |i|
+          player.value.maxammo[i] = player.value.maxammo[i] * 2
+        end
+        player.value.backpack = 1
+      end
+      CDoom::Ammotype::NUMAMMO.value.times do |i|
+        CDoom.p_give_ammo(player, CDoom::Ammotype.new(i), 1)
+      end
+      player.value.message = CDoom::GOTBACKPACK
+
+      # weapons
+    when CDoom::Spritenum::SPR_BFUG
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Bfg, 0) == 0
+      player.value.message = CDoom::GOTBFG9000
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_MGUN
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Chaingun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
+      player.value.message = CDoom::GOTCHAINGUN
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_CSAW
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Chainsaw, 0) == 0
+      player.value.message = CDoom::GOTCHAINSAW
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_LAUN
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Missile, 0) == 0
+      player.value.message = CDoom::GOTLAUNCHER
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_PLAS
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Plasma, 0) == 0
+      player.value.message = CDoom::GOTPLASMA
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_SHOT
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Shotgun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
+      player.value.message = CDoom::GOTSHOTGUN
+      sound = CDoom::Sfxenum::SFX_wpnup
+    when CDoom::Spritenum::SPR_SGN2
+      return if CDoom.p_give_weapon(player, CDoom::Weapontype::Supershotgun, (special.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0).to_unsafe) == 0
+      player.value.message = CDoom::GOTSHOTGUN2
+      sound = CDoom::Sfxenum::SFX_wpnup
+    else
+      CDoom.i_error("p_special_thing: Unknown gettable thing")
+    end
+
+    player.value.itemcount = player.value.itemcount + 1 if special.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
+    CDoom.p_remove_mobj(special)
+    player.value.bonuscount = player.value.bonuscount + CDoom::BONUSADD
+    CDoom.s_start_sound(Pointer(Void).null, sound.value) if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+  end
+
+  def self.p_kill_mobj(source : CDoom::Mobj*, target : CDoom::Mobj*)
+    target.value.flags = target.value.flags & ~(CDoom::Mobjflag::MF_SHOOTABLE.value | CDoom::Mobjflag::MF_FLOAT.value | CDoom::Mobjflag::MF_SKULLFLY.value)
+
+    target.value.flags = target.value.flags & ~CDoom::Mobjflag::MF_NOGRAVITY.value if target.value.type != CDoom::Mobjtype::MT_SKULL
+
+    target.value.flags = target.value.flags | (CDoom::Mobjflag::MF_CORPSE.value | CDoom::Mobjflag::MF_DROPOFF.value)
+    target.value.height = target.value.height >> 2
+
+    if !source.null? && !source.value.player.null?
+      # count for intermission
+      source.value.player.value.killcount = source.value.player.value.killcount + 1 if target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
+
+      source.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] =
+        source.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] + 1 if !target.value.player.null?
+    elsif CDoom.netgame == 0 && target.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
+      # count all monster deaths,
+      # even those caused by other monsters
+      CDoom.players.to_unsafe.value.killcount = CDoom.players[0].killcount + 1
+    end
+
+    if !target.value.player.null?
+      # count environment kills against you
+      target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] =
+        target.value.player.value.frags[target.value.player - CDoom.players.to_unsafe] + 1 if source.null?
+
+      target.value.flags = target.value.flags & ~CDoom::Mobjflag::MF_SOLID.value
+      target.value.player.value.playerstate = CDoom::Playerstate::PST_DEAD
+      CDoom.p_drop_weapon(target.value.player)
+
+      if target.value.player == CDoom.players.to_unsafe + CDoom.consoleplayer &&
+         CDoom.automapactive != 0
+        # don't die in automap,
+        # siwtch view prior to dying
+        CDoom.am_stop
+      end
+    end
+
+    if target.value.health < -target.value.info.value.spawnhealth &&
+       target.value.info.value.xdeathstate != 0
+      CDoom.p_set_mobj_state(target, CDoom::Statenum.new(target.value.info.value.xdeathstate))
+    else
+      CDoom.p_set_mobj_state(target, CDoom::Statenum.new(target.value.info.value.deathstate))
+    end
+
+    target.value.tics = target.value.tics - (CDoom.p_random & 3)
+
+    target.value.tics = 1 if target.value.tics < 1
+
+    item = CDoom::Mobjtype::MT_CLIP
+    # Drop stuff.
+    # This determines the kind of object spawned
+    # during the death frame of a thing.
+    case target.value.type
+    when CDoom::Mobjtype::MT_WOLFSS, CDoom::Mobjtype::MT_POSSESSED
+      item = CDoom::Mobjtype::MT_CLIP
+    when CDoom::Mobjtype::MT_SHOTGUN
+      item = CDoom::Mobjtype::MT_SHOTGUN
+    when CDoom::Mobjtype::MT_CHAINGUY
+      item = CDoom::Mobjtype::MT_CHAINGUN
+    else
+      return
+    end
+
+    mo = CDoom.p_spawn_mobj(target.value.x, target.value.y, CDoom::ONFLOORZ, item)
+    mo.value.flags = mo.value.flags | CDoom::Mobjflag::MF_DROPPED.value # special versions of items
+  end
+
+  #
+  # Damages both enemies and players
+  # "inflictor" is the thing that caused the damage
+  #  creature or missile, can be 0 (slime, etc)
+  # "source" is the thing to target after taking damage
+  #  creature or 0
+  # Source and inflictor are the same for melee attacks.
+  # Source can be 0 for slime, barrel explosions
+  # and other environmental stuff.
+  #
+  def self.p_damage_mobj(target : CDoom::Mobj*, inflictor : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+    return if target.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0 # shouldn't happen...
+
+    return if target.value.health <= 0
+
+    if target.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+      target.value.momx = 0
+      target.value.momy = 0
+      target.value.momz = 0
+    end
+
+    player = target.value.player
+    damage >>= 1 if !player.null? && CDoom.gameskill == CDoom::Skill::Baby # take half damage in trainer mode
+
+    # Some close combat weapons should not
+    # inflict thrust and push the victim out of reach,
+    # thus kick away unless using the chainsaw.
+    if !inflictor.null? &&
+       target.value.flags & CDoom::Mobjflag::MF_NOCLIP.value == 0 &&
+       (source.null? ||
+       source.value.player.null? ||
+       source.value.player.value.readyweapon != CDoom::Weapontype::Chainsaw)
+      ang = CDoom.r_point_to_angle2(inflictor.value.x,
+        inflictor.value.y,
+        target.value.x,
+        target.value.y)
+
+      thrust = damage*(CDoom::FRACUNIT >> 3)*100//target.value.info.value.mass
+
+      # make fall forwards sometimes
+      if damage < 40 &&
+         damage > target.value.health &&
+         target.value.z - inflictor.value.z > 64*CDoom::FRACUNIT &&
+         (CDoom.p_random & 1) != 0
+        ang &+= CDoom::ANG180
+        thrust *= 4
+      end
+
+      ang >>= CDoom::ANGLETOFINESHIFT
+      target.value.momx = target.value.momx + CDoom.fixed_mul(thrust, CDoom.finecosine[ang])
+      target.value.momy = target.value.momy + CDoom.fixed_mul(thrust, CDoom.finesine[ang])
+    end
+
+    # player specific
+    if !player.null?
+      # end of game hell hack
+      if target.value.subsector.value.sector.value.special == 1 &&
+         damage >= target.value.health
+        damage = target.value.health - 1
+      end
+
+      # Below certain threshold,
+      # ignore damage in GOD mode, or with INVUL power.
+      if damage < 1000 &&
+         (player.value.cheats & CDoom::Cheat::CF_GODMODE.value != 0 ||
+         player.value.powers[CDoom::Powertype::Invulnerability.value] != 0)
+        return
+      end
+
+      if player.value.armortype != 0
+        saved = damage//2
+        saved = damage//3 if player.value.armortype == 1
+
+        if player.value.armorpoints <= saved
+          # armor is used up
+          saved = player.value.armorpoints
+          player.value.armortype = 0
+        end
+
+        player.value.armorpoints = player.value.armorpoints - saved
+        damage -= saved
+      end
+      player.value.health = player.value.health - damage # mirror mobj health here for Dave
+      player.value.health = 0 if player.value.health < 0
+
+      player.value.attacker = source
+      player.value.damagecount = player.value.damagecount + damage # add damage after armor / invuln
+
+      player.value.damagecount = 100 if player.value.damagecount > 100 # teleport does 10k points...
+
+      temp = damage < 100 ? damage : 100
+
+      if player == CDoom.players.to_unsafe + CDoom.consoleplayer
+        CDoom.i_tactile(40, 10, 40 + temp*2)
+      end
+    end
+
+    # do the damage
+    target.value.health = target.value.health - damage
+    if target.value.health <= 0
+      CDoom.p_kill_mobj(source, target)
+      return
+    end
+
+    if CDoom.p_random < target.value.info.value.painchance &&
+       target.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value == 0
+      target.value.flags = target.value.flags | CDoom::Mobjflag::MF_JUSTHIT.value # fight back!
+
+      CDoom.p_set_mobj_state(target, CDoom::Statenum.new(target.value.info.value.painstate))
+    end
+
+    target.value.reactiontime = 0 # we're awake now...
+
+    if (target.value.threshold == 0 || target.value.type == CDoom::Mobjtype::MT_VILE) &&
+       !source.null? && source != target && source.value.type != CDoom::Mobjtype::MT_VILE
+      # if not intent on another player,
+      # chase after this one
+      target.value.target = source
+      target.value.threshold = CDoom::BASETHRESHOLD
+      if target.value.state == CDoom.states + target.value.info.value.spawnstate &&
+         target.value.info.value.seestate != CDoom::Statenum::S_NULL.value
+        CDoom.p_set_mobj_state(target, CDoom::Statenum.new(target.value.info.value.seestate))
+      end
+    end
+  end
+
+  def self.t_fire_flicker(flick : CDoom::Fireflicker*)
+    flick.value.count = flick.value.count - 1
+    return if flick.value.count != 0
+
+    amount = (CDoom.p_random & 3) * 16
+
+    if flick.value.sector.value.lightlevel - amount < flick.value.minlight
+      flick.value.sector.value.lightlevel = flick.value.minlight
+    else
+      flick.value.sector.value.lightlevel = flick.value.maxlight - amount
+    end
+
+    flick.value.count = 4
+  end
+
+  def self.p_spawn_fire_flicker(sector : CDoom::Sector*)
+    # Note that we are resetting sector attributes.
+    # Nothing special about it during gameplay.
+    sector.value.special = 0
+
+    flick = CDoom.z_malloc(sizeof(CDoom::Fireflicker), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Fireflicker*)
+
+    CDoom.p_add_thinker((flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker)).as(CDoom::Thinker*))
+
+    (flick.as(UInt8*) + offsetof(CDoom::Fireflicker, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_fire_flicker(p.as(CDoom::Fireflicker*)) }
+    flick.value.sector = sector
+    flick.value.maxlight = sector.value.lightlevel
+    flick.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel) + 16
+    flick.value.count = 4
+  end
+
+  #
+  # BROKEN LIGHT FLASHING
+  #
+
+  #
+  # Do flashing lights.
+  #
+  def self.t_light_flash(flash : CDoom::Lightflash*)
+    flash.value.count = flash.value.count - 1
+    return if flash.value.count != 0
+
+    if flash.value.sector.value.lightlevel == flash.value.maxlight
+      flash.value.sector.value.lightlevel = flash.value.minlight
+      flash.value.count = (CDoom.p_random & flash.value.mintime) + 1
+    else
+      flash.value.sector.value.lightlevel = flash.value.maxlight
+      flash.value.count = (CDoom.p_random & flash.value.maxtime) + 1
+    end
+  end
+
+  #
+  # After the map has been loaded, scan each sector
+  # for specials that spawn thinkers
+  #
+  def self.p_spawn_light_flash(sector : CDoom::Sector*)
+    # Nothing special about it during gameplay.
+    sector.value.special = 0
+
+    flash = CDoom.z_malloc(sizeof(CDoom::Lightflash), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Lightflash*)
+
+    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
+
+    (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_light_flash(p.as(CDoom::Lightflash*)) }
+    flash.value.sector = sector
+    flash.value.maxlight = sector.value.lightlevel
+
+    flash.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
+    flash.value.maxtime = 64
+    flash.value.mintime = 7
+    flash.value.count = (CDoom.p_random & flash.value.maxtime) + 1
+  end
+
+  #
+  # STROBE LIGHT FLASHING
+  #
+
+  def self.t_strobe_flash(flash : CDoom::Strobe*)
+    flash.value.count = flash.value.count - 1
+    return if flash.value.count != 0
+
+    if flash.value.sector.value.lightlevel == flash.value.minlight
+      flash.value.sector.value.lightlevel = flash.value.maxlight
+      flash.value.count = flash.value.brighttime
+    else
+      flash.value.sector.value.lightlevel = flash.value.minlight
+      flash.value.count = flash.value.darktime
+    end
+  end
+
+  #
+  # After the map has been loaded, scan each sector
+  # for specials that spawn thinkers
+  #
+  def self.p_spawn_strobe_flash(sector : CDoom::Sector*, fast_or_slow : LibC::Int, in_sync : LibC::Int)
+    flash = CDoom.z_malloc(sizeof(CDoom::Strobe), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Strobe*)
+
+    CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
+
+    flash.value.sector = sector
+    flash.value.darktime = fast_or_slow
+    flash.value.brighttime = CDoom::STROBEBRIGHT
+    (flash.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_strobe_flash(p.as(CDoom::Strobe*)) }
+    flash.value.maxlight = sector.value.lightlevel
+    flash.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
+
+    flash.value.minlight = 0 if flash.value.minlight == flash.value.maxlight
+
+    # nothing special about it during gameplay
+    sector.value.special = 0
+
+    if in_sync == 0
+      flash.value.count = (CDoom.p_random & 7) + 1
+    else
+      flash.value.count = 1
+    end
+  end
+
+  #
+  # Start strobing lights (usually from a trigger)
+  #
+  def self.ev_start_light_strobing(line : CDoom::Line*)
+    secnum = -1
+    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+      sec = CDoom.sectors + secnum
+      next if !sec.value.specialdata.null?
+
+      CDoom.p_spawn_strobe_flash(sec, CDoom::SLOWDARK, 0)
+    end
+  end
+
+  #
+  # TURN LINE'S TAG LIGHTS OFF
+  #
+  def self.ev_turn_tag_lights_off(line : CDoom::Line*)
+    sector = CDoom.sectors
+
+    CDoom.numsectors.times do |j|
+      if sector.value.tag == line.value.tag
+        min = sector.value.lightlevel
+        sector.value.linecount.times do |i|
+          templine = sector.value.lines[i]
+          tsec = CDoom.get_next_sector(templine, sector)
+          if tsec.null?
+            sector += 1
+            next
+          end
+          min = tsec.value.lightlevel if tsec.value.lightlevel < min
+        end
+        sector.value.lightlevel = min
+      end
+      sector += 1
+    end
+  end
+
+  def self.ev_light_turn_on(line : CDoom::Line*, bright : LibC::Int)
+    sector = CDoom.sectors
+
+    CDoom.numsectors.times do |j|
+      if sector.value.tag == line.value.tag
+        # bright = 0 means to search
+        # for highest light level
+        # surrounding sector
+        if bright == 0
+          sector.value.linecount.times do |i|
+            templine = sector.value.lines[i]
+            temp = CDoom.get_next_sector(templine, sector)
+            if temp.null?
+              sector += 1
+              next
+            end
+            bright = temp.value.lightlevel if temp.value.lightlevel > bright
+          end
+        end
+        sector.value.lightlevel = bright
+      end
+      sector += 1
+    end
+  end
+
+  def self.t_glow(g : CDoom::Glow*)
+    case g.value.direction
+    when -1
+      # DOWN
+      g.value.sector.value.lightlevel = g.value.sector.value.lightlevel - CDoom::GLOWSPEED
+      if g.value.sector.value.lightlevel <= g.value.minlight
+        g.value.sector.value.lightlevel = g.value.sector.value.lightlevel + CDoom::GLOWSPEED
+        g.value.direction = 1
+      end
+    when 1
+      # UP
+      g.value.sector.value.lightlevel = g.value.sector.value.lightlevel + CDoom::GLOWSPEED
+      if g.value.sector.value.lightlevel >= g.value.maxlight
+        g.value.sector.value.lightlevel = g.value.sector.value.lightlevel - CDoom::GLOWSPEED
+        g.value.direction = -1
+      end
+    end
+  end
+
+  def self.p_spawn_glowing_light(sector : CDoom::Sector*)
+    g = CDoom.z_malloc(sizeof(CDoom::Glow), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Glow*)
+
+    CDoom.p_add_thinker((g.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
+
+    g.value.sector = sector
+    g.value.minlight = CDoom.p_find_min_surrounding_light(sector, sector.value.lightlevel)
+    g.value.maxlight = sector.value.lightlevel
+    (g.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_glow(p.as(CDoom::Glow*)) }
+    g.value.direction = -1
+
+    sector.value.special = 0
+  end
+
+  #
+  # TELEPORT MOVE
+  #
+
+  def self.pit_stomp_thing(thing : CDoom::Mobj*) : CDoom::DoomBool
+    return 1 if thing.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0
+
+    blockdist = thing.value.radius + CDoom.tmthing.value.radius
+
+    if doom_abs(thing.value.x - CDoom.tmx) >= blockdist ||
+       doom_abs(thing.value.y - CDoom.tmy) >= blockdist
+      # didn't hit it
+      return 1
+    end
+
+    # don't clip against self
+    return 1 if thing == CDoom.tmthing
+
+    # monsters don't stomp things except on boss level
+    return 0 if CDoom.tmthing.value.player.null? && CDoom.gamemap != 30
+
+    CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing, 10000)
+
+    return 1
+  end
+
+  def self.p_teleport_move(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+    # kill anything occupying the position
+    CDoom.tmthing = thing
+    CDoom.tmflags = thing.value.flags
+
+    CDoom.tmx = x
+    CDoom.tmy = y
+
+    CDoom.tmbbox[CDoom::BOXTOP] = y + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXBOTTOM] = y - CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXRIGHT] = x + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXLEFT] = x - CDoom.tmthing.value.radius
+
+    newsubsec = CDoom.r_point_in_subsector(x, y)
+    CDoom.ceilingline = Pointer(CDoom::Line).null
+
+    # The base floor/ceiling is from the subsector
+    # that contains the point.
+    # Any contacted lines the step closer together
+    # will adjust them.
+    CDoom.tmfloorz = newsubsec.value.sector.value.floorheight
+    CDoom.tmdropoffz = CDoom.tmfloorz
+
+    CDoom.validcount += 1
+    CDoom.numspechit = 0
+
+    # stomp on anythings contacted
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] - CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] - CDoom.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] - CDoom.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] - CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+
+    bx = xl
+    while bx <= xh
+      by = yl
+      while by <= yh
+        return 0 if CDoom.p_block_things_iterator(bx, by, ->CDoom.pit_stomp_thing) == 0
+        by += 1
+      end
+      bx += 1
+    end
+
+    # the move is ok,
+    # so link the thing into its new position
+    CDoom.p_unset_thing_position(thing)
+
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
+    thing.value.x = x
+    thing.value.y = y
+
+    CDoom.p_set_thing_position(thing)
+
+    return 1
+  end
+
+  #
+  # MOVEMENT ITERATOR FUNCTIONS
+  #
+
+  #
+  # Adjusts tmfloorz and tmceilingz as lines are contacted
+  #
+  def self.pit_check_line(ld : CDoom::Line*) : CDoom::DoomBool
+    if CDoom.tmbbox[CDoom::BOXRIGHT] <= ld.value.bbox[CDoom::BOXLEFT] ||
+       CDoom.tmbbox[CDoom::BOXLEFT] >= ld.value.bbox[CDoom::BOXRIGHT] ||
+       CDoom.tmbbox[CDoom::BOXTOP] <= ld.value.bbox[CDoom::BOXBOTTOM] ||
+       CDoom.tmbbox[CDoom::BOXBOTTOM] >= ld.value.bbox[CDoom::BOXTOP]
+      return 1
+    end
+
+    return 1 if CDoom.p_box_on_line_side(CDoom.tmbbox, ld) != -1
+
+    # A line has been hit
+
+    # The moving thing's destination position will cross
+    # the given line.
+    # If this should not be allowed, return false.
+    # If the line is special, keep track of it
+    # to process later if the move is proven ok.
+    # NOTE: specials are NOT sorted by order,
+    # so two special lines that are only 8 pixels apart
+    # could be crossed in either order.
+
+    return 0 if ld.value.backsector.null? # one sided line
+
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value == 0
+      return 0 if ld.value.flags & CDoom::ML_BLOCKING != 0 # explicitly blocking everything
+
+      return 0 if CDoom.tmthing.value.player.null? && ld.value.flags & CDoom::ML_BLOCKMONSTERS != 0 # block monsters only
+    end
+
+    # set openrange, opentop, openbottom
+    CDoom.p_line_opening(ld)
+
+    # adjust floor / ceiling heights
+    if CDoom.opentop < CDoom.tmceilingz
+      CDoom.tmceilingz = CDoom.opentop
+      CDoom.ceilingline = ld
+    end
+
+    CDoom.tmfloorz = CDoom.openbottom if CDoom.openbottom > CDoom.tmfloorz
+
+    CDoom.tmdropoffz = CDoom.lowfloor if CDoom.lowfloor < CDoom.tmdropoffz
+
+    # if contacted a special line, add it to the list
+    if ld.value.special != 0
+      CDoom.spechit[CDoom.numspechit] = ld
+      CDoom.numspechit += 1
+    end
+
+    return 1
+  end
+
+  def self.pit_check_thing(thing : CDoom::Mobj*) : CDoom::DoomBool
+    return 1 if thing.value.flags & (CDoom::Mobjflag::MF_SOLID.value | CDoom::Mobjflag::MF_SPECIAL.value | CDoom::Mobjflag::MF_SHOOTABLE.value) == 0
+
+    blockdist = thing.value.radius + CDoom.tmthing.value.radius
+
+    if doom_abs(thing.value.x - CDoom.tmx) >= blockdist ||
+       doom_abs(thing.value.y - CDoom.tmy) >= blockdist
+      # didn't hit it
+      return 1
+    end
+
+    # don't clip against self
+    return 1 if thing == CDoom.tmthing
+
+    # check for skulls slamming into things
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+      damage = ((CDoom.p_random % 8) + 1) * CDoom.tmthing.value.info.value.damage
+
+      CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing, damage)
+
+      CDoom.tmthing.value.flags = CDoom.tmthing.value.flags & ~CDoom::Mobjflag::MF_SKULLFLY.value
+      CDoom.tmthing.value.momx = 0
+      CDoom.tmthing.value.momy = 0
+      CDoom.tmthing.value.momz = 0
+
+      CDoom.p_set_mobj_state(CDoom.tmthing, CDoom::Statenum.new(CDoom.tmthing.value.info.value.spawnstate))
+
+      return 0 # stop moving
+    end
+
+    # missiles can hit other things
+    if CDoom.tmthing.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
+      # see if it went over / under
+      return 1 if CDoom.tmthing.value.z > thing.value.z + thing.value.height         # overhead
+      return 1 if CDoom.tmthing.value.z + CDoom.tmthing.value.height < thing.value.z # underneath
+
+      if !CDoom.tmthing.value.target.null? && (
+           CDoom.tmthing.value.target.value.type == thing.value.type ||
+           (CDoom.tmthing.value.target.value.type == CDoom::Mobjtype::MT_KNIGHT && thing.value.type == CDoom::Mobjtype::MT_BRUISER) ||
+           (CDoom.tmthing.value.target.value.type == CDoom::Mobjtype::MT_BRUISER && thing.value.type == CDoom::Mobjtype::MT_KNIGHT)
+         )
+        # Don't hit same species as originator.
+        return 1 if thing == CDoom.tmthing.value.target
+
+        if thing.value.type != CDoom::Mobjtype::MT_PLAYER
+          # Explode, but do no damage.
+          # Let players missile other players.
+          return 0
+        end
+      end
+
+      if thing.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0
+        # didn't do any damage
+        return (thing.value.flags & CDoom::Mobjflag::MF_SOLID.value == 0).to_unsafe
+      end
+
+      # damage / explode
+      damage = ((CDoom.p_random % 8) + 1) * CDoom.tmthing.value.info.value.damage
+      CDoom.p_damage_mobj(thing, CDoom.tmthing, CDoom.tmthing.value.target, damage)
+
+      # don't traverse any more
+      return 0
+    end
+
+    # check for special pickup
+    if thing.value.flags & CDoom::Mobjflag::MF_SPECIAL.value != 0
+      solid = thing.value.flags & CDoom::Mobjflag::MF_SOLID.value != 0
+      if CDoom.tmflags & CDoom::Mobjflag::MF_PICKUP.value != 0
+        # can remove thing
+        CDoom.p_touch_special_thing(thing, CDoom.tmthing)
+      end
+      return (!solid).to_unsafe
+    end
+
+    return (thing.value.flags & CDoom::Mobjflag::MF_SOLID.value == 0).to_unsafe
+  end
+
+  #
+  # MOVEMENT CLIPPING
+  #
+
+  #
+  # This is purely informative, nothing is modified
+  # (except things picked up).
+  #
+  # in:
+  #  a mobj_t (can be valid or invalid)
+  #  a position to be checked
+  #   (doesn't need to be related to the mobj_t->x,y)
+  #
+  # during:
+  #  special things are touched if MF_PICKUP
+  #  early out on solid lines?
+  #
+  # out:
+  #  newsubsec
+  #  floorz
+  #  ceilingz
+  #  tmdropoffz
+  #   the lowest point contacted
+  #   (monsters won't move to a dropoff)
+  #  speciallines[]
+  #  numspeciallines
+  #
+  def self.p_check_position(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+    CDoom.tmthing = thing
+    CDoom.tmflags = thing.value.flags
+
+    CDoom.tmx = x
+    CDoom.tmy = y
+
+    CDoom.tmbbox[CDoom::BOXTOP] = y + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXBOTTOM] = y - CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXRIGHT] = x + CDoom.tmthing.value.radius
+    CDoom.tmbbox[CDoom::BOXLEFT] = x - CDoom.tmthing.value.radius
+
+    newsubsec = CDoom.r_point_in_subsector(x, y)
+    CDoom.ceilingline = Pointer(CDoom::Line).null
+
+    # The base floor/ceiling is from the subsector
+    # that contains the point.
+    # Any contacted lines the step closer together
+    # will adjust them.
+    CDoom.tmfloorz = newsubsec.value.sector.value.floorheight
+    CDoom.tmdropoffz = CDoom.tmfloorz
+    CDoom.tmceilingz = newsubsec.value.sector.value.ceilingheight
+
+    CDoom.validcount += 1
+    CDoom.numspechit = 0
+
+    return 1 if CDoom.tmflags & CDoom::Mobjflag::MF_NOCLIP.value != 0
+
+    # Check things first, possibly picking things up.
+    # The bounding box is extended by MAXRADIUS
+    # because mobj_ts are grouped into mapblocks
+    # based on their origin point, and can overlap
+    # into adjacent blocks by up to MAXRADIUS units.
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] - CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] - CDoom.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] - CDoom.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] - CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+
+    bx = xl
+    while bx <= xh
+      by = yl
+      while by <= yh
+        return 0 if CDoom.p_block_things_iterator(bx, by, ->CDoom.pit_check_thing) == 0
+        by += 1
+      end
+      bx += 1
+    end
+
+    # check lines
+    xl = (CDoom.tmbbox[CDoom::BOXLEFT] - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    xh = (CDoom.tmbbox[CDoom::BOXRIGHT] - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    yl = (CDoom.tmbbox[CDoom::BOXBOTTOM] - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    yh = (CDoom.tmbbox[CDoom::BOXTOP] - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+
+    bx = xl
+    while bx <= xh
+      by = yl
+      while by <= yh
+        return 0 if CDoom.p_block_lines_iterator(bx, by, ->CDoom.pit_check_line) == 0
+        by += 1
+      end
+      bx += 1
+    end
+
+    return 1
+  end
+
+  #
+  # Attempt to move to a new position,
+  # crossing special lines unless MF_TELEPORT is set.
+  #
+  def self.p_try_move(thing : CDoom::Mobj*, x : CDoom::Fixed, y : CDoom::Fixed) : CDoom::DoomBool
+    CDoom.floatok = 0
+    return 0 if CDoom.p_check_position(thing, x, y) == 0 # solid wall or thing
+
+    if thing.value.flags & CDoom::Mobjflag::MF_NOCLIP.value == 0
+      return 0 if CDoom.tmceilingz - CDoom.tmfloorz < thing.value.height # doesn't fit
+
+      CDoom.floatok = 1
+
+      if thing.value.flags & CDoom::Mobjflag::MF_TELEPORT.value == 0 &&
+         CDoom.tmceilingz - thing.value.z < thing.value.height
+        return 0 # mobj must lower itself to fit
+      end
+
+      if thing.value.flags & CDoom::Mobjflag::MF_TELEPORT.value == 0 &&
+         CDoom.tmfloorz - thing.value.z > 24 * CDoom::FRACUNIT
+        return 0 # too big a step up
+      end
+
+      if thing.value.flags & (CDoom::Mobjflag::MF_DROPOFF.value | CDoom::Mobjflag::MF_FLOAT.value) == 0 &&
+         CDoom.tmfloorz - CDoom.tmdropoffz > 24 * CDoom::FRACUNIT
+        return 0 # don't stand over a dropoff
+      end
+    end
+
+    # the move is ok,
+    # so link the thing into its new position
+    CDoom.p_unset_thing_position(thing)
+
+    oldx = thing.value.x
+    oldy = thing.value.y
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
+    thing.value.x = x
+    thing.value.y = y
+
+    CDoom.p_set_thing_position(thing)
+
+    # if any special lines were hit, do the effect
+    if thing.value.flags & (CDoom::Mobjflag::MF_TELEPORT.value | CDoom::Mobjflag::MF_NOCLIP.value) == 0
+      while CDoom.numspechit != 0
+        CDoom.numspechit -= 1
+        # see if the line was crossed
+        ld = CDoom.spechit[CDoom.numspechit]
+        side = CDoom.p_point_on_line_side(thing.value.x, thing.value.y, ld)
+        oldside = CDoom.p_point_on_line_side(oldx, oldy, ld)
+        if side != oldside
+          CDoom.p_cross_special_line((ld - CDoom.lines).to_i32!, oldside, thing) if ld.value.special != 0
+        end
+      end
+    end
+
+    return 1
+  end
+
+  def self.p_thing_height_clip(thing : CDoom::Mobj*) : CDoom::DoomBool
+    onfloor = (thing.value.z == thing.value.floorz).to_unsafe
+
+    CDoom.p_check_position(thing, thing.value.x, thing.value.y)
+    # what about stranding a monster partially off an edge?
+
+    thing.value.floorz = CDoom.tmfloorz
+    thing.value.ceilingz = CDoom.tmceilingz
+
+    if onfloor != 0
+      # walking monsters rise and fall with the floor
+      thing.value.z = thing.value.floorz
+    else
+      # don't adjust a floating monster unless forced to
+      if thing.value.z + thing.value.height > thing.value.ceilingz
+        thing.value.z = thing.value.ceilingz - thing.value.height
+      end
+    end
+
+    return 0 if thing.value.ceilingz - thing.value.floorz < thing.value.height
+
+    return 1
+  end
+
+  #
+  # SLIDE MOVE
+  # Allows the player to slide along any angled walls.
+  #
+
+  #
+  # Adjusts the xmove / ymove
+  # so that the next move will slide along the wall.
+  #
+  def self.p_hit_slide_line(ld : CDoom::Line*)
+    if ld.value.slopetype == CDoom::Slopetype::HORIZONTAL
+      CDoom.tmymove = 0
+      return
+    end
+
+    if ld.value.slopetype == CDoom::Slopetype::VERTICAL
+      CDoom.tmxmove = 0
+      return
+    end
+
+    side = CDoom.p_point_on_line_side(CDoom.slidemo.value.x, CDoom.slidemo.value.y, ld)
+
+    lineangle = CDoom.r_point_to_angle2(0, 0, ld.value.dx, ld.value.dy)
+
+    lineangle &+= CDoom::ANG180 if side == 1
+
+    moveangle = CDoom.r_point_to_angle2(0, 0, CDoom.tmxmove, CDoom.tmymove)
+    deltaangle = moveangle &- lineangle
+
+    deltaangle &+= CDoom::ANG180 if deltaangle > CDoom::ANG180
+
+    lineangle >>= CDoom::ANGLETOFINESHIFT
+    deltaangle >>= CDoom::ANGLETOFINESHIFT
+
+    movelen = CDoom.p_aprox_distance(CDoom.tmxmove, CDoom.tmymove)
+    newlen = CDoom.fixed_mul(movelen, CDoom.finecosine[deltaangle])
+
+    CDoom.tmxmove = CDoom.fixed_mul(newlen, CDoom.finecosine[lineangle])
+    CDoom.tmymove = CDoom.fixed_mul(newlen, CDoom.finesine[lineangle])
+  end
+
+  def self.ptr_slide_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
+    if int.value.isaline == 0
+      CDoom.i_error("Error: ptr_slide-traverse: not a line?")
+    end
+
+    li = int.value.d.line
+
+    isblocking = false
+
+    if li.value.flags & CDoom::ML_TWOSIDED == 0
+      if CDoom.p_point_on_line_side(CDoom.slidemo.value.x, CDoom.slidemo.value.y, li) != 0
+        # don't hit the back side
+        return 1
+      end
+      isblocking = true
+    end
+
+    unless isblocking
+      # set openrange, opentop, openbottom
+      CDoom.p_line_opening(li)
+
+      if CDoom.openrange < CDoom.slidemo.value.height ||                       # doesn't fit
+         CDoom.opentop - CDoom.slidemo.value.z < CDoom.slidemo.value.height || # mobj is too hight
+         CDoom.openbottom - CDoom.slidemo.value.z > 24 * CDoom::FRACUNIT       # too big a step up
+        isblocking = true
+      end
+
+      # this line doesn't block movement
+      return 1 unless isblocking
+    end
+
+    # the line does block movement,
+    # see if it is closer than best so far
+    if int.value.frac < CDoom.bestslidefrac
+      CDoom.secondslidefrac = CDoom.bestslidefrac
+      CDoom.secondslideline = CDoom.bestslideline
+      CDoom.bestslidefrac = int.value.frac
+      CDoom.bestslideline = li
+    end
+
+    return 0 # stop
+  end
+
+  #
+  # The momx / momy move is bad, so try to slide
+  # along a wall.
+  # Find the first line hit, move flush to it,
+  # and slide along it
+  #
+  # This is a kludgy mess.
+  #
+  def self.p_slide_move(mo : CDoom::Mobj*)
+    CDoom.slidemo = mo
+    hitcount = 0
+
+    loop do
+      hitcount += 1
+      stairstep = hitcount == 3 ? true : false # don't loop forever
+
+      unless stairstep
+        # trace along the three leading corners
+        if mo.value.momx > 0
+          leadx = mo.value.x + mo.value.radius
+          trailx = mo.value.x - mo.value.radius
+        else
+          leadx = mo.value.x - mo.value.radius
+          trailx = mo.value.x + mo.value.radius
+        end
+
+        if mo.value.momy > 0
+          leady = mo.value.y + mo.value.radius
+          traily = mo.value.y - mo.value.radius
+        else
+          leady = mo.value.y - mo.value.radius
+          traily = mo.value.y + mo.value.radius
+        end
+
+        CDoom.bestslidefrac = CDoom::FRACUNIT + 1
+
+        CDoom.p_path_traverse(leadx, leady, leadx + mo.value.momx, leady + mo.value.momy,
+          CDoom::PT_ADDLINES, ->CDoom.ptr_slide_traverse)
+        CDoom.p_path_traverse(trailx, leady, trailx + mo.value.momx, leady + mo.value.momy,
+          CDoom::PT_ADDLINES, ->CDoom.ptr_slide_traverse)
+        CDoom.p_path_traverse(leadx, traily, leadx + mo.value.momx, traily + mo.value.momy,
+          CDoom::PT_ADDLINES, ->CDoom.ptr_slide_traverse)
+      end
+
+      # move up to the wall
+      loop do
+        if stairstep || CDoom.bestslidefrac == CDoom::FRACUNIT + 1
+          # the move most have hit the middle, so stairstep
+          if CDoom.p_try_move(mo, mo.value.x, mo.value.y + mo.value.momy) == 0
+            CDoom.p_try_move(mo, mo.value.x + mo.value.momx, mo.value.y)
+          end
+          return
+        end
+
+        # fudge a bit to make sure it doesn't hit
+        CDoom.bestslidefrac -= 0x800
+        if CDoom.bestslidefrac > 0
+          newx = CDoom.fixed_mul(mo.value.momx, CDoom.bestslidefrac)
+          newy = CDoom.fixed_mul(mo.value.momy, CDoom.bestslidefrac)
+
+          if CDoom.p_try_move(mo, mo.value.x + newx, mo.value.y + newy) == 0
+            stairstep = true
+            next
+          end
+        end
+        break
+      end
+
+      # Now continue along the wall.
+      # First calculate remainder.
+      CDoom.bestslidefrac = CDoom::FRACUNIT - (CDoom.bestslidefrac + 0x800)
+
+      CDoom.bestslidefrac = CDoom::FRACUNIT if CDoom.bestslidefrac > CDoom::FRACUNIT
+      return if CDoom.bestslidefrac <= 0
+
+      CDoom.tmxmove = CDoom.fixed_mul(mo.value.momx, CDoom.bestslidefrac)
+      CDoom.tmymove = CDoom.fixed_mul(mo.value.momy, CDoom.bestslidefrac)
+
+      CDoom.p_hit_slide_line(CDoom.bestslideline) # clip the moves
+
+      mo.value.momx = CDoom.tmxmove
+      mo.value.momy = CDoom.tmymove
+
+      next if CDoom.p_try_move(mo, mo.value.x + CDoom.tmxmove, mo.value.y + CDoom.tmymove) == 0
+
+      break
+    end
+  end
+
+  #
+  # Sets linetaget and aimslope when a target is aimed at.
+  #
+  def self.ptr_aim_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
+    if int.value.isaline != 0
+      li = int.value.d.line
+
+      return 0 if li.value.flags & CDoom::ML_TWOSIDED == 0 # stop
+
+      # Crosses a two sided line.
+      # A two sided line will restrict
+      # the possible target ranges.
+      CDoom.p_line_opening(li)
+
+      return 0 if CDoom.openbottom >= CDoom.opentop # stop
+
+      dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+
+      if li.value.frontsector.value.floorheight != li.value.backsector.value.floorheight
+        slope = CDoom.fixed_div(CDoom.openbottom - CDoom.shootz, dist)
+        CDoom.bottomslope = slope if slope > CDoom.bottomslope
+      end
+
+      if li.value.frontsector.value.ceilingheight != li.value.backsector.value.ceilingheight
+        slope = CDoom.fixed_div(CDoom.opentop - CDoom.shootz, dist)
+        CDoom.topslope = slope if slope < CDoom.topslope
+      end
+
+      return 0 if CDoom.topslope <= CDoom.bottomslope # stop
+
+      return 1 # shot continues
+    end
+
+    # shoot a thing
+    th = int.value.d.thing
+    return 1 if th == CDoom.shootthing # can't shoot self
+
+    return 1 if th.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
+
+    # check angles to see if the thing can be aimed at
+    dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - CDoom.shootz, dist)
+
+    return 1 if thingtopslope < CDoom.bottomslope # shot over the thing
+
+    thingbottomslope = CDoom.fixed_div(th.value.z - CDoom.shootz, dist)
+
+    return 1 if thingbottomslope > CDoom.topslope # shot under the thing
+
+    # this thing can be hit!
+    thingtopslope = CDoom.topslope if thingtopslope > CDoom.topslope
+    thingbottomslope = CDoom.bottomslope if thingbottomslope < CDoom.bottomslope
+
+    CDoom.aimslope = (thingtopslope + thingbottomslope) // 2
+    CDoom.linetarget = th
+
+    return 0 # don't go any farther
+  end
+
+  def self.ptr_shoot_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
+    if int.value.isaline != 0
+      li = int.value.d.line
+
+      CDoom.p_shoot_special_line(CDoom.shootthing, li) if li.value.special != 0
+
+      hitline = li.value.flags & CDoom::ML_TWOSIDED == 0 ? true : false
+
+      unless hitline
+        # crosses a two sided line
+        CDoom.p_line_opening(li)
+
+        dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+
+        if li.value.frontsector.value.floorheight != li.value.backsector.value.floorheight
+          slope = CDoom.fixed_div(CDoom.openbottom - CDoom.shootz, dist)
+          hitline = slope > CDoom.aimslope
+        end
+
+        if !hitline && li.value.frontsector.value.ceilingheight != li.value.backsector.value.ceilingheight
+          slope = CDoom.fixed_div(CDoom.opentop - CDoom.shootz, dist)
+          hitline = slope < CDoom.aimslope
+        end
+
+        return 1 unless hitline # shot continues
+      end
+
+      # hit line
+      # position a bit closer
+      frac = int.value.frac - CDoom.fixed_div(4 * CDoom::FRACUNIT, CDoom.attackrange)
+      x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
+      y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+      z = CDoom.shootz + CDoom.fixed_mul(CDoom.aimslope, CDoom.fixed_mul(frac, CDoom.attackrange))
+
+      if li.value.frontsector.value.ceilingpic == CDoom.skyflatnum
+        # don't shoot the sky!
+        return 0 if z > li.value.frontsector.value.ceilingheight
+
+        # it's a sky hack wall
+        return 0 if !li.value.backsector.null? && li.value.backsector.value.ceilingpic == CDoom.skyflatnum
+      end
+
+      # Spawn bullet puffs.
+      CDoom.p_spawn_puff(x, y, z)
+
+      # don't go any farther
+      return 0
+    end
+
+    # shoot a thing
+    th = int.value.d.thing
+    return 1 if th == CDoom.shootthing # can't shoot self
+
+    return 1 if th.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0 # corpse or something
+
+    # check angles to see if the thing can be aimed at
+    dist = CDoom.fixed_mul(CDoom.attackrange, int.value.frac)
+    thingtopslope = CDoom.fixed_div(th.value.z + th.value.height - CDoom.shootz, dist)
+
+    return 1 if thingtopslope < CDoom.aimslope # shot over the thing
+
+    thingbottomslope = CDoom.fixed_div(th.value.z - CDoom.shootz, dist)
+
+    return 1 if thingbottomslope > CDoom.aimslope # shot under the thing
+
+    # hit thing
+    # position a bit closer
+    frac = int.value.frac - CDoom.fixed_div(10 * CDoom::FRACUNIT, CDoom.attackrange)
+
+    x = CDoom.trace.x + CDoom.fixed_mul(CDoom.trace.dx, frac)
+    y = CDoom.trace.y + CDoom.fixed_mul(CDoom.trace.dy, frac)
+    z = CDoom.shootz + CDoom.fixed_mul(CDoom.aimslope, CDoom.fixed_mul(frac, CDoom.attackrange))
+
+    # Spawn bullet puffs or blod spots,
+    # depending on target type.
+    if int.value.d.thing.value.flags & CDoom::Mobjflag::MF_NOBLOOD.value != 0
+      CDoom.p_spawn_puff(x, y, z)
+    else
+      CDoom.p_spawn_blood(x, y, z, CDoom.la_damage)
+    end
+
+    CDoom.p_damage_mobj(th, CDoom.shootthing, CDoom.shootthing, CDoom.la_damage) if CDoom.la_damage != 0
+
+    # don't go any farther
+    return 0
+  end
+
+  def self.p_aim_line_attack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed) : CDoom::Fixed
+    angle >>= CDoom::ANGLETOFINESHIFT
+    CDoom.shootthing = t1
+
+    x2 = t1.value.x + (distance >> CDoom::FRACBITS) * CDoom.finecosine[angle]
+    y2 = t1.value.y + (distance >> CDoom::FRACBITS) * CDoom.finesine[angle]
+    CDoom.shootz = t1.value.z + (t1.value.height >> 1) + 8 * CDoom::FRACUNIT
+
+    # can't shoot outside view angles
+    CDoom.topslope = 100 * CDoom::FRACUNIT // 160
+    CDoom.bottomslope = -100 * CDoom::FRACUNIT // 160
+
+    CDoom.attackrange = distance
+    CDoom.linetarget = Pointer(CDoom::Mobj).null
+
+    CDoom.p_path_traverse(t1.value.x, t1.value.y,
+      x2, y2,
+      CDoom::PT_ADDLINES | CDoom::PT_ADDTHINGS,
+      ->CDoom.ptr_aim_traverse)
+
+    return CDoom.aimslope unless CDoom.linetarget.null?
+
+    return 0
+  end
+
+  #
+  # If damage == 0, it is just a test trace
+  # that will leave linetarget set.
+  #
+  def self.p_line_attack(t1 : CDoom::Mobj*, angle : CDoom::Angle, distance : CDoom::Fixed, slope : CDoom::Fixed, damage : LibC::Int)
+    angle >>= CDoom::ANGLETOFINESHIFT
+    CDoom.shootthing = t1
+    CDoom.la_damage = damage
+    x2 = t1.value.x + (distance >> CDoom::FRACBITS) * CDoom.finecosine[angle]
+    y2 = t1.value.y + (distance >> CDoom::FRACBITS) * CDoom.finesine[angle]
+    CDoom.shootz = t1.value.z + (t1.value.height >> 1) + 8 * CDoom::FRACUNIT
+    CDoom.attackrange = distance
+    CDoom.aimslope = slope
+
+    CDoom.p_path_traverse(t1.value.x, t1.value.y,
+      x2, y2,
+      CDoom::PT_ADDLINES | CDoom::PT_ADDTHINGS,
+      ->CDoom.ptr_shoot_traverse)
+  end
+
+  def self.ptr_use_traverse(int : CDoom::Intercept*) : CDoom::DoomBool
+    if int.value.d.line.value.special == 0
+      CDoom.p_line_opening(int.value.d.line)
+      if CDoom.openrange <= 0
+        CDoom.s_start_sound(CDoom.usething, CDoom::Sfxenum::SFX_noway.value)
+
+        # can't use through a wall
+        return 0
+      end
+      # not a special line, but keep checking
+      return 1
+    end
+
+    side = 0
+    side = 1 if CDoom.p_point_on_line_side(CDoom.usething.value.x, CDoom.usething.value.y, int.value.d.line) != 0
+
+    CDoom.p_use_special_line(CDoom.usething, int.value.d.line, side)
+
+    # can't use for than one special line in a row
+    return 0
+  end
+
+  #
+  # Looks for special lines in front of the player to activate.
+  #
+  def self.p_use_lines(player : CDoom::Player*)
+    CDoom.usething = player.value.mo
+
+    angle = player.value.mo.value.angle >> CDoom::ANGLETOFINESHIFT
+
+    x1 = player.value.mo.value.x
+    y1 = player.value.mo.value.y
+    x2 = x1 + (CDoom::USERANGE >> CDoom::FRACBITS) * CDoom.finecosine[angle]
+    y2 = y1 + (CDoom::USERANGE >> CDoom::FRACBITS) * CDoom.finesine[angle]
+
+    CDoom.p_path_traverse(x1, y1, x2, y2, CDoom::PT_ADDLINES, ->CDoom.ptr_use_traverse)
+  end
+
+  #
+  # RADIUS ATTACK
+  #
+
+  #
+  # "bombsource" is the creature
+  # that caused the explosion at "bombspot".
+  #
+  def self.pit_radius_attack(thing : CDoom::Mobj*) : CDoom::DoomBool
+    return 1 if thing.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0
+
+    # Boss spider and cyborg
+    # take no damage from concussion.
+    return 1 if thing.value.type == CDoom::Mobjtype::MT_CYBORG ||
+                thing.value.type == CDoom::Mobjtype::MT_SPIDER
+
+    dx = doom_abs(thing.value.x - CDoom.bombspot.value.x)
+    dy = doom_abs(thing.value.y - CDoom.bombspot.value.y)
+
+    dist = dx > dy ? dx : dy
+    dist = (dist - thing.value.radius) >> CDoom::FRACBITS
+
+    dist = 0 if dist < 0
+
+    return 1 if dist >= CDoom.bombdamage # out of range
+
+    if CDoom.p_check_sight(thing, CDoom.bombspot) != 0
+      # must be in direct path
+      CDoom.p_damage_mobj(thing, CDoom.bombspot, CDoom.bombsource, CDoom.bombdamage - dist)
+    end
+
+    return 1
+  end
+
+#
+# Source is the creature that caused the explosion at spot.
+#
+  def self.p_radius_attack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+    dist = (damage + CDoom::MAXRADIUS) << CDoom::FRACBITS
+    yh = (spot.value.y + dist - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    yl = (spot.value.y - dist - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+    xh = (spot.value.x + dist - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    xl = (spot.value.x - dist - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+    CDoom.bombspot = spot
+    CDoom.bombsource = source
+    CDoom.bombdamage = damage
+
+    y = yl
+    while y <= yh
+      x = xl
+      while x <= xh
+        CDoom.p_block_things_iterator(x, y, ->CDoom.pit_radius_attack)
+        x += 1
+      end
+      y += 1
+    end
+  end
 
 end

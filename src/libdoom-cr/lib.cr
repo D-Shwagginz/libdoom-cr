@@ -5566,7 +5566,7 @@ lib CDoom
   fun p_set_mobj_state = P_SetMobjState(mobj : Mobj*, state : Statenum) : DoomBool
   fun p_mobj_thinker = P_MobjThinker(mobj : Mobj*)
   fun p_spawn_puff = P_SpawnPuff(x : Fixed, y : Fixed, z : Fixed)
-  fun p_spawn_blood = P_SpawnBlood(x : Fixed, y : Fixed, z : Fixed)
+  fun p_spawn_blood = P_SpawnBlood(x : Fixed, y : Fixed, z : Fixed, damage : LibC::Int)
   fun p_spawn_missile = P_SpawnMissile(source : Mobj*, dest : Mobj*, type : Mobjtype) : Mobj*
   fun p_spawn_player_missile = P_SpawnPlayerMissile(source : Mobj*, type : Mobjtype)
 
@@ -5639,6 +5639,8 @@ lib CDoom
   $tmfloorz : Fixed
   $tmceilingz : Fixed
 
+  # keep track of the line that lowers the ceiling,
+  # so missiles don't explode against sky hack walls
   $ceilingline : Line*
 
   fun p_check_position = P_CheckPosition(thing : Mobj*, x : Fixed, y : Fixed) : DoomBool
@@ -5650,6 +5652,7 @@ lib CDoom
   fun p_change_sector = P_ChangeSector(sector : Sector*, crunch : DoomBool) : DoomBool
 
   $linetarget : Mobj* # who got hit (or 0)
+  $shootthing : Mobj*
 
   fun p_aim_line_attack = P_AimLineAttack(t1 : Mobj*, angle : Angle, distance : Fixed) : Fixed
   fun p_line_attack = P_LineAttack(t1 : Mobj*, angle : Angle, distance : Fixed, slope : Fixed, damage : LibC::Int)
@@ -7382,6 +7385,8 @@ lib CDoom
   $numbraintargets : LibC::Int
   $braintargeton : LibC::Int
 
+  # keep track of special lines as they are hit,
+  # but don't process them until the move is proven valid
   $spechit : Line*[MAXSPECIALCROSS]
   $numspechit : LibC::Int
 
@@ -7403,7 +7408,66 @@ lib CDoom
 
   fun a_pain_shoot_skull = A_PainShootSkull(actor : Mobj*, angle : Angle)
 
-    BONUSADD = 6
-    
-    fun p_give_ammo = P_GiveAmmo(player : Player*, ammo : Ammotype, num : LibC::Int) : DoomBool
+  BONUSADD = 6
+
+  fun p_give_ammo = P_GiveAmmo(player : Player*, ammo : Ammotype, num : LibC::Int) : DoomBool
+  fun p_give_weapon = P_GiveWeapon(player : Player*, weapon : Weapontype, dropped : DoomBool) : DoomBool
+  fun p_give_body = P_GiveBody(player : Player*, num : LibC::Int) : DoomBool
+  fun p_give_armor = P_GiveArmor(player : Player*, armortype : LibC::Int) : DoomBool
+  fun p_give_card = P_GiveCard(player : Player*, card : Card)
+
+  fun p_kill_mobj = P_KillMobj(source : Mobj*, target : Mobj*)
+
+  fun t_fire_flicker = T_FireFlicker(flick : Fireflicker*)
+
+  $tmbbox : Fixed[4]
+  $tmthing : Mobj*
+  $tmflags : LibC::Int
+  $tmx : Fixed
+  $tmy : Fixed
+  $tmdropoffz : Fixed
+
+  # Height if not aiming up or down
+  # ???: use slope for monsters?
+  $shootz : Fixed
+
+  $la_damage : LibC::Int
+  $attackrange : Fixed
+
+  $aimslope : Fixed
+  $usething : Mobj*
+  $crushchange : DoomBool
+  $nofit : DoomBool
+
+  # slopes to top and bottom of target
+  $topslope : Fixed
+  $bottomslope : Fixed
+
+  fun pit_stomp_thing = PIT_StompThing(thing : Mobj*) : DoomBool
+  fun pit_check_line = PIT_CheckLine(ld : Line*) : DoomBool
+
+  fun pit_check_thing = PIT_CheckThing(thing : Mobj*) : DoomBool
+  fun p_thing_height_clip = P_ThingHeightClip(thing : Mobj*) : DoomBool
+
+  $bestslidefrac : Fixed
+  $secondslidefrac : Fixed
+
+  $bestslideline : Line*
+  $secondslideline : Line*
+
+  $slidemo : Mobj*
+
+  $tmxmove : Fixed
+  $tmymove : Fixed
+
+  fun p_hit_slide_line = P_HitSlideLine(ld : Line*)
+  fun ptr_slide_traverse = PTR_SlideTraverse(int : Intercept*) : DoomBool
+  fun ptr_aim_traverse = PTR_AimTraverse(int : Intercept*) : DoomBool
+  fun ptr_shoot_traverse = PTR_ShootTraverse(int : Intercept*) : DoomBool
+  fun ptr_use_traverse = PTR_UseTraverse(int : Intercept*) : DoomBool
+
+  $bombsource : Mobj*
+  $bombspot : Mobj*
+  $bombdamage : LibC::Int
+  fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : DoomBool
 end
