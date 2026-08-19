@@ -8272,7 +8272,7 @@ module LibDoom
     Raylib.init_window(1024, 768, "LibDoom")
     Raylib.set_exit_key(Raylib::KeyboardKey::Null)
     Raylib.disable_cursor
-    Raylib.toggle_fullscreen
+    # Raylib.toggle_fullscreen
     # Raylib.set_target_fps(60)
 
     image = Raylib.gen_image_color(320, 200, Raylib::BLACK)
@@ -12799,6 +12799,7 @@ module LibDoom
     # will adjust them.
     CDoom.tmfloorz = newsubsec.value.sector.value.floorheight
     CDoom.tmdropoffz = CDoom.tmfloorz
+    CDoom.tmceilingz = newsubsec.value.sector.value.ceilingheight
 
     CDoom.validcount += 1
     CDoom.numspechit = 0
@@ -13581,9 +13582,9 @@ module LibDoom
     return 1
   end
 
-#
-# Source is the creature that caused the explosion at spot.
-#
+  #
+  # Source is the creature that caused the explosion at spot.
+  #
   def self.p_radius_attack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
     dist = (damage + CDoom::MAXRADIUS) << CDoom::FRACBITS
     yh = (spot.value.y + dist - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
@@ -13604,5 +13605,634 @@ module LibDoom
       y += 1
     end
   end
+
+  def self.pit_change_sector(thing : CDoom::Mobj*) : CDoom::DoomBool
+    return 1 if CDoom.p_thing_height_clip(thing) != 0 # keep checking
+
+    # crunch bodies to giblets
+    if thing.value.health <= 0
+      CDoom.p_set_mobj_state(thing, CDoom::Statenum::S_GIBS)
+
+      thing.value.flags = thing.value.flags & ~CDoom::Mobjflag::MF_SOLID.value
+      thing.value.height = 0
+      thing.value.radius = 0
+
+      # keep checking
+      return 1
+    end
+
+    # crunch dropped items
+    if thing.value.flags & CDoom::Mobjflag::MF_DROPPED.value != 0
+      CDoom.p_remove_mobj(thing)
+
+      # keep checking
+      return 1
+    end
+
+    if thing.value.flags & CDoom::Mobjflag::MF_SHOOTABLE.value == 0
+      # assume it is bloody gibs or something
+      return 1
+    end
+
+    CDoom.nofit = 1
+
+    if CDoom.crushchange && CDoom.leveltime & 3 == 0
+      CDoom.p_damage_mobj(thing, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 10)
+
+      # spray blood in a random direction
+      mo = CDoom.p_spawn_mobj(thing.value.x,
+        thing.value.y,
+        thing.value.z + thing.value.height // 2, CDoom::Mobjtype::MT_BLOOD)
+
+      mo.value.momx = (CDoom.p_random - CDoom.p_random) << 12
+      mo.value.momy = (CDoom.p_random - CDoom.p_random) << 12
+    end
+
+    # keep checking (crush other things)
+    return 1
+  end
+
+  def self.p_change_sector(sector : CDoom::Sector*, crunch : CDoom::DoomBool) : CDoom::DoomBool
+    CDoom.nofit = 0
+    CDoom.crushchange = crunch
+
+    # re-check heights for all things near the moving sector
+    x = sector.value.blockbox[CDoom::BOXLEFT]
+    while x <= sector.value.blockbox[CDoom::BOXRIGHT]
+      y = sector.value.blockbox[CDoom::BOXBOTTOM]
+      while y <= sector.value.blockbox[CDoom::BOXTOP]
+        CDoom.p_block_things_iterator(x, y, ->CDoom.pit_change_sector)
+        y += 1
+      end
+
+      x += 1
+    end
+
+    return CDoom.nofit
+  end
+
+  #
+  # Gives an estimation of distance (not exact)
+  #
+  def self.p_aprox_distance(dx : CDoom::Fixed, dy : CDoom::Fixed) : CDoom::Fixed
+    dx = doom_abs(dx)
+    dy = doom_abs(dy)
+    return dx + dy - (dx >> 1) if dx < dy
+    return dx + dy - (dy >> 1)
+  end
+
+  #
+  # Returns 0 or 1
+  #
+  def self.p_point_on_line_side(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Line*) : LibC::Int
+    if line.value.dx == 0
+      return (line.value.dy > 0).to_unsafe if x <= line.value.v1.value.x
+
+      return (line.value.dy < 0).to_unsafe
+    end
+    if line.value.dy == 0
+      return (line.value.dx < 0).to_unsafe if y <= line.value.v1.value.y
+
+      return (line.value.dx > 0).to_unsafe
+    end
+
+    dx = (x - line.value.v1.value.x)
+    dy = (y - line.value.v1.value.y)
+
+    left = CDoom.fixed_mul(line.value.dy >> CDoom::FRACBITS, dx)
+    right = CDoom.fixed_mul(dy, line.value.dx >> CDoom::FRACBITS)
+
+    return 0 if right < left # front side
+    return 1                 # back side
+  end
+
+  #
+  # Considers the line to be infinite
+  # Returns side 0 or 1, -1 if box crosses the line.
+  #
+  def self.p_box_on_line_side(tmbox : CDoom::Fixed*, ld : CDoom::Line*) : LibC::Int
+    p1 = 0
+    p2 = 0
+
+    case ld.value.slopetype
+    when CDoom::Slopetype::HORIZONTAL
+      p1 = (tmbox[CDoom::BOXTOP] > ld.value.v1.value.y).to_unsafe
+      p2 = (tmbox[CDoom::BOXBOTTOM] > ld.value.v1.value.y).to_unsafe
+      if ld.value.dx < 0
+        p1 ^= 1
+        p2 ^= 1
+      end
+    when CDoom::Slopetype::VERTICAL
+      p1 = (tmbox[CDoom::BOXRIGHT] < ld.value.v1.value.x).to_unsafe
+      p2 = (tmbox[CDoom::BOXLEFT] < ld.value.v1.value.x).to_unsafe
+      if ld.value.dy < 0
+        p1 ^= 1
+        p2 ^= 1
+      end
+    when CDoom::Slopetype::POSITIVE
+      p1 = CDoom.p_point_on_line_side(tmbox[CDoom::BOXLEFT], tmbox[CDoom::BOXTOP], ld)
+      p2 = CDoom.p_point_on_line_side(tmbox[CDoom::BOXRIGHT], tmbox[CDoom::BOXBOTTOM], ld)
+    when CDoom::Slopetype::NEGATIVE
+      p1 = CDoom.p_point_on_line_side(tmbox[CDoom::BOXRIGHT], tmbox[CDoom::BOXTOP], ld)
+      p2 = CDoom.p_point_on_line_side(tmbox[CDoom::BOXLEFT], tmbox[CDoom::BOXBOTTOM], ld)
+    end
+
+    return p1 if p1 == p2
+    return -1
+  end
+
+  def self.p_point_on_divline_side(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Divline*) : LibC::Int
+    if line.value.dx == 0
+      return (line.value.dy > 0).to_unsafe if x <= line.value.x
+
+      return (line.value.dy < 0).to_unsafe
+    end
+    if line.value.dy == 0
+      return (line.value.dx < 0).to_unsafe if y <= line.value.y
+
+      return (line.value.dx > 0).to_unsafe
+    end
+
+    dx = (x - line.value.x)
+    dy = (y - line.value.y)
+
+    # try to quickly decide by looking at sign bits
+    if (line.value.dy ^ line.value.dx ^ dx ^ dy) & 0x80000000 != 0
+      return 1 if (line.value.dy ^ dx) & 0x80000000 != 0 # (left is negative)
+      return 0
+    end
+
+    left = CDoom.fixed_mul(line.value.dy >> 8, dx >> 8)
+    right = CDoom.fixed_mul(dy >> 8, line.value.dx >> 8)
+
+    return 0 if right < left # front side
+    return 1                 # back side
+  end
+
+  def self.p_make_divline(li : CDoom::Line*, dl : CDoom::Divline*)
+    dl.value.x = li.value.v1.value.x
+    dl.value.y = li.value.v1.value.y
+    dl.value.dx = li.value.dx
+    dl.value.dy = li.value.dy
+  end
+
+  #
+  # Returns the fractional intercept point
+  # along the first divline.
+  # This is only called by the addthings
+  # and addlines traversers.
+  #
+  def self.p_intercept_vector(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+    den = CDoom.fixed_mul(v1.value.dy >> 8, v2.value.dx) - CDoom.fixed_mul(v1.value.dx >> 8, v2.value.dy)
+
+    return 0 if den == 0
+
+    num =
+      CDoom.fixed_mul((v1.value.x - v2.value.x) >> 8, v1.value.dy) +
+        CDoom.fixed_mul((v2.value.y - v1.value.y) >> 8, v1.value.dx)
+    frac = CDoom.fixed_div(num, den)
+
+    return frac
+  end
+
+  #
+  # Sets opentop and openbottom to the window
+  # through a two sided line.
+  # OPTIMIZE: keep this precalculated
+  #
+  def self.p_line_opening(linedef : CDoom::Line*)
+    if linedef.value.sidenum[1] == -1
+      # single sided line
+      CDoom.openrange = 0
+      return
+    end
+
+    front = linedef.value.frontsector
+    back = linedef.value.backsector
+
+    if front.value.ceilingheight < back.value.ceilingheight
+      CDoom.opentop = front.value.ceilingheight
+    else
+      CDoom.opentop = back.value.ceilingheight
+    end
+
+    if front.value.floorheight > back.value.floorheight
+      CDoom.openbottom = front.value.floorheight
+      CDoom.lowfloor = back.value.floorheight
+    else
+      CDoom.openbottom = back.value.floorheight
+      CDoom.lowfloor = front.value.floorheight
+    end
+
+    CDoom.openrange = CDoom.opentop - CDoom.openbottom
+  end
+
+  #
+  # THING POSITION SETTING
+  #
+
+  #
+  # Unlinks a thing from block map and sectors.
+  # On each position change, BLOCKMAP and other
+  # lookups maintaining lists ot things inside
+  # these structures need to be updated.
+  #
+  def self.p_unset_thing_position(thing : CDoom::Mobj*)
+    if thing.value.flags & CDoom::Mobjflag::MF_NOSECTOR.value == 0
+      # inert things don't need to be in blockmap?
+      # unlink from subsector
+      thing.value.snext.value.sprev = thing.value.sprev unless thing.value.snext.null?
+
+      if !thing.value.sprev.null?
+        thing.value.sprev.value.snext = thing.value.snext
+      else
+        thing.value.subsector.value.sector.value.thinglist = thing.value.snext
+      end
+    end
+
+    if thing.value.flags & CDoom::Mobjflag::MF_NOBLOCKMAP.value == 0
+      # inert things don't need to be in blockmap
+      # unlink from block map
+      thing.value.bnext.value.bprev = thing.value.bprev unless thing.value.bnext.null?
+
+      if !thing.value.bprev.null?
+        thing.value.bprev.value.bnext = thing.value.bnext
+      else
+        blockx = (thing.value.x - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+        blocky = (thing.value.y - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+
+        if blockx >= 0 && blockx < CDoom.bmapwidth &&
+           blocky >= 0 && blocky < CDoom.bmapheight
+          CDoom.blocklinks[blocky * CDoom.bmapwidth + blockx] = thing.value.bnext
+        end
+      end
+    end
+  end
+
+  def self.p_set_thing_position(thing : CDoom::Mobj*)
+    # link into subsector
+    ss = CDoom.r_point_in_subsector(thing.value.x, thing.value.y)
+    thing.value.subsector = ss
+
+    if thing.value.flags & CDoom::Mobjflag::MF_NOSECTOR.value == 0
+      # invisible things don't go into the sector links
+      sec = ss.value.sector
+
+      thing.value.sprev = Pointer(CDoom::Mobj).null
+      thing.value.snext = sec.value.thinglist
+
+      sec.value.thinglist.value.sprev = thing unless sec.value.thinglist.null?
+
+      sec.value.thinglist = thing
+    end
+
+    # link into blockmap
+    if thing.value.flags & CDoom::Mobjflag::MF_NOBLOCKMAP.value == 0
+      # inert things don't need to be in blockmap
+      blockx = (thing.value.x - CDoom.bmaporgx) >> CDoom::MAPBLOCKSHIFT
+      blocky = (thing.value.y - CDoom.bmaporgy) >> CDoom::MAPBLOCKSHIFT
+
+      if blockx >= 0 && blockx < CDoom.bmapwidth &&
+         blocky >= 0 && blocky < CDoom.bmapheight
+        link = CDoom.blocklinks + (blocky * CDoom.bmapwidth + blockx)
+        thing.value.bprev = Pointer(CDoom::Mobj).null
+        thing.value.bnext = link.value
+        link.value.value.bprev = thing unless link.value.null?
+
+        link.value = thing
+      else
+        # thing is off the map
+        thing.value.bnext = Pointer(CDoom::Mobj).null
+        thing.value.bprev = Pointer(CDoom::Mobj).null
+      end
+    end
+  end
+
+  #
+  # BLOCK MAP ITERATORS
+  # For each line/thing in the given mapblock,
+  # call the passed PIT_* function.
+  # If the function returns false,
+  # exit with false without checking anything else.
+  #
+
+  #
+  # The validcount flags are used to avoid checking lines
+  # that are marked in multiple mapblocks,
+  # so increment validcount before the first call
+  # to P_BlockLinesIterator, then make one or more calls
+  # to it.
+  #
+  def self.p_block_lines_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, CDoom::DoomBool)) : CDoom::DoomBool
+    return 1 if x < 0 || y < 0 || x >= CDoom.bmapwidth || y >= CDoom.bmapheight
+
+    offset = y * CDoom.bmapwidth + x
+
+    offset = (CDoom.blockmap + offset).value
+
+    list = CDoom.blockmaplump + offset
+    while list.value != -1
+      ld = CDoom.lines + list.value
+
+      if ld.value.validcount == CDoom.validcount
+        list += 1
+        next # line has already been checked
+      end
+
+      ld.value.validcount = CDoom.validcount
+
+      return 0 if func.call(ld) == 0
+
+      list += 1
+    end
+
+    return 1 # everything was checked
+  end
+
+  def self.p_block_things_iterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
+    return 1 if x < 0 || y < 0 || x >= CDoom.bmapwidth || y >= CDoom.bmapheight
+
+    mobj = CDoom.blocklinks[y * CDoom.bmapwidth + x]
+    while !mobj.null?
+      return 0 if func.call(mobj) == 0
+
+      mobj = mobj.value.bnext
+    end
+
+    return 1
+  end
+
+  #
+  # INTERCEPT ROUTINES
+  #
+
+  #
+  # Looks for lines in the given block
+  # that intercept the given trace
+  # to add to the intercepts list.
+  #
+  # A line is crossed if its endpoints
+  # are on opposite sides of the trace.
+  # Returns true if earlyout and a solid line hit.
+  #
+  def self.pit_add_line_intercepts(ld : CDoom::Line*) : CDoom::DoomBool
+    s1 = 0
+    s2 = 0
+    dl = CDoom::Divline.new
+    # avoid precision problems with two routines
+    if CDoom.trace.dx > CDoom::FRACUNIT * 16 ||
+       CDoom.trace.dy > CDoom::FRACUNIT * 16 ||
+       CDoom.trace.dx < -CDoom::FRACUNIT * 16 ||
+       CDoom.trace.dy < -CDoom::FRACUNIT * 16
+      s1 = CDoom.p_point_on_divline_side(ld.value.v1.value.x, ld.value.v1.value.y, pointerof(CDoom.trace))
+      s2 = CDoom.p_point_on_divline_side(ld.value.v2.value.x, ld.value.v2.value.y, pointerof(CDoom.trace))
+    else
+      s1 = CDoom.p_point_on_line_side(CDoom.trace.x, CDoom.trace.y, ld)
+      s2 = CDoom.p_point_on_line_side(CDoom.trace.x + CDoom.trace.dx, CDoom.trace.y + CDoom.trace.dy, ld)
+    end
+
+    return 1 if s1 == s2 # line isn't crossed
+
+    # hit the line
+    CDoom.p_make_divline(ld, pointerof(dl))
+    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
+
+    return 1 if frac < 0 # behind source
+
+    # try to early out the check
+    if CDoom.earlyout != 0 &&
+       frac < CDoom::FRACUNIT &&
+       ld.value.backsector.null?
+      return 0 # stop checking
+    end
+
+    CDoom.intercept_p.value.frac = frac
+    CDoom.intercept_p.value.isaline = 1
+    CDoom.intercept_p.value.d.line = ld
+
+    CDoom.intercept_p += 1
+
+    return 1 # continue
+  end
+
+  def self.pit_add_thing_intercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
+    tracepositive = ((CDoom.trace.dx ^ CDoom.trace.dy) > 0).to_unsafe
+
+    # check a corner to corner crossection for hit
+    if tracepositive != 0
+      x1 = thing.value.x - thing.value.radius
+      y1 = thing.value.y + thing.value.radius
+
+      x2 = thing.value.x + thing.value.radius
+      y2 = thing.value.y - thing.value.radius
+    else
+      x1 = thing.value.x - thing.value.radius
+      y1 = thing.value.y - thing.value.radius
+
+      x2 = thing.value.x + thing.value.radius
+      y2 = thing.value.y + thing.value.radius
+    end
+
+    s1 = CDoom.p_point_on_divline_side(x1, y1, pointerof(CDoom.trace))
+    s2 = CDoom.p_point_on_divline_side(x2, y2, pointerof(CDoom.trace))
+
+    return 1 if s1 == s2 # line isn't crossed
+
+    dl = CDoom::Divline.new(
+      x: x1,
+      y: y1,
+      dx: x2 - x1,
+      dy: y2 - y1
+    )
+
+    frac = CDoom.p_intercept_vector(pointerof(CDoom.trace), pointerof(dl))
+
+    return 1 if frac < 0 # behind source
+
+    CDoom.intercept_p.value.frac = frac
+    CDoom.intercept_p.value.isaline = 0
+    CDoom.intercept_p.value.d.thing = thing
+
+    CDoom.intercept_p += 1
+
+    return 1 # keep going
+  end
+
+  #
+  # Returns true if the traverser function returns true
+  # for all lines.
+  #
+  def self.p_traverse_intercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
+    count = (CDoom.intercept_p - CDoom.intercepts.to_unsafe).to_i32!
+
+    int = Pointer(CDoom::Intercept).null # shut up compiler warning
+
+    while count != 0
+      count -= 1
+      dist = Int32::MAX
+      scan = CDoom.intercepts.to_unsafe
+      while scan < CDoom.intercept_p
+        if scan.value.frac < dist
+          dist = scan.value.frac
+          int = scan
+        end
+        scan += 1
+      end
+
+      return 1 if dist > maxfrac # checked everything in range
+
+      # Unused block here in original source. I'm not porting #if 0 sections
+
+      return 0 if func.call(int) == 0 # don't bother going farther
+
+      int.value.frac = Int32::MAX
+    end
+
+    return 1 # everything was traversed
+  end
+
+  #
+  # Traces a line from x1,y1 to x2,y2,
+  # calling the traverser function for each.
+  # Returns true if the traverser function returns true
+  # for all lines.
+  #
+  def self.p_path_traverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed, flags : LibC::Int, trav : Proc(CDoom::Intercept*, CDoom::DoomBool)) : CDoom::DoomBool
+    CDoom.earlyout = flags & CDoom::PT_EARLYOUT != 0
+
+    CDoom.validcount += 1
+    CDoom.intercept_p = CDoom.intercepts.to_unsafe
+
+    x1 += CDoom::FRACUNIT if (x1 - CDoom.bmaporgx) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
+
+    y1 += CDoom::FRACUNIT if (y1 - CDoom.bmaporgy) & (CDoom::MAPBLOCKSIZE - 1) == 0 # don't side exactly on a line
+
+    CDoom.trace.x = x1
+    CDoom.trace.y = y1
+    CDoom.trace.dx = x2 - x1
+    CDoom.trace.dy = y2 - y1
+
+    x1 -= CDoom.bmaporgx
+    y1 -= CDoom.bmaporgy
+    xt1 = x1 >> CDoom::MAPBLOCKSHIFT
+    yt1 = y1 >> CDoom::MAPBLOCKSHIFT
+
+    x2 -= CDoom.bmaporgx
+    y2 -= CDoom.bmaporgy
+    xt2 = x2 >> CDoom::MAPBLOCKSHIFT
+    yt2 = y2 >> CDoom::MAPBLOCKSHIFT
+
+    if xt2 > xt1
+      mapxstep = 1
+      partial = CDoom::FRACUNIT - ((x1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1))
+      ystep = CDoom.fixed_div(y2 - y1, doom_abs(x2 - x1))
+    elsif xt2 < xt1
+      mapxstep = -1
+      partial = (x1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1)
+      ystep = CDoom.fixed_div(y2 - y1, doom_abs(x2 - x1))
+    else
+      mapxstep = 0
+      partial = CDoom::FRACUNIT
+      ystep = 256 * CDoom::FRACUNIT
+    end
+
+    yintercept = (y1 >> CDoom::MAPBTOFRAC) + CDoom.fixed_mul(partial, ystep)
+
+    if yt2 > yt1
+      mapystep = 1
+      partial = CDoom::FRACUNIT - ((y1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1))
+      xstep = CDoom.fixed_div(x2 - x1, doom_abs(y2 - y1))
+    elsif xt2 < xt1
+      mapystep = -1
+      partial = (y1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1)
+      xstep = CDoom.fixed_div(x2 - x1, doom_abs(y2 - y1))
+    else
+      mapystep = 0
+      partial = CDoom::FRACUNIT
+      xstep = 256 * CDoom::FRACUNIT
+    end
+
+    xintercept = (x1 >> CDoom::MAPBTOFRAC) + CDoom.fixed_mul(partial, xstep)
+
+    # Step through map blocks.
+    # Count is present to prevent a round off error
+    # from skipping the break.
+    mapx = xt1
+    mapy = yt1
+
+    64.times do |count|
+      if flags & CDoom::PT_ADDLINES != 0
+        if CDoom.p_block_lines_iterator(mapx, mapy, ->CDoom.pit_add_line_intercepts) == 0
+          return 0 # early out
+        end
+      end
+
+      if flags & CDoom::PT_ADDTHINGS != 0
+        if CDoom.p_block_things_iterator(mapx, mapy, ->CDoom.pit_add_thing_intercepts) == 0
+          return 0 # early out
+        end
+      end
+
+      break if mapx == xt1 && mapy == yt2
+
+      if (yintercept >> CDoom::FRACBITS) == mapy
+        yintercept += ystep
+        mapx += mapxstep
+      elsif (xintercept >> CDoom::FRACBITS) == mapx
+        xintercept += xstep
+        mapy += mapystep
+      end
+    end
+
+    # go through the sorted list
+    return CDoom.p_traverse_intercepts(trav, CDoom::FRACUNIT)
+  end
+
+
+
+  def self.p_set_mobj_state(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
+    loop do
+      if state == CDoom::Statenum::S_NULL
+        mobj.value.state = Pointer(CDoom::State).new(CDoom::Statenum::S_NULL.value)
+        CDoom.p_remove_mobj(mobj)
+        return 0
+      end
+
+      st = CDoom.states + state.value
+      mobj.value.state = st
+      mobj.value.tics = st.value.tics
+      mobj.value.sprite = st.value.sprite
+      mobj.value.frame = st.value.frame
+
+      # Modified handling.
+        # Call action functions when the state is set
+        if !st.value.action.null?
+          CDoom::ActionfP1.new(st.value.action, Pointer(Void).null).call(mobj.as(Void*))
+        end
+
+        state = st.value.nextstate
+      break unless mobj.value.tics == 0
+    end
+
+    return 1
+  end 
+
+    def self.p_explode_missile(mo : CDoom::Mobj*)
+      mo.value.momx = 0
+      mo.value.momy = 0
+      mo.value.momz = 0
+
+      CDoom.p_set_mobj_state(mo, CDoom::Statenum.new(CDoom.mobjinfo[mo.value.type.value].deathstate))
+
+      mo.value.tics = mo.value.tics - (CDoom.p_random & 3)
+
+      mo.value.tics = 1 if mo.value.tics < 1
+
+      mo.value.flags = mo.value.flags & ~CDoom::Mobjflag::MF_MISSILE.value
+
+      CDoom.s_start_sound(mo, mo.value.info.value.deathsound) if mo.value.info.value.deathsound != 0
+
+    end
+
 
 end

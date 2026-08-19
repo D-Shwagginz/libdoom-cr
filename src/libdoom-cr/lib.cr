@@ -7470,4 +7470,19 @@ lib CDoom
   $bombspot : Mobj*
   $bombdamage : LibC::Int
   fun pit_radius_attack = PIT_RadiusAttack(thing : Mobj*) : DoomBool
+  fun pit_change_sector = PIT_ChangeSector(thing : Mobj*) : DoomBool
+
+  $earlyout : DoomBool
+  $ptflags : LibC::Int
+
+  fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : Line*) : DoomBool
+  fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : Mobj*) : DoomBool
+  fun p_traverse_intercepts = P_TraverseIntercepts(func : Traverser, maxfrac : Fixed) : DoomBool
+
+    STOPSPEED = 0x1000
+    FRICTION = 0xe800
+
+    fun p_explode_missile = P_ExplodeMissile(mo : Mobj*)
+
+
 end

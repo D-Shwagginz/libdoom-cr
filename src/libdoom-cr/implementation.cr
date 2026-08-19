@@ -1769,6 +1769,82 @@ fun pit_radius_attack = PIT_RadiusAttack(thing : CDoom::Mobj*) : CDoom::DoomBool
   LibDoom.pit_radius_attack(thing)
 end
 
-  fun p_radius_attack = P_RadiusAttack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
-LibDoom.p_radius_attack(spot, source, damage)
+fun p_radius_attack = P_RadiusAttack(spot : CDoom::Mobj*, source : CDoom::Mobj*, damage : LibC::Int)
+  LibDoom.p_radius_attack(spot, source, damage)
+end
+
+fun pit_change_sector = PIT_ChangeSector(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_change_sector(thing)
+end
+
+fun p_change_sector = P_ChangeSector(sector : CDoom::Sector*, crunch : CDoom::DoomBool) : CDoom::DoomBool
+  LibDoom.p_change_sector(sector, crunch)
+end
+
+fun p_aprox_distance = P_AproxDistance(dx : CDoom::Fixed, dy : CDoom::Fixed) : CDoom::Fixed
+  LibDoom.p_aprox_distance(dx, dy)
+end
+
+fun p_point_on_line_side = P_PointOnLineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Line*) : LibC::Int
+  LibDoom.p_point_on_line_side(x, y, line)
+end
+
+fun p_box_on_line_side = P_BoxOnLineSide(tmbox : CDoom::Fixed*, ld : CDoom::Line*) : LibC::Int
+  LibDoom.p_box_on_line_side(tmbox, ld)
+end
+
+fun p_point_on_divline_side = P_PointOnDivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, line : CDoom::Divline*) : LibC::Int
+  LibDoom.p_point_on_divline_side(x, y, line)
+end
+
+fun p_make_divline = P_MakeDivline(li : CDoom::Line*, dl : CDoom::Divline*)
+  LibDoom.p_make_divline(li, dl)
+end
+
+fun p_intercept_vector = P_InterceptVector(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+  LibDoom.p_intercept_vector(v2, v1)
+end
+
+fun p_line_opening = P_LineOpening(linedef : CDoom::Line*)
+  LibDoom.p_line_opening(linedef)
+end
+
+fun p_unset_thing_position = P_UnsetThingPosition(thing : CDoom::Mobj*)
+  LibDoom.p_unset_thing_position(thing)
+end
+
+fun p_set_thing_position = P_SetThingPosition(thing : CDoom::Mobj*)
+  LibDoom.p_set_thing_position(thing)
+end
+
+fun p_block_lines_iterator = P_BlockLinesIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Line*, CDoom::DoomBool)) : CDoom::DoomBool
+  LibDoom.p_block_lines_iterator(x, y, func)
+end
+
+fun p_block_things_iterator = P_BlockThingsIterator(x : LibC::Int, y : LibC::Int, func : Proc(CDoom::Mobj*, CDoom::DoomBool)) : CDoom::DoomBool
+  LibDoom.p_block_things_iterator(x, y, func)
+end
+
+fun pit_add_line_intercepts = PIT_AddLineIntercepts(ld : CDoom::Line*) : CDoom::DoomBool
+  LibDoom.pit_add_line_intercepts(ld)
+end
+
+fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.pit_add_thing_intercepts(thing)
+end
+
+fun p_traverse_intercepts = P_TraverseIntercepts(func : CDoom::Traverser, maxfrac : CDoom::Fixed) : CDoom::DoomBool
+  LibDoom.p_traverse_intercepts(func, maxfrac)
+end
+
+fun p_path_traverse = P_PathTraverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : CDoom::Fixed, y2 : CDoom::Fixed, flags : LibC::Int, trav : Proc(CDoom::Intercept*, CDoom::DoomBool)) : CDoom::DoomBool
+  LibDoom.p_path_traverse(x1, y1, x2, y2, flags, trav)
+end
+
+  fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
+LibDoom.p_set_mobj_state(mobj, state)
   end
+
+    fun p_explode_missile = P_ExplodeMissile(mo : CDoom::Mobj*)
+LibDoom.p_explode_missile(mo)
+    end
