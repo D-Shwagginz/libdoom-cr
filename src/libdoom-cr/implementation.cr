@@ -1848,3 +1848,32 @@ LibDoom.p_set_mobj_state(mobj, state)
     fun p_explode_missile = P_ExplodeMissile(mo : CDoom::Mobj*)
 LibDoom.p_explode_missile(mo)
     end
+
+      fun p_xymovement = P_XYMovement(mo : CDoom::Mobj*)
+LibDoom.p_xymovement(mo)
+      end
+
+        fun p_zmovement = P_ZMovement(mo : CDoom::Mobj*)
+LibDoom.p_zmovement(mo)
+        end
+
+          fun p_nightmare_respawn = P_NightmareRespawn(mobj : CDoom::Mobj*)
+LibDoom.p_nightmare_respawn(mobj)
+          end
+
+  fun p_mobj_thinker = P_MobjThinker(mobj : CDoom::Mobj*)
+    LibDoom.p_mobj_thinker(mobj)
+  end
+
+  fun p_spawn_mobj = P_SpawnMobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
+LibDoom.p_spawn_mobj(x, y, z, type)
+  end
+
+  fun p_remove_mobj = P_RemoveMobj(mobj : CDoom::Mobj*)
+LibDoom.p_remove_mobj(mobj)
+  end
+
+  fun p_respawn_specials = P_RespawnSpecials
+LibDoom.p_respawn_specials
+  end
+

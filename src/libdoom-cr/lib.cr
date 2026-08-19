@@ -5562,7 +5562,7 @@ lib CDoom
 
   fun p_respawn_specials = P_RespawnSpecials
   fun p_spawn_mobj = P_SpawnMobj(x : Fixed, y : Fixed, z : Fixed, type : Mobjtype) : Mobj*
-  fun p_remove_mobj = P_RemoveMobj(th : Mobj*)
+  fun p_remove_mobj = P_RemoveMobj(mobj : Mobj*)
   fun p_set_mobj_state = P_SetMobjState(mobj : Mobj*, state : Statenum) : DoomBool
   fun p_mobj_thinker = P_MobjThinker(mobj : Mobj*)
   fun p_spawn_puff = P_SpawnPuff(x : Fixed, y : Fixed, z : Fixed)
@@ -7483,6 +7483,11 @@ lib CDoom
     FRICTION = 0xe800
 
     fun p_explode_missile = P_ExplodeMissile(mo : Mobj*)
+
+      fun p_xymovement = P_XYMovement(mo : Mobj*)
+        fun p_zmovement = P_ZMovement(mo : Mobj*)
+
+          fun p_nightmare_respawn = P_NightmareRespawn(mobj : Mobj*)
 
 
 end

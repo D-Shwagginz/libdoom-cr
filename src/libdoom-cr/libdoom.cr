@@ -12400,7 +12400,7 @@ module LibDoom
     case target.value.type
     when CDoom::Mobjtype::MT_WOLFSS, CDoom::Mobjtype::MT_POSSESSED
       item = CDoom::Mobjtype::MT_CLIP
-    when CDoom::Mobjtype::MT_SHOTGUN
+    when CDoom::Mobjtype::MT_SHOTGUY
       item = CDoom::Mobjtype::MT_SHOTGUN
     when CDoom::Mobjtype::MT_CHAINGUY
       item = CDoom::Mobjtype::MT_CHAINGUN
@@ -12409,6 +12409,7 @@ module LibDoom
     end
 
     mo = CDoom.p_spawn_mobj(target.value.x, target.value.y, CDoom::ONFLOORZ, item)
+
     mo.value.flags = mo.value.flags | CDoom::Mobjflag::MF_DROPPED.value # special versions of items
   end
 
@@ -14142,7 +14143,7 @@ module LibDoom
       mapystep = 1
       partial = CDoom::FRACUNIT - ((y1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1))
       xstep = CDoom.fixed_div(x2 - x1, doom_abs(y2 - y1))
-    elsif xt2 < xt1
+    elsif yt2 < yt1
       mapystep = -1
       partial = (y1 >> CDoom::MAPBTOFRAC) & (CDoom::FRACUNIT - 1)
       xstep = CDoom.fixed_div(x2 - x1, doom_abs(y2 - y1))
@@ -14173,7 +14174,7 @@ module LibDoom
         end
       end
 
-      break if mapx == xt1 && mapy == yt2
+      break if mapx == xt2 && mapy == yt2
 
       if (yintercept >> CDoom::FRACBITS) == mapy
         yintercept += ystep
@@ -14233,6 +14234,425 @@ module LibDoom
       CDoom.s_start_sound(mo, mo.value.info.value.deathsound) if mo.value.info.value.deathsound != 0
 
     end
+
+
+
+      def self.p_xymovement(mo : CDoom::Mobj*)
+        if mo.value.momx == 0 && mo.value.momy == 0
+          if mo.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+            # the skull slammed into something
+            mo.value.flags = mo.value.flags & ~CDoom::Mobjflag::MF_SKULLFLY.value
+            mo.value.momx = 0
+            mo.value.momy = 0
+            mo.value.momz = 0
+
+            CDoom.p_set_mobj_state(mo, CDoom::Statenum.new(mo.value.info.value.spawnstate))
+          end
+          return
+        end
+
+        player = mo.value.player
+
+        if mo.value.momx > CDoom::MAXMOVE
+          mo.value.momx = CDoom::MAXMOVE
+        elsif mo.value.momx < -CDoom::MAXMOVE
+          mo.value.momx = -CDoom::MAXMOVE
+        end
+
+        if mo.value.momy > CDoom::MAXMOVE
+          mo.value.momy = CDoom::MAXMOVE
+        elsif mo.value.momy < -CDoom::MAXMOVE
+          mo.value.momy = -CDoom::MAXMOVE
+        end
+
+        xmove = mo.value.momx
+        ymove = mo.value.momy
+
+        loop do
+          if xmove > CDoom::MAXMOVE // 2 || ymove > CDoom::MAXMOVE // 2
+            ptryx = mo.value.x + xmove // 2
+            ptryy = mo.value.y + ymove // 2
+            xmove >>= 1
+            ymove >>= 1
+          else
+            ptryx = mo.value.x + xmove
+            ptryy = mo.value.y + ymove
+            xmove = 0
+            ymove = 0
+          end
+
+          if CDoom.p_try_move(mo, ptryx, ptryy) == 0
+            # blocked move
+            if !mo.value.player.null?
+              CDoom.p_slide_move(mo) # try to slide along it
+            elsif mo.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
+              # explode a missile
+              if !CDoom.ceilingline.null? &&
+                !CDoom.ceilingline.value.backsector.null? &&
+                CDoom.ceilingline.value.backsector.value.ceilingpic == CDoom.skyflatnum
+                # Hack to prevent missiles exploding
+                    # against the sky.
+                    # Does not handle sky floors.
+                    CDoom.p_remove_mobj(mo)
+                    return
+              end
+              CDoom.p_explode_missile(mo)
+            else
+              mo.value.momx = 0
+              mo.value.momy = 0
+            end
+          end
+
+          break unless xmove != 0 || ymove != 0
+        end
+
+        # slow down
+        if !player.null? && player.value.cheats & CDoom::Cheat::CF_NOMOMENTUM.value != 0
+          # debug option for no sliding at all
+          mo.value.momx = 0
+          mo.value.momy = 0
+          return
+        end
+
+        # no friction for missiles ever
+        return if mo.value.flags & (CDoom::Mobjflag::MF_MISSILE.value | CDoom::Mobjflag::MF_SKULLFLY.value) != 0
+
+        # no friction when airborne
+        return if mo.value.z > mo.value.floorz
+        
+        if (mo.value.flags & CDoom::Mobjflag::MF_CORPSE.value != 0) &&
+          (mo.value.momx > CDoom::FRACUNIT // 4 ||
+          mo.value.momx < -CDoom::FRACUNIT // 4 ||
+          mo.value.momy > CDoom::FRACUNIT // 4 ||
+          mo.value.momy < -CDoom::FRACUNIT // 4) &&
+          (mo.value.floorz != mo.value.subsector.value.sector.value.floorheight)
+          # do not stop sliding
+          # if halfway off a step with some momentum
+          return
+        end
+
+        if mo.value.momx > -CDoom::STOPSPEED &&
+          mo.value.momx < CDoom::STOPSPEED &&
+          mo.value.momy > -CDoom::STOPSPEED &&
+          mo.value.momy < CDoom::STOPSPEED &&
+          (player.null? || (
+            player.value.cmd.forwardmove == 0 &&
+            player.value.cmd.sidemove == 0
+          ))
+          # if in a walking frame, stop moving
+          if !player.null? && ((player.value.mo.value.state - CDoom.states) - CDoom::Statenum::S_PLAY_RUN1.value).to_u32! < 4
+            CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY)
+          end
+
+          mo.value.momx = 0
+          mo.value.momy = 0
+        else
+          mo.value.momx = CDoom.fixed_mul(mo.value.momx, CDoom::FRICTION)
+          mo.value.momy = CDoom.fixed_mul(mo.value.momy, CDoom::FRICTION)
+        end
+
+      end
+    
+
+        def self.p_zmovement(mo : CDoom::Mobj*)
+          # check for smooth step up
+          if !mo.value.player.null? && mo.value.z < mo.value.floorz
+            mo.value.player.value.viewheight = mo.value.player.value.viewheight - (mo.value.floorz - mo.value.z)
+
+            mo.value.player.value.deltaviewheight = (CDoom::VIEWHEIGHT - mo.value.player.value.viewheight) >> 3
+          end
+
+          # adjust height
+          mo.value.z = mo.value.z + mo.value.momz
+
+          if mo.value.flags & CDoom::Mobjflag::MF_FLOAT.value != 0 &&
+            !mo.value.target.null?
+            # float down towards target if too close
+            if mo.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value == 0 &&
+              mo.value.flags & CDoom::Mobjflag::MF_INFLOAT.value == 0
+              dist = CDoom.p_aprox_distance(mo.value.x - mo.value.target.value.x,
+              mo.value.y - mo.value.target.value.y)
+              
+              delta = (mo.value.target.value.z + (mo.value.height >> 1)) - mo.value.z
+
+              if delta < 0 && dist < -(delta * 3)
+                mo.value.z = mo.value.z - CDoom::FLOATSPEED
+              elsif delta > 0 && dist < (delta * 3)
+                mo.value.z = mo.value.z + CDoom::FLOATSPEED
+              end
+            end
+          end
+
+          # clip movement
+          if mo.value.z <= mo.value.floorz
+            # hit the floor
+
+            # Note (id):
+        #  somebody left this after the setting momz to 0,
+        #  kinda useless there.
+            if mo.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+              # the skull slammed into something
+              mo.value.momz = -mo.value.momz
+            end
+
+            if mo.value.momz < 0
+              if !mo.value.player.null? &&
+                mo.value.momz < -CDoom::GRAVITY * 8
+                # Squat down.
+                # Decrease viewheight for a moment
+                # after hitting the ground (hard),
+                # and utter appropriate sound.
+                mo.value.player.value.deltaviewheight = mo.value.momz >> 3
+                CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_oof.value)
+              end
+              mo.value.momz = 0
+            end
+            mo.value.z = mo.value.floorz
+
+            if mo.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0 &&
+              mo.value.flags & CDoom::Mobjflag::MF_NOCLIP.value == 0
+              CDoom.p_explode_missile(mo)
+              return
+            end
+          elsif mo.value.flags & CDoom::Mobjflag::MF_NOGRAVITY.value == 0
+            if mo.value.momz == 0
+              mo.value.momz = -CDoom::GRAVITY * 2
+            else
+              mo.value.momz = mo.value.momz - CDoom::GRAVITY
+            end
+          end
+
+          if mo.value.z + mo.value.height > mo.value.ceilingz
+            # hit the ceiling
+            mo.value.momz = 0 if mo.value.momz > 0
+            mo.value.z = mo.value.ceilingz - mo.value.height
+
+            if mo.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0
+              # the skull slammed into something
+              mo.value.momz = -mo.value.momz
+            end
+
+            if mo.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0 &&
+              mo.value.flags & CDoom::Mobjflag::MF_NOCLIP.value == 0
+              CDoom.p_explode_missile(mo)
+              return
+            end
+          end
+        end
+      
+
+          def self.p_nightmare_respawn(mobj : CDoom::Mobj*)
+            x = mobj.value.spawnpoint.x.to_i32 << CDoom::FRACBITS
+            y = mobj.value.spawnpoint.y.to_i32 << CDoom::FRACBITS
+
+            # somthing is occupying it's position?
+            return if CDoom.p_check_position(mobj, x, y) == 0 # no respwan
+
+            # spawn a teleport fog at old spot
+    # because of removal of the body?
+            mo = CDoom.p_spawn_mobj(mobj.value.x,
+            mobj.value.y,
+            mobj.value.subsector.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
+            # initiate teleport sound
+            CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept.value)
+
+            # spawn a teleport fog at the new spot
+            ss = CDoom.r_point_in_subsector(x, y)
+
+            mo = CDoom.p_spawn_mobj(x, y, ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_TFOG)
+
+            CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_telept.value)
+
+            # spawn the new monster
+            mthing = (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @spawnpoint)).as(CDoom::Mapthing*)
+
+            # spawn it
+            if mobj.value.info.value.flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
+              z = CDoom::ONCEILINGZ
+            else
+              z = CDoom::ONFLOORZ
+            end
+
+            # inherit attributes from deceased one
+            mo = CDoom.p_spawn_mobj(x, y, z, mobj.value.type)
+            mo.value.spawnpoint = mobj.value.spawnpoint
+            mo.value.angle = CDoom::ANG45 &* (mthing.value.angle // 45) 
+            
+            if mthing.value.options & CDoom::MTF_AMBUSH != 0
+              mo.value.flags = mo.value.flags | CDoom::Mobjflag::MF_AMBUSH.value
+            end
+
+            mo.value.reactiontime = 18
+
+            # remove the old monster,
+            CDoom.p_remove_mobj(mobj)
+          end
+
+
+
+  def self.p_mobj_thinker(mobj : CDoom::Mobj*)
+    # momentum movement
+    if mobj.value.momx != 0 ||
+      mobj.value.momy != 0 ||
+      (mobj.value.flags & CDoom::Mobjflag::MF_SKULLFLY.value != 0)
+      CDoom.p_xymovement(mobj)
+
+      # FIXME: decent NOP/0/Nil function pointer please.
+      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+    end
+if mobj.value.z != mobj.value.floorz ||
+  mobj.value.momz != 0
+      CDoom.p_zmovement(mobj)
+
+      # FIXME: decent NOP/0/Nil function pointer please.
+      return if mobj.value.thinker.function.acv.pointer == Pointer(Void).new(UInt64::MAX) # mobj was removed
+    end
+
+    # cycle through states,
+    # calling action functions at transitions
+    if mobj.value.tics != -1
+      mobj.value.tics = mobj.value.tics - 1
+
+      # you can cycle through multiple states in a tic
+      if mobj.value.tics == 0 &&
+        CDoom.p_set_mobj_state(mobj, CDoom::Statenum.new(mobj.value.state.value.nextstate)) == 0
+        return # freed itself
+      end
+    else
+      # check for nightmare respawn
+      return if mobj.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value == 0
+
+      return if CDoom.respawnmonsters == 0
+
+      mobj.value.movecount = mobj.value.movecount + 1
+
+      return if mobj.value.movecount < 12 * 35
+
+      return if CDoom.leveltime & 31 != 0
+      
+      return if CDoom.p_random > 4
+
+      CDoom.p_nightmare_respawn(mobj)
+    end
+
+  end
+
+
+  def self.p_spawn_mobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
+    mobj = CDoom.z_malloc(sizeof(CDoom::Mobj), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj*)
+    CDoom.doom_memset(mobj, 0, sizeof(CDoom::Mobj))
+    info = CDoom.mobjinfo.to_unsafe + type.value
+
+    mobj.value.type = type
+    mobj.value.info = info
+    mobj.value.x = x
+    mobj.value.y = y
+    mobj.value.radius = info.value.radius
+    mobj.value.height = info.value.height
+    mobj.value.flags = info.value.flags
+    mobj.value.health = info.value.spawnhealth
+
+    mobj.value.reactiontime = info.value.reactiontime if CDoom.gameskill != CDoom::Skill::Nightmare
+
+    mobj.value.lastlook = CDoom.p_random % CDoom::MAXPLAYERS
+    # do not set the state with p_set_mobj_state,
+    # because action routines can not be called yet
+    st = CDoom.states + info.value.spawnstate
+
+    mobj.value.state = st
+    mobj.value.tics = st.value.tics
+    mobj.value.sprite = st.value.sprite
+    mobj.value.frame = st.value.frame
+
+    # set subsector and/or block links
+    CDoom.p_set_thing_position(mobj)
+
+    mobj.value.floorz = mobj.value.subsector.value.sector.value.floorheight
+    mobj.value.ceilingz = mobj.value.subsector.value.sector.value.ceilingheight
+
+    if z == CDoom::ONFLOORZ
+      mobj.value.z = mobj.value.floorz
+    elsif z == CDoom::ONCEILINGZ
+      mobj.value.z = mobj.value.ceilingz - mobj.value.info.value.height
+    else
+      mobj.value.z = z
+    end
+
+    (mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.p_mobj_thinker(p.as(CDoom::Mobj*)) }
+
+      CDoom.p_add_thinker((mobj.as(UInt8*) + offsetof(CDoom::Mobj, @thinker)).as(CDoom::Thinker*))
+    
+      return mobj
+  end
+
+  def self.p_remove_mobj(mobj : CDoom::Mobj*)
+    if mobj.value.flags & CDoom::Mobjflag::MF_SPECIAL.value != 0 &&
+       mobj.value.flags & CDoom::Mobjflag::MF_DROPPED.value == 0 &&
+       mobj.value.type != CDoom::Mobjtype::MT_INV &&
+       mobj.value.type != CDoom::Mobjtype::MT_INS
+      CDoom.itemrespawnque[CDoom.iquehead] = mobj.value.spawnpoint
+      CDoom.itemrespawntime[CDoom.iquehead] = CDoom.leveltime
+      CDoom.iquehead = (CDoom.iquehead + 1) & (CDoom::ITEMQUESIZE - 1)
+
+      # lose one off the end?
+      CDoom.iquetail = (CDoom.iquetail + 1) & (CDoom::ITEMQUESIZE - 1) if CDoom.iquehead == CDoom.iquetail
+    end
+
+    # unlink from sector and block lists
+    CDoom.p_unset_thing_position(mobj)
+
+    # stop any playing sound
+    CDoom.s_stop_sound(mobj)
+
+    # free block
+    CDoom.p_remove_thinker(mobj.as(CDoom::Thinker*))
+  end
+
+
+  def self.p_respawn_specials
+    # only respawn items in deathmatch
+    return if CDoom.deathmatch != 2
+
+    # nothing left to respawn?
+    return if CDoom.iquehead == CDoom.iquetail
+
+    # wait at least 30 seconds
+    return if CDoom.leveltime - CDoom.itemrespawntime[CDoom.iquetail] < 30 * 35
+
+    mthing = CDoom.itemrespawnque.to_unsafe + CDoom.iquetail
+
+    x = mthing.value.x.to_i32 << CDoom::FRACBITS
+    y = mthing.value.y.to_i32 << CDoom::FRACBITS
+
+    # spawn a teleport fog at the new spot
+    ss = CDoom.r_point_in_subsector(x, y)
+
+    mo = CDoom.p_spawn_mobj(x, y, ss.value.sector.value.floorheight, CDoom::Mobjtype::MT_IFOG)
+    CDoom.s_start_sound(mo, CDoom::Sfxenum::SFX_itmbk.value)
+
+    # find which type to spawn
+    i = 0
+    while i < CDoom::Mobjtype::NUMMOBJTYPES.value
+      break if mthing.value.type == CDoom.mobjinfo[i].doomednum
+      i += 1
+    end
+
+    # spawn it
+    if CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
+      z = CDoom::ONCEILINGZ
+    else
+      z = CDoom::ONFLOORZ
+    end
+
+    mo = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype.new(i))
+    mo.value.spawnpoint = mthing.value
+    mo.value.angle = CDoom::ANG45 &* (mthing.value.angle // 45)
+
+    # pull it from the que
+    CDoom.iquetail = (CDoom.iquetail + 1) & (CDoom::ITEMQUESIZE - 1)
+  end
+
+
 
 
 end
