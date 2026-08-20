@@ -1952,3 +1952,97 @@ LibDoom.p_drop_weapon(player)
   fun a_weapon_ready = A_WeaponReady(player : CDoom::Player*, psp : CDoom::Pspdef*)
 LibDoom.a_weapon_ready(player, psp)
   end
+
+  fun a_refire = A_ReFire(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_refire(player, psp)
+  end
+
+  fun a_check_reload = A_CheckReload(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_check_reload(player, psp)
+  end
+
+  fun a_lower = A_Lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_lower(player, psp)
+  end
+
+  fun a_raise = A_Raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_raise(player, psp)
+  end
+
+  fun a_gun_flash = A_GunFlash(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_gun_flash(player, psp)
+  end
+
+
+  fun a_punch = A_Punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_punch(player, psp)
+  end
+
+  fun a_saw = A_Saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_saw(player, psp)
+  end
+
+  fun a_fire_missile = A_FireMissile(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_missile(player, psp)
+  end
+
+  fun a_fire_bfg = A_FireBFG(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_bfg(player, psp)
+  end
+
+  fun a_fire_plasma = A_FirePlasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_plasma(player, psp)
+  end
+
+        fun p_bullet_slope = P_BulletSlope(mo : CDoom::Mobj*)
+          LibDoom.p_bullet_slope(mo)
+        end
+
+          fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
+            LibDoom.p_gunshot(mo, accurate)
+          end
+
+  fun a_fire_pistol = A_FirePistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_pistol(player, psp)
+  end
+
+  fun a_fire_shotgun = A_FireShotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_shotgun(player, psp)
+  end
+
+  fun a_fire_shotgun2 = A_FireShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_shotgun2(player, psp)
+  end
+
+  fun a_fire_cgun = A_FireCGun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_fire_cgun(player, psp)
+  end
+
+  fun a_light0 = A_Light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_light0(player, psp)
+  end
+
+  fun a_light1 = A_Light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_light1(player, psp)
+  end
+
+  fun a_light2 = A_Light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_light2(player, psp)
+  end
+
+  fun a_bfg_spray = A_BFGSpray(mo : CDoom::Mobj*)
+LibDoom.a_bfg_spray(mo)
+  end
+
+  fun a_bfg_sound = A_BFGsound(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_bfg_sound(player , psp)
+  end
+
+  fun p_setup_psprites = P_SetupPsprites(curplayer : CDoom::Player*)
+LibDoom.p_setup_psprites(curplayer)
+  end
+
+  fun p_move_psprites = P_MovePsprites(curplayer : CDoom::Player*)
+LibDoom.p_move_psprites(curplayer)
+  end
+

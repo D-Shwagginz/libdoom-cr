@@ -15187,7 +15187,7 @@ end
     player.value.pendingweapon = player.value.readyweapon if player.value.pendingweapon == CDoom::Weapontype::Nochange
 
     CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawup.value) if player.value.pendingweapon == CDoom::Weapontype::Chainsaw
-
+    
     newstate = CDoom.weaponinfo[player.value.pendingweapon.value].upstate
 
     player.value.pendingweapon = CDoom::Weapontype::Nochange
@@ -15235,7 +15235,7 @@ end
         player.value.pendingweapon = CDoom::Weapontype::Shotgun
       elsif player.value.ammo[CDoom::Ammotype::Clip.value] != 0
         player.value.pendingweapon = CDoom::Weapontype::Pistol
-      elsif player.value.weaponowned[CDoom::Weapontype::Chainsaw.value] != 0 &&
+      elsif player.value.weaponowned[CDoom::Weapontype::Chainsaw.value] != 0
         player.value.pendingweapon = CDoom::Weapontype::Chainsaw
       elsif player.value.weaponowned[CDoom::Weapontype::Missile.value] != 0 &&
         player.value.ammo[CDoom::Ammotype::Misl.value] != 0
@@ -15270,9 +15270,9 @@ end
         CDoom.p_noise_alert(player.value.mo, player.value.mo)
 
         # Pause gun bobbing when shooting
-        psp = player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value
-        psp.value.sx = psp.value.sx
-        psp.value.sy = psp.value.sy
+        # psp = player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value
+        # psp.value.sx = psp.value.sx
+        # psp.value.sy = psp.value.sy
       end
 
       #
@@ -15305,7 +15305,7 @@ end
 
     # check for change
     #  if player is dead, put the weapon away
-    if player.value.readyweapon != CDoom::Weapontype::Nochange || player.value.health == 0
+    if player.value.pendingweapon != CDoom::Weapontype::Nochange || player.value.health == 0
       # change weapon
         #  (pending weapon should allready be validated)
         newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate)
@@ -15315,10 +15315,381 @@ end
 
     # check for fire
     #  the missile launcher and bfg do not auto fire
-    if player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value !+ 0
-      
+    if player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value != 0
+      if player.value.attackdown == 0 ||
+        (player.value.readyweapon != CDoom::Weapontype::Missile &&
+        player.value.readyweapon != CDoom::Weapontype::Bfg)
+        player.value.attackdown = 1
+        CDoom.p_fire_weapon(player)
+        return
+      end
+    else
+      player.value.attackdown = 0
+    end
+
+    # bob the weapon based on movement speed
+    angle = (128 * CDoom.leveltime) & CDoom::FINEMASK
+    psp.value.sx = CDoom::FRACUNIT + CDoom.fixed_mul(player.value.bob, CDoom.finecosine[angle])
+    angle &= CDoom::FINEANGLES // 2 - 1
+    psp.value.sy = CDoom::WEAPONTOP + CDoom.fixed_mul(player.value.bob, CDoom.finesine[angle])
   end
 
-  
+
+#
+# The player can re-fire the weapon
+# without lowering it entirely.
+#
+  def self.a_refire(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    # check for fire
+    #  (if a weaponchange is pending, let it go through instead)
+    if (player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value != 0) &&
+      player.value.pendingweapon == CDoom::Weapontype::Nochange &&
+      player.value.health != 0
+      player.value.refire = player.value.refire + 1
+      CDoom.p_fire_weapon(player)
+    else
+      player.value.refire = 0
+      CDoom.p_check_ammo(player)
+    end
+  end
+
+
+  def self.a_check_reload(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    CDoom.p_check_ammo(player)
+  end
+
+  #
+  # Lowers current weapon,
+#  and changes weapon at bottom.
+#
+  def self.a_lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    psp.value.sy = psp.value.sy + CDoom::LOWERSPEED
+
+    # Is already down.
+    return if psp.value.sy < CDoom::WEAPONBOTTOM
+
+    # Player is dead.
+    if player.value.playerstate == CDoom::Playerstate::PST_DEAD
+      psp.value.sy = CDoom::WEAPONBOTTOM
+
+      # don't bring weapon back up
+      return
+    end
+
+    # The old weapon has been lowered off the screen,
+    # so change the weapon and start raising it
+    if player.value.health == 0
+      # Player is dead, so keep the weapon off screen.
+      CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, CDoom::Statenum::S_NULL)
+      return
+    end
+
+    player.value.readyweapon = player.value.pendingweapon
+
+    CDoom.p_bring_up_weapon(player)
+  end
+
+
+
+  def self.a_raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    psp.value.sy = psp.value.sy - CDoom::RAISESPEED
+
+    return if psp.value.sy > CDoom::WEAPONTOP
+
+    psp.value.sy = CDoom::WEAPONTOP
+
+    # The weapon has been raised all the way,
+    #  so change to the ready state.
+    newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].readystate)
+
+    CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
+  end
+
+
+  def self.a_gun_flash(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
+        CDoom.p_set_psprite(player, CDoom::Psprnum::Flash, CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+  end
+
+
+  #
+  # WEAPON ATTACKS
+  #
+
+  def self.a_punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    damage = (CDoom.p_random % 10 + 1) << 1
+
+    damage *= 10 if player.value.powers[CDoom::Powertype::Strength.value] != 0
+
+    angle = player.value.mo.value.angle
+    angle &+= (CDoom.p_random - CDoom.p_random) << 18
+    slope = CDoom.p_aim_line_attack(player.value.mo, angle, CDoom::MELEERANGE)
+    CDoom.p_line_attack(player.value.mo, angle, CDoom::MELEERANGE, slope, damage)
+
+    # turn to face target
+    if !CDoom.linetarget.null?
+      CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_punch.value)
+      player.value.mo.value.angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
+      player.value.mo.value.y,
+      CDoom.linetarget.value.x,
+      CDoom.linetarget.value.y)
+    end
+  end
+
+  def self.a_saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    damage = 2 * (CDoom.p_random % 10 + 1)
+    angle = player.value.mo.value.angle
+    angle &+= (CDoom.p_random - CDoom.p_random) << 18
+
+    # use meleerange + 1 se the puff doesn't skip the flash
+    slope = CDoom.p_aim_line_attack(player.value.mo, angle, CDoom::MELEERANGE + 1)
+    CDoom.p_line_attack(player.value.mo, angle, CDoom::MELEERANGE + 1, slope, damage)
+
+    if CDoom.linetarget.null?
+      CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawful.value)
+      return
+    end
+      CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawhit.value)
+
+      # turn to face target
+      angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
+      player.value.mo.value.y,
+      CDoom.linetarget.value.x,
+      CDoom.linetarget.value.y)
+      if angle &- player.value.mo.value.angle > CDoom::ANG180
+        if angle &- player.value.mo.value.angle < -CDoom::ANG90 // 20
+          player.value.mo.value.angle = angle &+ CDoom::ANG90 // 21
+        else
+          player.value.mo.value.angle = player.value.mo.value.angle &- CDoom::ANG90 // 20
+        end
+      else
+        if angle &- player.value.mo.value.angle > CDoom::ANG90 // 20
+          player.value.mo.value.angle = angle &- CDoom::ANG90 // 21
+        else
+          player.value.mo.value.angle = player.value.mo.value.angle &+ CDoom::ANG90 // 20
+        end
+      end
+      player.value.mo.value.flags =  player.value.mo.value.flags | CDoom::Mobjflag::MF_JUSTATTACKED.value
+  end
+
+
+
+
+  def self.a_fire_missile(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_ROCKET)
+  end
+
+  def self.a_fire_bfg(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - CDoom::BFGCELLS
+    CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_BFG)
+  end
+
+  def self.a_fire_plasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Flash,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate + (CDoom.p_random & 1)))
+
+    CDoom.p_spawn_player_missile(player.value.mo, CDoom::Mobjtype::MT_PLASMA)
+  end
+
+
+#
+# Sets a slope so a near miss is at aproximately
+# the height of the intended target
+#
+        def self.p_bullet_slope(mo : CDoom::Mobj*)
+          # see which target is to be aimed at
+          an = mo.value.angle
+          CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * CDoom::FRACUNIT)
+
+          if CDoom.linetarget.null?
+            an &+= 1 << 26
+                      CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * CDoom::FRACUNIT)
+                if CDoom.linetarget.null?
+            an &-= 2 << 26
+                      CDoom.bulletslope = CDoom.p_aim_line_attack(mo, an, 16 * 64 * CDoom::FRACUNIT)
+                end
+              end
+            
+
+        end
+
+
+          def self.p_gunshot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
+            damage = 5 * (CDoom.p_random % 3 + 1)
+            angle = mo.value.angle
+
+            angle &+= (CDoom.p_random - CDoom.p_random) << 18 if accurate == 0
+
+            CDoom.p_line_attack(mo, angle, CDoom::MISSILERANGE, CDoom.bulletslope, damage)
+          end
+
+
+  def self.a_fire_pistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
+
+    CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
+player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Flash,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+
+    CDoom.p_bullet_slope(player.value.mo)
+    CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
+  end
+
+
+  def self.a_fire_shotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_shotgn.value)
+    CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
+
+player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Flash,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+
+    CDoom.p_bullet_slope(player.value.mo)
+
+    7.times do |i|
+      CDoom.p_gunshot(player.value.mo, 0)
+    end
+  end
+
+
+  def self.a_fire_shotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_dshtgn.value)
+    CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
+
+player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 2
+    
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Flash,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate))
+
+    CDoom.p_bullet_slope(player.value.mo)
+
+    20.times do |i|
+      damage = 5 * (CDoom.p_random % 3 + 1)
+      angle = player.value.mo.value.angle
+      angle &+= (CDoom.p_random - CDoom.p_random) << 19
+      CDoom.p_line_attack(player.value.mo,
+      angle,
+      CDoom::MISSILERANGE,
+      CDoom.bulletslope + ((CDoom.p_random - CDoom.p_random) << 5), damage)
+    end
+  end
+
+
+  def self.a_fire_cgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_pistol.value)
+
+    return if player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] == 0
+
+    CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK2)
+player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] =
+    player.value.ammo[CDoom.weaponinfo[player.value.readyweapon.value].ammo.value] - 1
+    
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Flash,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].flashstate +
+    (psp.value.state - (CDoom.states + CDoom::Statenum::S_CHAIN1.value)).to_i32!))
+
+    CDoom.p_bullet_slope(player.value.mo)
+
+    CDoom.p_gunshot(player.value.mo, (player.value.refire == 0).to_unsafe)
+  end 
+
+  def self.a_light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.extralight = 0
+  end
+
+  def self.a_light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.extralight = 1
+  end
+
+  def self.a_light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    player.value.extralight = 2
+  end
+
+#
+# Spawn a BFG explosion on every monster in view
+#
+  def self.a_bfg_spray(mo : CDoom::Mobj*)
+    # offset angles from its attack angle
+    40.times do |i|
+      an = mo.value.angle &- CDoom::ANG90 // 2 &+ CDoom::ANG90 // 40 &* i
+
+      # mo->target is the originator (player)
+        #  of the missile
+        CDoom.p_aim_line_attack(mo.value.target, an, 16 * 64 * CDoom::FRACUNIT)
+
+        next if CDoom.linetarget.null?
+
+        CDoom.p_spawn_mobj(CDoom.linetarget.value.x,
+        CDoom.linetarget.value.y,
+        CDoom.linetarget.value.z + (CDoom.linetarget.value.height >> 2),
+        CDoom::Mobjtype::MT_EXTRABFG)
+
+        damage = 0
+        15.times do |j|
+          damage += (CDoom.p_random & 7) + 1
+        end
+
+        CDoom.p_damage_mobj(CDoom.linetarget, mo.value.target, mo.value.target, damage)
+      end
+    
+  end
+
+  def self.a_bfg_sound(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_bfg.value)
+  end
+
+#
+# Called at start of level for each player.
+#
+  def self.p_setup_psprites(player : CDoom::Player*)
+    # remove all psprites
+    CDoom::Psprnum::NUMPSPRITES.value.times do |i|
+      (player.value.psprites.to_unsafe + i).value.state = Pointer(CDoom::State).null
+    end
+
+    # spawn the gun
+    player.value.pendingweapon = player.value.readyweapon
+    CDoom.p_bring_up_weapon(player)
+  end
+
+
+  #
+  # Called every tic by player thinking routine.
+  #
+  def self.p_move_psprites(player : CDoom::Player*)
+    psp = (player.value.psprites.to_unsafe)
+    CDoom::Psprnum::NUMPSPRITES.value.times do |i|
+      # a null state means not active
+      if !(state = psp.value.state).null?
+        # drop tic count and possibly change state
+
+        # a -1 tic count never changes
+        if psp.value.tics != -1
+          psp.value.tics = psp.value.tics - 1
+          CDoom.p_set_psprite(player, CDoom::Psprnum.new(i), psp.value.state.value.nextstate) if psp.value.tics == 0
+        end
+      end
+      psp += 1
+    end
+
+    (player.value.psprites.to_unsafe + CDoom::Psprnum::Flash.value).value.sx = player.value.psprites[CDoom::Psprnum::Weapon.value].sx
+    (player.value.psprites.to_unsafe + CDoom::Psprnum::Flash.value).value.sy = player.value.psprites[CDoom::Psprnum::Weapon.value].sy
+  end
 
 end

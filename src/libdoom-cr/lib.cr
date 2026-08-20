@@ -6912,29 +6912,29 @@ lib CDoom
   SPRNAMES_SIZE = Spritenum::NUMSPRITES + 1
   $sprnames : LibC::Char**
 
-  fun a_light0 = A_Light0(Void*)
+  fun a_light0 = A_Light0(player : Player*, psp : Pspdef*)
   fun a_weapon_ready = A_WeaponReady(player : Player*, psp : Pspdef*)
-  fun a_lower = A_Lower(Void*)
-  fun a_raise = A_Raise(Void*)
-  fun a_punch = A_Punch(Void*)
+  fun a_lower = A_Lower(player : Player*, psp : Pspdef*)
+  fun a_raise = A_Raise(player : Player*, psp : Pspdef*)
+  fun a_punch = A_Punch(player : Player*, psp : Pspdef*)
   fun a_refire = A_ReFire(player : Player*, psp : Pspdef*)
-  fun a_fire_pistol = A_FirePistol(Void*)
-  fun a_light1 = A_Light1(Void*)
-  fun a_fire_shotgun = A_FireShotgun(Void*)
-  fun a_light2 = A_Light2(Void*)
-  fun a_fire_shotgun2 = A_FireShotgun2(Void*)
-  fun a_check_reload = A_CheckReload(Void*)
+  fun a_fire_pistol = A_FirePistol(player : Player*, psp : Pspdef*)
+  fun a_light1 = A_Light1(player : Player*, psp : Pspdef*)
+  fun a_fire_shotgun = A_FireShotgun(player : Player*, psp : Pspdef*)
+  fun a_light2 = A_Light2(player : Player*, psp : Pspdef*)
+  fun a_fire_shotgun2 = A_FireShotgun2(player : Player*, psp : Pspdef*)
+  fun a_check_reload = A_CheckReload(player : Player*, psp : Pspdef*)
   fun a_open_shotgun2 = A_OpenShotgun2(player : Player*, psp : Pspdef*)
   fun a_load_shotgun2 = A_LoadShotgun2(player : Player*, psp : Pspdef*)
   fun a_close_shotgun2 = A_CloseShotgun2(player : Player*, psp : Pspdef*)
-  fun a_fire_cgun = A_FireCGun(Void*)
-  fun a_gun_flash = A_GunFlash(Void*)
-  fun a_fire_missile = A_FireMissile(Void*)
-  fun a_saw = A_Saw(Void*)
-  fun a_fire_plasma = A_FirePlasma(Void*)
-  fun a_bfg_sound = A_BFGsound(Void*)
-  fun a_fire_bfg = A_FireBFG(Void*)
-  fun a_bfg_spray = A_BFGSpray(Void*)
+  fun a_fire_cgun = A_FireCGun(player : Player*, psp : Pspdef*)
+  fun a_gun_flash = A_GunFlash(player : Player*, psp : Pspdef*)
+  fun a_fire_missile = A_FireMissile(player : Player*, psp : Pspdef*)
+  fun a_saw = A_Saw(player : Player*, psp : Pspdef*)
+  fun a_fire_plasma = A_FirePlasma(player : Player*, psp : Pspdef*)
+  fun a_bfg_sound = A_BFGsound(player : Player*, psp : Pspdef*)
+  fun a_fire_bfg = A_FireBFG(player : Player*, psp : Pspdef*)
+  fun a_bfg_spray = A_BFGSpray(mo : Mobj*)
   fun a_explode = A_Explode(thingy : Mobj*)
   fun a_pain = A_Pain(actor : Mobj*)
   fun a_player_scream = A_PlayerScream(mo : Mobj*)
@@ -7502,8 +7502,14 @@ WEAPONTOP = 32*FRACUNIT
 # plasma cells for a bfg attack
 BFGCELLS = 40
 
+$swingx : Fixed
+$swingy : Fixed
+$bulletslope : Fixed
+
 fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
   fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
     fun p_check_ammo = P_CheckAmmo(player : Player*) : DoomBool
       fun p_fire_weapon = P_FireWeapon(player : Player*)
+        fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
+          fun p_gunshot = P_GunShot(mo : Mobj*, accurate : DoomBool)
 end
