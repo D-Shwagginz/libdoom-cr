@@ -1877,3 +1877,78 @@ LibDoom.p_remove_mobj(mobj)
 LibDoom.p_respawn_specials
   end
 
+  fun p_spawn_player = P_SpawnPlayer(mthing : CDoom::Mapthing*)
+LibDoom.p_spawn_player(mthing)
+  end
+
+            fun p_spawn_map_thing = P_SpawnMapThing(mthing : CDoom::Mapthing*)
+LibDoom.p_spawn_map_thing(mthing)
+            end
+
+  fun p_spawn_puff = P_SpawnPuff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
+LibDoom.p_spawn_puff(x, y, z)
+  end
+
+  fun p_spawn_blood = P_SpawnBlood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : LibC::Int)
+LibDoom.p_spawn_blood(x, y, z, damage)
+  end
+
+              fun p_check_missile_spawn = P_CheckMissileSpawn(th : CDoom::Mobj*)
+LibDoom.p_check_missile_spawn(th)
+              end
+
+  fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
+LibDoom.p_spawn_missile(source, dest, type)
+  end
+
+  fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
+LibDoom.p_spawn_player_missile(source, type)
+  end
+
+  fun t_plat_raise = T_PlatRaise(plat : CDoom::Plat*)
+LibDoom.t_plat_raise(plat)
+  end
+
+  fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
+LibDoom.ev_do_plat(line, type, amount)
+  end
+
+  fun p_activate_in_stasis = P_ActivateInStasis(tag : LibC::Int)
+LibDoom.p_activate_in_stasis(tag)
+  end
+
+  fun ev_stop_plat = EV_StopPlat(line : CDoom::Line*)
+LibDoom.ev_stop_plat(line)
+  end
+
+  fun p_add_active_plat = P_AddActivePlat(plat : CDoom::Plat*)
+LibDoom.p_add_active_plat(plat)
+  end
+
+  fun p_remove_active_plat = P_RemoveActivePlat(plat : CDoom::Plat*)
+LibDoom.p_remove_active_plat(plat)
+  end
+
+fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
+LibDoom.p_set_psprite(player, position, stnum)
+end
+
+  fun p_bring_up_weapon = P_BringUpWeapon(player : CDoom::Player*)
+LibDoom.p_bring_up_weapon(player)
+  end
+
+    fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : CDoom::DoomBool
+LibDoom.p_check_ammo(player)
+    end
+
+      fun p_fire_weapon = P_FireWeapon(player : CDoom::Player*)
+LibDoom.p_fire_weapon(player)
+      end
+
+  fun p_drop_weapon = P_DropWeapon(player : CDoom::Player*)
+LibDoom.p_drop_weapon(player)
+  end
+
+  fun a_weapon_ready = A_WeaponReady(player : CDoom::Player*, psp : CDoom::Pspdef*)
+LibDoom.a_weapon_ready(player, psp)
+  end

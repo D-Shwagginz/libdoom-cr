@@ -14652,7 +14652,673 @@ if mobj.value.z != mobj.value.floorz ||
     CDoom.iquetail = (CDoom.iquetail + 1) & (CDoom::ITEMQUESIZE - 1)
   end
 
+  #
+  # Called when a player is spawned on the level.
+# Most of the player structure stays unchanged
+# between levels.
+#
+  def self.p_spawn_player(mthing : CDoom::Mapthing*)
+    # not playing?
+    return if CDoom.playeringame[mthing.value.type - 1] == 0
+
+    p = CDoom.players.to_unsafe + mthing.value.type - 1
+
+    if p.value.playerstate == CDoom::Playerstate::PST_REBORN
+      CDoom.g_player_reborn(mthing.value.type - 1)
+    end
+
+    x = mthing.value.x.to_i32 << CDoom::FRACBITS
+    y = mthing.value.y.to_i32 << CDoom::FRACBITS
+    z = CDoom::ONFLOORZ
+    mobj = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype::MT_PLAYER)
+    
+    # set color translations for player sprites
+    if mthing.value.type > 1
+      mobj.value.flags = mobj.value.flags | ((mthing.value.type - 1).to_i32 << CDoom::Mobjflag::MF_TRANSSHIFT.value)
+    end
+
+    mobj.value.angle = CDoom::ANG45 &* (mthing.value.angle // 45)
+    mobj.value.player = p
+    mobj.value.health = p.value.health
+
+    p.value.mo = mobj
+    p.value.playerstate = CDoom::Playerstate::PST_LIVE
+    p.value.refire = 0
+    p.value.message = Pointer(UInt8).null
+    p.value.damagecount = 0
+    p.value.bonuscount = 0
+    p.value.extralight = 0
+    p.value.fixedcolormap = 0
+    p.value.viewheight = CDoom::VIEWHEIGHT
+
+    # setup gun psprite
+    CDoom.p_setup_psprites(p)
+
+    # give all cards in death match mode
+    if CDoom.deathmatch != 0
+      CDoom::Card::NUMCARDS.value.times do |i|
+        p.value.cards[i] = 1
+      end
+    end
+
+    if mthing.value.type - 1 == CDoom.consoleplayer
+      # wake up the status bar
+      CDoom.st_start
+      # wake up the heads up text
+      CDoom.hu_start
+    end
+  end
+
+#
+# The fields of the mapthing should
+# already be in host byte order.
+#
+            def self.p_spawn_map_thing(mthing : CDoom::Mapthing*)
+              # count deathmatch start positions
+              if mthing.value.type == 11
+                if CDoom.deathmatch_p < CDoom.deathmatchstarts.to_unsafe + 10
+                  CDoom.doom_memcpy(CDoom.deathmatch_p, mthing, sizeof(typeof(mthing)))
+                  CDoom.deathmatch_p += 1
+                end
+                return
+              end
+
+              # check for players specially
+              if mthing.value.type <= 4
+                # save spots for respawning in network games
+                CDoom.playerstarts[mthing.value.type - 1] = mthing.value
+                CDoom.p_spawn_player(mthing) if CDoom.deathmatch == 0
+
+                return 
+              end
+
+              # check for apropriate skill level
+              return if CDoom.netgame == 0 && mthing.value.options & 16 != 0
+
+              if CDoom.gameskill == CDoom::Skill::Baby
+                bit = 1
+              elsif CDoom.gameskill == CDoom::Skill::Nightmare
+                bit = 4
+              else
+                bit = 1 << (CDoom.gameskill.value - 1)
+              end
+
+              return if mthing.value.options & bit == 0
+
+              # find which type to spawn
+              i = 0
+              while i < CDoom::Mobjtype::NUMMOBJTYPES.value
+                break if mthing.value.type == CDoom.mobjinfo[i].doomednum
+                i += 1
+              end
+
+              if i == CDoom::Mobjtype::NUMMOBJTYPES.value
+
+                CDoom.doom_strcpy(CDoom.error_buf, "Error: p_spawn_map_thing: Unknown type ")
+                CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(mthing.value.type, 10))
+ CDoom.doom_concat(CDoom.error_buf, " at (")
+                CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(mthing.value.x, 10))
+                CDoom.doom_concat(CDoom.error_buf, ", ")
+                CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(mthing.value.y, 10))
+                CDoom.doom_concat(CDoom.error_buf, ")")
+                CDoom.i_error(CDoom.error_buf)
+              end
+
+              # don't spawn keycards and players in deathmatch
+              return if CDoom.deathmatch != 0 && CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_NOTDMATCH.value != 0
+
+              # don't spawn any monsters if -nomonsters
+              if CDoom.nomonsters != 0 &&
+                (i == CDoom::Mobjtype::MT_SKULL.value ||
+                (CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0))
+                return
+              end
+
+              # spawn it
+              x = mthing.value.x.to_i32 << CDoom::FRACBITS
+              y = mthing.value.y.to_i32 << CDoom::FRACBITS
+
+              if CDoom.mobjinfo[i].flags & CDoom::Mobjflag::MF_SPAWNCEILING.value != 0
+                z = CDoom::ONCEILINGZ
+              else
+                z = CDoom::ONFLOORZ
+              end
+
+              mobj = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype.new(i))
+              mobj.value.spawnpoint = mthing.value
+
+              if mobj.value.tics > 0
+                mobj.value.tics = 1 + (CDoom.p_random % mobj.value.tics)
+              end
+              if mobj.value.flags & CDoom::Mobjflag::MF_COUNTKILL.value != 0
+                CDoom.totalkills += 1
+              end
+              if mobj.value.flags & CDoom::Mobjflag::MF_COUNTITEM.value != 0
+                CDoom.totalitems += 1
+              end
+
+              mobj.value.angle = CDoom::ANG45 &* (mthing.value.angle // 45) 
+              if mthing.value.options & CDoom::MTF_AMBUSH != 0
+                mobj.value.flags = mobj.value.flags | CDoom::Mobjflag::MF_AMBUSH.value
+              end
+            end
 
 
+            #
+            # GAME SPAWN FUNCTIONS
+            #
+
+  def self.p_spawn_puff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
+    z += (CDoom.p_random - CDoom.p_random) << 10
+
+    th = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype::MT_PUFF)
+    th.value.momz = CDoom::FRACUNIT
+    th.value.tics = th.value.tics - (CDoom.p_random & 3)
+
+    th.value.tics = 1 if th.value.tics < 1
+
+    # don't make punches spark on the wall
+    CDoom.p_set_mobj_state(th, CDoom::Statenum::S_PUFF3) if CDoom.attackrange == CDoom::MELEERANGE
+  end
+
+
+
+  def self.p_spawn_blood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : Int32)
+    z += (CDoom.p_random - CDoom.p_random) << 10
+    th = CDoom.p_spawn_mobj(x, y, z, CDoom::Mobjtype::MT_BLOOD)
+    th.value.momz = CDoom::FRACUNIT * 2
+    th.value.tics = th.value.tics - (CDoom.p_random & 3)
+
+    th.value.tics = 1 if th.value.tics < 1
+
+    if damage <= 12 && damage >= 9
+      CDoom.p_set_mobj_state(th, CDoom::Statenum::S_BLOOD2)
+    elsif damage < 9
+      CDoom.p_set_mobj_state(th, CDoom::Statenum::S_BLOOD3)
+    end
+  end
+
+
+
+  #
+  # Moves the missile forward a bit
+#  and possibly explodes it right there.
+#
+              def self.p_check_missile_spawn(th : CDoom::Mobj*)
+                    th.value.tics = th.value.tics - (CDoom.p_random & 3)
+    th.value.tics = 1 if th.value.tics < 1
+
+    # move a little forward so an angle can
+    # be computed if it immediately explodes
+    th.value.x = th.value.x + (th.value.momx >> 1)
+    th.value.y = th.value.y + (th.value.momy >> 1)
+    th.value.z = th.value.z + (th.value.momz >> 1)
+
+    CDoom.p_explode_missile(th) if CDoom.p_try_move(th, th.value.x, th.value.y) == 0
+              end
+
+
+
+  def self.p_spawn_missile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
+    th = CDoom.p_spawn_mobj(source.value.x,
+    source.value.y,
+    source.value.z + 4 * 8 * CDoom::FRACUNIT, type)
+
+    CDoom.s_start_sound(th, th.value.info.value.seesound) if th.value.info.value.seesound != 0
+
+    th.value.target = source # where it came from
+    an = CDoom.r_point_to_angle2(source.value.x, source.value.y, dest.value.x, dest.value.y)
+
+    # fuzzy player
+    an += (CDoom.p_random - CDoom.p_random) << 20 if dest.value.flags & CDoom::Mobjflag::MF_SHADOW.value != 0
+
+    th.value.angle = an
+    an >>= CDoom::ANGLETOFINESHIFT
+    th.value.momx = CDoom.fixed_mul(th.value.info.value.speed, CDoom.finecosine[an])
+    th.value.momy = CDoom.fixed_mul(th.value.info.value.speed, CDoom.finesine[an])
+
+    dist = CDoom.p_aprox_distance(dest.value.x - source.value.x, dest.value.y - source.value.y)
+    dist = dist // th.value.info.value.speed
+
+    dist = 1 if dist < 1
+
+    th.value.momz = (dest.value.z - source.value.z) // dist
+    CDoom.p_check_missile_spawn(th)
+
+    return th
+  end
+
+  #
+  # Tries to aim at a nearby monster
+  #
+  def self.p_spawn_player_missile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
+    # see which target is to be aimed at
+    an = source.value.angle
+    slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * CDoom::FRACUNIT)
+
+    if CDoom.linetarget.null?
+      an &+= 1 << 26
+      slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * CDoom::FRACUNIT)
+
+      if CDoom.linetarget.null?
+        an &-= 2 << 26
+        slope = CDoom.p_aim_line_attack(source, an, 16 * 64 * CDoom::FRACUNIT)
+      end
+
+      if CDoom.linetarget.null?
+        an = source.value.angle
+        slope = 0
+      end
+    end
+
+    x = source.value.x
+    y = source.value.y
+    z = source.value.z + 4 * 8 * CDoom::FRACUNIT
+
+    th = CDoom.p_spawn_mobj(x, y, z, type)
+
+    CDoom.s_start_sound(th, th.value.info.value.seesound) if th.value.info.value.seesound != 0
+
+    th.value.target = source
+    th.value.angle = an
+    th.value.momx = CDoom.fixed_mul(th.value.info.value.speed,
+    CDoom.finecosine[an >> CDoom::ANGLETOFINESHIFT])
+    th.value.momy = CDoom.fixed_mul(th.value.info.value.speed,
+    CDoom.finesine[an >> CDoom::ANGLETOFINESHIFT])
+    th.value.momz = CDoom.fixed_mul(th.value.info.value.speed, slope)
+
+    CDoom.p_check_missile_spawn(th)
+  end
+
+  #
+  # Move a plat up and down
+  #
+  def self.t_plat_raise(plat : CDoom::Plat*)
+    case plat.value.status
+    when CDoom::Platenum::Up
+      res = CDoom.t_move_plane(plat.value.sector,
+      plat.value.speed,
+      plat.value.high,
+      plat.value.crush, 0, 1)
+      
+      if plat.value.type == CDoom::Plattype::RaiseAndChange ||
+       plat.value.type == CDoom::Plattype::RaiseToNearestAndChange
+       CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_stnmov) if CDoom.leveltime & 7 == 0
+      end
+      
+      if res == CDoom::Result::Crushed && plat.value.crush == 0
+        plat.value.count = plat.value.wait
+        plat.value.status = CDoom::Platenum::Down
+        CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstart)
+      else
+        if res == CDoom::Result::Pastdest
+          plat.value.count = plat.value.wait
+          plat.value.status = CDoom::Platenum::Waiting
+          CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstop)
+
+        case plat.value.type
+        when CDoom::Plattype::BlazeDWUS, CDoom::Plattype::DownWaitUpStay
+          CDoom.p_remove_active_plat(plat)
+        when CDoom::Plattype::RaiseAndChange, CDoom::Plattype::RaiseToNearestAndChange
+          CDoom.p_remove_active_plat(plat)
+        end
+      end
+    end
+  when CDoom::Platenum::Down
+    res = CDoom.t_move_plane(plat.value.sector, plat.value.speed, plat.value.low, 0, 0, -1)
+
+    if res == CDoom::Result::Pastdest
+      plat.value.count = plat.value.wait
+      plat.value.status = CDoom::Platenum::Waiting
+      CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstop)
+    end
+  when CDoom::Platenum::Waiting
+    plat.value.count = plat.value.count - 1
+    if plat.value.count == 0
+      if plat.value.sector.value.floorheight == plat.value.low
+        plat.value.status = CDoom::Platenum::Up
+      else
+        plat.value.status = CDoom::Platenum::Down
+      end
+      CDoom.s_start_sound((plat.value.sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstart)
+    end
+  when CDoom::Platenum::InStasis
+  end
+
+  end
+
+
+  #
+  # Do Platforms
+#  "amount" is only used for SOME platforms.
+#
+  def self.ev_do_plat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
+    secnum = -1
+    rtn = 0
+
+    # Activate all <type> plats that are in_stasis
+    case type
+    when CDoom::Plattype::PerpetualRaise
+      CDoom.p_activate_in_stasis(line.value.tag)
+    end
+
+    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+      sec = CDoom.sectors + secnum
+
+      next if !sec.value.specialdata.null?
+
+      # Find lowest & highest floors around sector
+      rtn = 1
+      plat = CDoom.z_malloc(sizeof(CDoom::Plat), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Plat*)
+      CDoom.p_add_thinker((plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+
+      plat.value.type = type
+      plat.value.sector = sec
+      plat.value.sector.value.specialdata = plat
+      (plat.as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_plat_raise(p.as(CDoom::Plat*)) }
+      plat.value.crush = 0
+      plat.value.tag = line.value.tag
+      
+      case type
+      when CDoom::Plattype::RaiseToNearestAndChange
+        plat.value.speed = CDoom::PLATSPEED // 2
+        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
+        plat.value.high = CDoom.p_find_next_highest_floor(sec, sec.value.floorheight)
+        plat.value.wait = 0
+        plat.value.status = CDoom::Platenum::Up
+        # NO MORE DAMAGE, IF APPLICABLE
+        sec.value.special = 0
+CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_stnmov)
+      when CDoom::Plattype::RaiseAndChange
+        plat.value.speed = CDoom::PLATSPEED // 2
+        sec.value.floorpic = CDoom.sides[line.value.sidenum[0]].sector.value.floorpic
+        plat.value.high = sec.value.floorheight + amount * CDoom::FRACUNIT
+        plat.value.wait = 0
+        plat.value.status = CDoom::Platenum::Up
+
+CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_stnmov)
+
+      when CDoom::Plattype::DownWaitUpStay
+        plat.value.speed = CDoom::PLATSPEED * 4
+        plat.value.low = CDoom.p_find_lowest_floor_surrounding(sec)
+
+        plat.value.low = sec.value.floorheight if plat.value.low > sec.value.floorheight
+
+        plat.value.high = sec.value.floorheight
+        plat.value.wait = 35 * CDoom::PLATWAIT
+        plat.value.status = CDoom::Platenum::Down
+CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstart)
+
+
+        when CDoom::Plattype::BlazeDWUS
+        plat.value.speed = CDoom::PLATSPEED * 8
+        plat.value.low = CDoom.p_find_lowest_floor_surrounding(sec)
+
+        plat.value.low = sec.value.floorheight if plat.value.low > sec.value.floorheight
+
+        plat.value.high = sec.value.floorheight
+        plat.value.wait = 35 * CDoom::PLATWAIT
+        plat.value.status = CDoom::Platenum::Down
+CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstart)
+
+      when CDoom::Plattype::PerpetualRaise
+        plat.value.speed = CDoom::PLATSPEED
+        plat.value.low = CDoom.p_find_lowest_floor_surrounding(sec)
+
+        plat.value.low = sec.value.floorheight if plat.value.low > sec.value.floorheight
+
+        plat.value.high = CDoom.p_find_highest_floor_surrounding(sec)
+
+        plat.value.high = sec.value.floorheight if plat.value.high < sec.value.floorheight
+
+
+        plat.value.wait = 35 * CDoom::PLATWAIT
+        plat.value.status = CDoom::Platenum.new(CDoom.p_random & 1)
+CDoom.s_start_sound((sec.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*),
+        CDoom::Sfxenum::SFX_pstart)
+      end
+      CDoom.p_add_active_plat(plat)
+    end
+
+    return rtn
+  end
+
+
+  def self.p_activate_in_stasis(tag : LibC::Int)
+    CDoom::MAXPLATS.times do |i|
+      if !CDoom.activeplats[i].null? &&
+        CDoom.activeplats[i].value.tag == tag &&
+        CDoom.activeplats[i].value.status == CDoom::Platenum::InStasis
+        CDoom.activeplats[i].value.status = CDoom.activeplats[i].value.oldstatus
+        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acp1 = CDoom::ActionfP1.new { |p| CDoom.t_plat_raise(p.as(CDoom::Plat*)) }
+      end
+    end
+  end
+
+
+  def self.ev_stop_plat(line : CDoom::Line*)
+CDoom::MAXPLATS.times do |i|
+      if !CDoom.activeplats[i].null? &&
+        CDoom.activeplats[i].value.status != CDoom::Platenum::InStasis &&
+                CDoom.activeplats[i].value.tag == line.value.tag
+        CDoom.activeplats[i].value.oldstatus = CDoom.activeplats[i].value.status
+        CDoom.activeplats[i].value.status = CDoom::Platenum::InStasis
+        (CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::Think*).value.acv = NULL_PROC
+      end
+    end
+  end
+
+
+  def self.p_add_active_plat(plat : CDoom::Plat*)
+    CDoom::MAXPLATS.times do |i|
+      if CDoom.activeplats[i].null?
+        CDoom.activeplats[i] = plat
+        return
+      end
+    end
+    CDoom.i_error("Error: p_add_active_plat: no more plats!")
+  end
+
+  def self.p_remove_active_plat(plat : CDoom::Plat*)
+    CDoom::MAXPLATS.times do |i|
+      if plat == CDoom.activeplats[i]
+        CDoom.activeplats[i].value.sector.value.specialdata = Pointer(Void).null
+            CDoom.p_remove_thinker((CDoom.activeplats[i].as(UInt8*) + offsetof(CDoom::Plat, @thinker)).as(CDoom::Thinker*))
+        CDoom.activeplats[i] = Pointer(CDoom::Plat).null
+
+        return
+      end
+    end
+    CDoom.i_error("Error: p_remove_active_plat: can't find plat!")
+  end
+
+
+
+
+def self.p_set_psprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
+  psp = player.value.psprites.to_unsafe + position
+
+  loop do
+    if stnum.value == 0
+      # object removed itself
+      psp.value.state = Pointer(CDoom::State).null
+      break
+    end
+
+    state = CDoom.states + stnum.value
+    psp.value.state = state
+    psp.value.tics = state.value.tics # could be 0
+
+    if state.value.misc1 != 0
+      # coordinate set
+      psp.value.sx = state.value.misc1 << CDoom::FRACBITS
+      psp.value.sy = state.value.misc2 << CDoom::FRACBITS
+    end
+
+    # Call action routine.
+    # Modified handling.
+    if !state.value.action.null?
+      CDoom::ActionfP2.new(state.value.action, Pointer(Void).null).call(player.as(Void*), psp.as(Void*))
+      break if psp.value.state.null?
+    end
+
+    stnum = psp.value.state.value.nextstate
+
+    break unless psp.value.tics == 0
+  end
+  # an initial state of 0 could cycle through
+end
+
+#
+# Starts bringing the pending weapon up
+# from the bottom of the screen.
+# Uses player
+#
+  def self.p_bring_up_weapon(player : CDoom::Player*)
+    player.value.pendingweapon = player.value.readyweapon if player.value.pendingweapon == CDoom::Weapontype::Nochange
+
+    CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawup.value) if player.value.pendingweapon == CDoom::Weapontype::Chainsaw
+
+    newstate = CDoom.weaponinfo[player.value.pendingweapon.value].upstate
+
+    player.value.pendingweapon = CDoom::Weapontype::Nochange
+    (player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value).value.sy = CDoom::WEAPONBOTTOM
+
+    CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, CDoom::Statenum.new(newstate))
+  end
+
+  #
+  # Returns true if there is enough ammo to shoot.
+# If not, selects the next weapon to use.
+#
+    def self.p_check_ammo(player : CDoom::Player*) : CDoom::DoomBool
+      ammo = CDoom::Ammotype.new(CDoom.weaponinfo[player.value.readyweapon.value].ammo)
+
+      # Minimal amount for one shot varies.
+      if player.value.readyweapon == CDoom::Weapontype::Bfg
+        count = CDoom::BFGCELLS
+      elsif player.value.readyweapon == CDoom::Weapontype::Supershotgun
+        count = 2 # Double barrel.
+      else
+        count = 1 # Regular.
+      end
+
+      # Some do not need ammunition anyway.
+    # Return if current ammunition sufficient.
+    return 1 if ammo == CDoom::Ammotype::Noammo || player.value.ammo[ammo.value] >= count
+
+    # Out of ammo, pick a weapon to change to.
+    # Preferences are set here.
+    loop do
+      if player.value.weaponowned[CDoom::Weapontype::Plasma.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Cell.value] != 0 &&
+        CDoom.gamemode != CDoom::GameMode::Shareware
+        player.value.pendingweapon = CDoom::Weapontype::Plasma
+      elsif player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Shell.value] > 2 &&
+        CDoom.gamemode == CDoom::GameMode::Commercial
+        player.value.pendingweapon = CDoom::Weapontype::Supershotgun
+      elsif player.value.weaponowned[CDoom::Weapontype::Chaingun.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Clip.value] != 0
+        player.value.pendingweapon = CDoom::Weapontype::Chaingun
+      elsif player.value.weaponowned[CDoom::Weapontype::Shotgun.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Shell.value] != 0
+        player.value.pendingweapon = CDoom::Weapontype::Shotgun
+      elsif player.value.ammo[CDoom::Ammotype::Clip.value] != 0
+        player.value.pendingweapon = CDoom::Weapontype::Pistol
+      elsif player.value.weaponowned[CDoom::Weapontype::Chainsaw.value] != 0 &&
+        player.value.pendingweapon = CDoom::Weapontype::Chainsaw
+      elsif player.value.weaponowned[CDoom::Weapontype::Missile.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Misl.value] != 0
+        player.value.pendingweapon = CDoom::Weapontype::Missile
+      elsif player.value.weaponowned[CDoom::Weapontype::Bfg.value] != 0 &&
+        player.value.ammo[CDoom::Ammotype::Cell.value] > 40 &&
+        CDoom.gamemode != CDoom::GameMode::Shareware
+        player.value.pendingweapon = CDoom::Weapontype::Bfg
+      else
+        # If everything fails.
+                player.value.pendingweapon = CDoom::Weapontype::Fist
+      end
+
+
+      break unless player.value.pendingweapon == CDoom::Weapontype::Nochange
+    end
+
+    # Now set appropriate weapon overlay.
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Weapon,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
+    
+    return 0
+    end
+
+      def self.p_fire_weapon(player : CDoom::Player*)
+        return if CDoom.p_check_ammo(player) == 0
+
+        CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_ATK1)
+        newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].atkstate)
+        CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
+        CDoom.p_noise_alert(player.value.mo, player.value.mo)
+
+        # Pause gun bobbing when shooting
+        psp = player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value
+        psp.value.sx = psp.value.sx
+        psp.value.sy = psp.value.sy
+      end
+
+      #
+      # Player died, so put the weapon away.
+      #
+  def self.p_drop_weapon(player : CDoom::Player*)
+    CDoom.p_set_psprite(player,
+    CDoom::Psprnum::Weapon,
+    CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate))
+  end
+
+
+  #
+  # The player can fire the weapon
+# or change to another weapon at this time.
+# Follows after getting weapon up,
+# or after previous attack/fire sequence.
+#
+  def self.a_weapon_ready(player : CDoom::Player*, psp : CDoom::Pspdef*)
+    # get out of attack state
+    if player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY_ATK1.value ||
+     player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY_ATK2.value
+      CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY)
+    end
+
+    if player.value.readyweapon == CDoom::Weapontype::Chainsaw &&
+      psp.value.state == CDoom.states + CDoom::Statenum::S_SAW.value
+      CDoom.s_start_sound(player.value.mo, CDoom::Sfxenum::SFX_sawidl.value)
+    end
+
+    # check for change
+    #  if player is dead, put the weapon away
+    if player.value.readyweapon != CDoom::Weapontype::Nochange || player.value.health == 0
+      # change weapon
+        #  (pending weapon should allready be validated)
+        newstate = CDoom::Statenum.new(CDoom.weaponinfo[player.value.readyweapon.value].downstate)
+        CDoom.p_set_psprite(player, CDoom::Psprnum::Weapon, newstate)
+        return
+    end
+
+    # check for fire
+    #  the missile launcher and bfg do not auto fire
+    if player.value.cmd.buttons & CDoom::Buttoncode::BT_ATTACK.value !+ 0
+      
+  end
+
+  
 
 end

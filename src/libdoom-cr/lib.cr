@@ -4967,7 +4967,7 @@ lib CDoom
     sector : Sector*
     speed : Fixed
     low : Fixed
-    hight : Fixed
+    high : Fixed
     wait : LibC::Int
     count : LibC::Int
     status : Platenum
@@ -6913,7 +6913,7 @@ lib CDoom
   $sprnames : LibC::Char**
 
   fun a_light0 = A_Light0(Void*)
-  fun a_weapon_ready = A_WeaponReady(Void*)
+  fun a_weapon_ready = A_WeaponReady(player : Player*, psp : Pspdef*)
   fun a_lower = A_Lower(Void*)
   fun a_raise = A_Raise(Void*)
   fun a_punch = A_Punch(Void*)
@@ -7489,5 +7489,21 @@ lib CDoom
 
           fun p_nightmare_respawn = P_NightmareRespawn(mobj : Mobj*)
 
+            fun p_spawn_map_thing = P_SpawnMapThing(mthing : Mapthing*)
 
+              fun p_check_missile_spawn = P_CheckMissileSpawn(th : Mobj*)
+
+LOWERSPEED = FRACUNIT*6
+RAISESPEED = FRACUNIT*6
+
+WEAPONBOTTOM = 128*FRACUNIT
+WEAPONTOP = 32*FRACUNIT
+
+# plasma cells for a bfg attack
+BFGCELLS = 40
+
+fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
+  fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
+    fun p_check_ammo = P_CheckAmmo(player : Player*) : DoomBool
+      fun p_fire_weapon = P_FireWeapon(player : Player*)
 end
