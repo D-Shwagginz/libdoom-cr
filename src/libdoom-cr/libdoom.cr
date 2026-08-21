@@ -7907,6 +7907,9 @@ module LibDoom
     @@adl_player = ADLMIDI.adl_init(44100)
     ADLMIDI.adl_setNumChips(@@adl_player.not_nil!, 4)
     ADLMIDI.adl_setBank(@@adl_player.not_nil!, MIDI_BANK)
+
+    ADLMIDI.adl_setSoftPanEnabled(@@adl_player.not_nil!, 1)
+
     RAudio.set_audio_stream_buffer_size_default(MIDI_BUFFER_SIZE // 2)
     @@music_stream = RAudio.load_audio_stream(MIDI_SAMPLE_RATE, 16, 2)
     RAudio.set_audio_stream_volume(@@music_stream.not_nil!, 1.0)
@@ -16440,7 +16443,7 @@ module LibDoom
       soundorg.value.y = (bbox[CDoom::BOXTOP] + bbox[CDoom::BOXBOTTOM]) // 2
 
       # adjust bounding box to map blocks
-      block = (bbox[CDoom::BOXTOP] - CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = (bbox[CDoom::BOXTOP] &- CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
       block = block >= CDoom.bmapheight ? CDoom.bmapheight - 1 : block
       sector.value.blockbox[CDoom::BOXTOP] = block
 
@@ -16452,7 +16455,7 @@ module LibDoom
       block = block >= CDoom.bmapwidth ? CDoom.bmapwidth - 1 : block
       sector.value.blockbox[CDoom::BOXRIGHT] = block
 
-      block = (bbox[CDoom::BOXLEFT] - CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = (bbox[CDoom::BOXLEFT] &- CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
       block = block < 0 ? 0 : block
       sector.value.blockbox[CDoom::BOXLEFT] = block
 
