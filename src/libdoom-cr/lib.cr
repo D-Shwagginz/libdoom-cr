@@ -54,6 +54,10 @@ macro c_array_strings(array, *objs)
   {% end %}
 end
 
+macro padsavep
+  CDoom.save_p += (4 - (CDoom.save_p.address & 3)) & 3
+end
+
 @[Link(ldflags: "-L#{__DIR__}/../.. -lpuredoom")]
 lib CDoom
   # Sample rate of sound samples from doom
@@ -899,6 +903,7 @@ lib CDoom
     prev : Thinker*
     next : Thinker*
     function : Think
+    pad : LibC::LongLong
   end
 
   # __DOOM_CONFIG_H__
@@ -7479,37 +7484,55 @@ lib CDoom
   fun pit_add_thing_intercepts = PIT_AddThingIntercepts(thing : Mobj*) : DoomBool
   fun p_traverse_intercepts = P_TraverseIntercepts(func : Traverser, maxfrac : Fixed) : DoomBool
 
-    STOPSPEED = 0x1000
-    FRICTION = 0xe800
+  STOPSPEED = 0x1000
+  FRICTION  = 0xe800
 
-    fun p_explode_missile = P_ExplodeMissile(mo : Mobj*)
+  fun p_explode_missile = P_ExplodeMissile(mo : Mobj*)
 
-      fun p_xymovement = P_XYMovement(mo : Mobj*)
-        fun p_zmovement = P_ZMovement(mo : Mobj*)
+  fun p_xymovement = P_XYMovement(mo : Mobj*)
+  fun p_zmovement = P_ZMovement(mo : Mobj*)
 
-          fun p_nightmare_respawn = P_NightmareRespawn(mobj : Mobj*)
+  fun p_nightmare_respawn = P_NightmareRespawn(mobj : Mobj*)
 
-            fun p_spawn_map_thing = P_SpawnMapThing(mthing : Mapthing*)
+  fun p_spawn_map_thing = P_SpawnMapThing(mthing : Mapthing*)
 
-              fun p_check_missile_spawn = P_CheckMissileSpawn(th : Mobj*)
+  fun p_check_missile_spawn = P_CheckMissileSpawn(th : Mobj*)
 
-LOWERSPEED = FRACUNIT*6
-RAISESPEED = FRACUNIT*6
+  LOWERSPEED = FRACUNIT*6
+  RAISESPEED = FRACUNIT*6
 
-WEAPONBOTTOM = 128*FRACUNIT
-WEAPONTOP = 32*FRACUNIT
+  WEAPONBOTTOM = 128*FRACUNIT
+  WEAPONTOP    = 32*FRACUNIT
 
-# plasma cells for a bfg attack
-BFGCELLS = 40
+  # plasma cells for a bfg attack
+  BFGCELLS = 40
 
-$swingx : Fixed
-$swingy : Fixed
-$bulletslope : Fixed
+  $swingx : Fixed
+  $swingy : Fixed
+  $bulletslope : Fixed
 
-fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
+  fun p_set_psprite = P_SetPsprite(player : Player*, position : LibC::Int, stnum : Statenum)
   fun p_bring_up_weapon = P_BringUpWeapon(player : Player*)
-    fun p_check_ammo = P_CheckAmmo(player : Player*) : DoomBool
-      fun p_fire_weapon = P_FireWeapon(player : Player*)
-        fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
-          fun p_gunshot = P_GunShot(mo : Mobj*, accurate : DoomBool)
+  fun p_check_ammo = P_CheckAmmo(player : Player*) : DoomBool
+  fun p_fire_weapon = P_FireWeapon(player : Player*)
+  fun p_bullet_slope = P_BulletSlope(mo : Mobj*)
+  fun p_gunshot = P_GunShot(mo : Mobj*, accurate : DoomBool)
+
+  $save_p : Byte*
+
+  enum Thinkerclass : Byte
+    End
+    Mobj
+  end
+
+  enum Specials : Byte
+    Ceiling
+    Door
+    Floor
+    Plat
+    Flash
+    Strobe
+    Glow
+    End
+  end
 end

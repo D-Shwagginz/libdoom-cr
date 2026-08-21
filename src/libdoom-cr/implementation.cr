@@ -1841,208 +1841,238 @@ fun p_path_traverse = P_PathTraverse(x1 : CDoom::Fixed, y1 : CDoom::Fixed, x2 : 
   LibDoom.p_path_traverse(x1, y1, x2, y2, flags, trav)
 end
 
-  fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
-LibDoom.p_set_mobj_state(mobj, state)
-  end
-
-    fun p_explode_missile = P_ExplodeMissile(mo : CDoom::Mobj*)
-LibDoom.p_explode_missile(mo)
-    end
-
-      fun p_xymovement = P_XYMovement(mo : CDoom::Mobj*)
-LibDoom.p_xymovement(mo)
-      end
-
-        fun p_zmovement = P_ZMovement(mo : CDoom::Mobj*)
-LibDoom.p_zmovement(mo)
-        end
-
-          fun p_nightmare_respawn = P_NightmareRespawn(mobj : CDoom::Mobj*)
-LibDoom.p_nightmare_respawn(mobj)
-          end
-
-  fun p_mobj_thinker = P_MobjThinker(mobj : CDoom::Mobj*)
-    LibDoom.p_mobj_thinker(mobj)
-  end
-
-  fun p_spawn_mobj = P_SpawnMobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
-LibDoom.p_spawn_mobj(x, y, z, type)
-  end
-
-  fun p_remove_mobj = P_RemoveMobj(mobj : CDoom::Mobj*)
-LibDoom.p_remove_mobj(mobj)
-  end
-
-  fun p_respawn_specials = P_RespawnSpecials
-LibDoom.p_respawn_specials
-  end
-
-  fun p_spawn_player = P_SpawnPlayer(mthing : CDoom::Mapthing*)
-LibDoom.p_spawn_player(mthing)
-  end
-
-            fun p_spawn_map_thing = P_SpawnMapThing(mthing : CDoom::Mapthing*)
-LibDoom.p_spawn_map_thing(mthing)
-            end
-
-  fun p_spawn_puff = P_SpawnPuff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
-LibDoom.p_spawn_puff(x, y, z)
-  end
-
-  fun p_spawn_blood = P_SpawnBlood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : LibC::Int)
-LibDoom.p_spawn_blood(x, y, z, damage)
-  end
-
-              fun p_check_missile_spawn = P_CheckMissileSpawn(th : CDoom::Mobj*)
-LibDoom.p_check_missile_spawn(th)
-              end
-
-  fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
-LibDoom.p_spawn_missile(source, dest, type)
-  end
-
-  fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
-LibDoom.p_spawn_player_missile(source, type)
-  end
-
-  fun t_plat_raise = T_PlatRaise(plat : CDoom::Plat*)
-LibDoom.t_plat_raise(plat)
-  end
-
-  fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
-LibDoom.ev_do_plat(line, type, amount)
-  end
-
-  fun p_activate_in_stasis = P_ActivateInStasis(tag : LibC::Int)
-LibDoom.p_activate_in_stasis(tag)
-  end
-
-  fun ev_stop_plat = EV_StopPlat(line : CDoom::Line*)
-LibDoom.ev_stop_plat(line)
-  end
-
-  fun p_add_active_plat = P_AddActivePlat(plat : CDoom::Plat*)
-LibDoom.p_add_active_plat(plat)
-  end
-
-  fun p_remove_active_plat = P_RemoveActivePlat(plat : CDoom::Plat*)
-LibDoom.p_remove_active_plat(plat)
-  end
-
-fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
-LibDoom.p_set_psprite(player, position, stnum)
+fun p_set_mobj_state = P_SetMobjState(mobj : CDoom::Mobj*, state : CDoom::Statenum) : CDoom::DoomBool
+  LibDoom.p_set_mobj_state(mobj, state)
 end
 
-  fun p_bring_up_weapon = P_BringUpWeapon(player : CDoom::Player*)
-LibDoom.p_bring_up_weapon(player)
-  end
+fun p_explode_missile = P_ExplodeMissile(mo : CDoom::Mobj*)
+  LibDoom.p_explode_missile(mo)
+end
 
-    fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : CDoom::DoomBool
-LibDoom.p_check_ammo(player)
-    end
+fun p_xymovement = P_XYMovement(mo : CDoom::Mobj*)
+  LibDoom.p_xymovement(mo)
+end
 
-      fun p_fire_weapon = P_FireWeapon(player : CDoom::Player*)
-LibDoom.p_fire_weapon(player)
-      end
+fun p_zmovement = P_ZMovement(mo : CDoom::Mobj*)
+  LibDoom.p_zmovement(mo)
+end
 
-  fun p_drop_weapon = P_DropWeapon(player : CDoom::Player*)
-LibDoom.p_drop_weapon(player)
-  end
+fun p_nightmare_respawn = P_NightmareRespawn(mobj : CDoom::Mobj*)
+  LibDoom.p_nightmare_respawn(mobj)
+end
 
-  fun a_weapon_ready = A_WeaponReady(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_weapon_ready(player, psp)
-  end
+fun p_mobj_thinker = P_MobjThinker(mobj : CDoom::Mobj*)
+  LibDoom.p_mobj_thinker(mobj)
+end
 
-  fun a_refire = A_ReFire(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_refire(player, psp)
-  end
+fun p_spawn_mobj = P_SpawnMobj(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, type : CDoom::Mobjtype) : CDoom::Mobj*
+  LibDoom.p_spawn_mobj(x, y, z, type)
+end
 
-  fun a_check_reload = A_CheckReload(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_check_reload(player, psp)
-  end
+fun p_remove_mobj = P_RemoveMobj(mobj : CDoom::Mobj*)
+  LibDoom.p_remove_mobj(mobj)
+end
 
-  fun a_lower = A_Lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_lower(player, psp)
-  end
+fun p_respawn_specials = P_RespawnSpecials
+  LibDoom.p_respawn_specials
+end
 
-  fun a_raise = A_Raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_raise(player, psp)
-  end
+fun p_spawn_player = P_SpawnPlayer(mthing : CDoom::Mapthing*)
+  LibDoom.p_spawn_player(mthing)
+end
 
-  fun a_gun_flash = A_GunFlash(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_gun_flash(player, psp)
-  end
+fun p_spawn_map_thing = P_SpawnMapThing(mthing : CDoom::Mapthing*)
+  LibDoom.p_spawn_map_thing(mthing)
+end
 
+fun p_spawn_puff = P_SpawnPuff(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed)
+  LibDoom.p_spawn_puff(x, y, z)
+end
 
-  fun a_punch = A_Punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_punch(player, psp)
-  end
+fun p_spawn_blood = P_SpawnBlood(x : CDoom::Fixed, y : CDoom::Fixed, z : CDoom::Fixed, damage : LibC::Int)
+  LibDoom.p_spawn_blood(x, y, z, damage)
+end
 
-  fun a_saw = A_Saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_saw(player, psp)
-  end
+fun p_check_missile_spawn = P_CheckMissileSpawn(th : CDoom::Mobj*)
+  LibDoom.p_check_missile_spawn(th)
+end
 
-  fun a_fire_missile = A_FireMissile(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_missile(player, psp)
-  end
+fun p_spawn_missile = P_SpawnMissile(source : CDoom::Mobj*, dest : CDoom::Mobj*, type : CDoom::Mobjtype) : CDoom::Mobj*
+  LibDoom.p_spawn_missile(source, dest, type)
+end
 
-  fun a_fire_bfg = A_FireBFG(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_bfg(player, psp)
-  end
+fun p_spawn_player_missile = P_SpawnPlayerMissile(source : CDoom::Mobj*, type : CDoom::Mobjtype)
+  LibDoom.p_spawn_player_missile(source, type)
+end
 
-  fun a_fire_plasma = A_FirePlasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
+fun t_plat_raise = T_PlatRaise(plat : CDoom::Plat*)
+  LibDoom.t_plat_raise(plat)
+end
+
+fun ev_do_plat = EV_DoPlat(line : CDoom::Line*, type : CDoom::Plattype, amount : LibC::Int) : LibC::Int
+  LibDoom.ev_do_plat(line, type, amount)
+end
+
+fun p_activate_in_stasis = P_ActivateInStasis(tag : LibC::Int)
+  LibDoom.p_activate_in_stasis(tag)
+end
+
+fun ev_stop_plat = EV_StopPlat(line : CDoom::Line*)
+  LibDoom.ev_stop_plat(line)
+end
+
+fun p_add_active_plat = P_AddActivePlat(plat : CDoom::Plat*)
+  LibDoom.p_add_active_plat(plat)
+end
+
+fun p_remove_active_plat = P_RemoveActivePlat(plat : CDoom::Plat*)
+  LibDoom.p_remove_active_plat(plat)
+end
+
+fun p_set_psprite = P_SetPsprite(player : CDoom::Player*, position : LibC::Int, stnum : CDoom::Statenum)
+  LibDoom.p_set_psprite(player, position, stnum)
+end
+
+fun p_bring_up_weapon = P_BringUpWeapon(player : CDoom::Player*)
+  LibDoom.p_bring_up_weapon(player)
+end
+
+fun p_check_ammo = P_CheckAmmo(player : CDoom::Player*) : CDoom::DoomBool
+  LibDoom.p_check_ammo(player)
+end
+
+fun p_fire_weapon = P_FireWeapon(player : CDoom::Player*)
+  LibDoom.p_fire_weapon(player)
+end
+
+fun p_drop_weapon = P_DropWeapon(player : CDoom::Player*)
+  LibDoom.p_drop_weapon(player)
+end
+
+fun a_weapon_ready = A_WeaponReady(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_weapon_ready(player, psp)
+end
+
+fun a_refire = A_ReFire(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_refire(player, psp)
+end
+
+fun a_check_reload = A_CheckReload(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_check_reload(player, psp)
+end
+
+fun a_lower = A_Lower(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_lower(player, psp)
+end
+
+fun a_raise = A_Raise(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_raise(player, psp)
+end
+
+fun a_gun_flash = A_GunFlash(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_gun_flash(player, psp)
+end
+
+fun a_punch = A_Punch(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_punch(player, psp)
+end
+
+fun a_saw = A_Saw(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_saw(player, psp)
+end
+
+fun a_fire_missile = A_FireMissile(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_missile(player, psp)
+end
+
+fun a_fire_bfg = A_FireBFG(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_bfg(player, psp)
+end
+
+fun a_fire_plasma = A_FirePlasma(player : CDoom::Player*, psp : CDoom::Pspdef*)
   LibDoom.a_fire_plasma(player, psp)
-  end
+end
 
-        fun p_bullet_slope = P_BulletSlope(mo : CDoom::Mobj*)
-          LibDoom.p_bullet_slope(mo)
-        end
+fun p_bullet_slope = P_BulletSlope(mo : CDoom::Mobj*)
+  LibDoom.p_bullet_slope(mo)
+end
 
-          fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
-            LibDoom.p_gunshot(mo, accurate)
-          end
+fun p_gunshot = P_GunShot(mo : CDoom::Mobj*, accurate : CDoom::DoomBool)
+  LibDoom.p_gunshot(mo, accurate)
+end
 
-  fun a_fire_pistol = A_FirePistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_pistol(player, psp)
-  end
+fun a_fire_pistol = A_FirePistol(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_pistol(player, psp)
+end
 
-  fun a_fire_shotgun = A_FireShotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_shotgun(player, psp)
-  end
+fun a_fire_shotgun = A_FireShotgun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_shotgun(player, psp)
+end
 
-  fun a_fire_shotgun2 = A_FireShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_shotgun2(player, psp)
-  end
+fun a_fire_shotgun2 = A_FireShotgun2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_shotgun2(player, psp)
+end
 
-  fun a_fire_cgun = A_FireCGun(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_fire_cgun(player, psp)
-  end
+fun a_fire_cgun = A_FireCGun(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_fire_cgun(player, psp)
+end
 
-  fun a_light0 = A_Light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_light0(player, psp)
-  end
+fun a_light0 = A_Light0(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_light0(player, psp)
+end
 
-  fun a_light1 = A_Light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_light1(player, psp)
-  end
+fun a_light1 = A_Light1(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_light1(player, psp)
+end
 
-  fun a_light2 = A_Light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_light2(player, psp)
-  end
+fun a_light2 = A_Light2(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_light2(player, psp)
+end
 
-  fun a_bfg_spray = A_BFGSpray(mo : CDoom::Mobj*)
-LibDoom.a_bfg_spray(mo)
-  end
+fun a_bfg_spray = A_BFGSpray(mo : CDoom::Mobj*)
+  LibDoom.a_bfg_spray(mo)
+end
 
-  fun a_bfg_sound = A_BFGsound(player : CDoom::Player*, psp : CDoom::Pspdef*)
-LibDoom.a_bfg_sound(player , psp)
-  end
+fun a_bfg_sound = A_BFGsound(player : CDoom::Player*, psp : CDoom::Pspdef*)
+  LibDoom.a_bfg_sound(player, psp)
+end
 
-  fun p_setup_psprites = P_SetupPsprites(curplayer : CDoom::Player*)
-LibDoom.p_setup_psprites(curplayer)
-  end
+fun p_setup_psprites = P_SetupPsprites(curplayer : CDoom::Player*)
+  LibDoom.p_setup_psprites(curplayer)
+end
 
-  fun p_move_psprites = P_MovePsprites(curplayer : CDoom::Player*)
-LibDoom.p_move_psprites(curplayer)
-  end
+fun p_move_psprites = P_MovePsprites(curplayer : CDoom::Player*)
+  LibDoom.p_move_psprites(curplayer)
+end
 
+fun p_archive_players = P_ArchivePlayers
+  LibDoom.p_archive_players
+end
+
+fun p_unarchive_players = P_UnArchivePlayers
+  LibDoom.p_unarchive_players
+end
+
+fun p_archive_world = P_ArchiveWorld
+  LibDoom.p_archive_world
+end
+
+fun p_unarchive_world = P_UnArchiveWorld
+  LibDoom.p_unarchive_world
+end
+
+fun p_archive_thinkers = P_ArchiveThinkers
+  LibDoom.p_archive_thinkers
+end
+
+fun p_unarchive_thinkers = P_UnArchiveThinkers
+  LibDoom.p_unarchive_thinkers
+end
+
+fun p_archive_specials = P_ArchiveSpecials
+  LibDoom.p_archive_specials
+end
+
+fun p_unarchive_specials = P_UnArchiveSpecials
+  LibDoom.p_unarchive_specials
+end
