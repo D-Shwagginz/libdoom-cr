@@ -10777,7 +10777,7 @@ module LibDoom
     bangle = actor.value.angle
     slope = CDoom.p_aim_line_attack(actor, bangle, CDoom::MISSILERANGE)
 
-    angle = bangle + ((CDoom.p_random - CDoom.p_random) << 20)
+    angle = bangle &+ ((CDoom.p_random - CDoom.p_random) << 20)
     damage = ((CDoom.p_random % 5) + 1) * 3
     CDoom.p_line_attack(actor, angle, CDoom::MISSILERANGE, slope, damage)
   end
@@ -15239,6 +15239,9 @@ module LibDoom
     # psp = player.value.psprites.to_unsafe + CDoom::Psprnum::Weapon.value
     # psp.value.sx = psp.value.sx
     # psp.value.sy = psp.value.sy
+    # psp.value.sx = CDoom::FRACUNIT
+    # psp.value.sy = CDoom::WEAPONTOP
+
   end
 
   #
@@ -16020,7 +16023,7 @@ module LibDoom
         CDoom.save_p += sizeof(CDoom::Vldoor)
         door.value.sector = CDoom.sectors + door.value.sector.address
         door.value.sector.value.specialdata = door
-          (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
+        (door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_vertical_door).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker((door.as(UInt8*) + offsetof(CDoom::Vldoor, @thinker)).as(CDoom::Thinker*))
       when CDoom::Specials::Floor
@@ -16030,7 +16033,7 @@ module LibDoom
         CDoom.save_p += sizeof(CDoom::Floormove)
         floor.value.sector = CDoom.sectors + floor.value.sector.address
         floor.value.sector.value.specialdata = floor
-          (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
       when CDoom::Specials::Plat
@@ -16052,7 +16055,7 @@ module LibDoom
         CDoom.doom_memcpy(flash, CDoom.save_p, sizeof(CDoom::Lightflash))
         CDoom.save_p += sizeof(CDoom::Lightflash)
         flash.value.sector = CDoom.sectors + flash.value.sector.address
-          (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
+        (flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_light_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker((flash.as(UInt8*) + offsetof(CDoom::Lightflash, @thinker)).as(CDoom::Thinker*))
       when CDoom::Specials::Strobe
@@ -16061,7 +16064,7 @@ module LibDoom
         CDoom.doom_memcpy(strobe, CDoom.save_p, sizeof(CDoom::Strobe))
         CDoom.save_p += sizeof(CDoom::Strobe)
         strobe.value.sector = CDoom.sectors + strobe.value.sector.address
-          (strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
+        (strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_strobe_flash).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker((strobe.as(UInt8*) + offsetof(CDoom::Strobe, @thinker)).as(CDoom::Thinker*))
       when CDoom::Specials::Glow
@@ -16070,7 +16073,7 @@ module LibDoom
         CDoom.doom_memcpy(glow, CDoom.save_p, sizeof(CDoom::Glow))
         CDoom.save_p += sizeof(CDoom::Glow)
         glow.value.sector = CDoom.sectors + glow.value.sector.address
-          (glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
+        (glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_glow).pointer, Pointer(Void).null)
 
         CDoom.p_add_thinker((glow.as(UInt8*) + offsetof(CDoom::Glow, @thinker)).as(CDoom::Thinker*))
       else
@@ -16082,6 +16085,521 @@ module LibDoom
     end
   end
 
+  def self.p_load_vertexes(lump : LibC::Int)
+    # Determine number of lumps:
+    #  total lump length / vertex record length.
+    CDoom.numvertexes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapvertex)
 
-  
+    # Allocate zone memory for buffer.
+    CDoom.vertexes = CDoom.z_malloc(CDoom.numvertexes * sizeof(CDoom::Vertex), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Vertex*)
+
+    # Load data into cache.
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    ml = data.as(CDoom::Mapvertex*)
+    li = CDoom.vertexes
+
+    # Copy and convert vertex coordinates,
+    # internal representation as fixed.
+    CDoom.numvertexes.times do |i|
+      li.value.x = ml.value.x.to_i32 << CDoom::FRACBITS
+      li.value.y = ml.value.y.to_i32 << CDoom::FRACBITS
+
+      li += 1
+      ml += 1
+    end
+
+    # Free buffer memory.
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_segs(lump : LibC::Int)
+    CDoom.numsegs = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapseg)
+    CDoom.segs = CDoom.z_malloc(CDoom.numsegs * sizeof(CDoom::Seg), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Seg*)
+    CDoom.doom_memset(CDoom.segs, 0, CDoom.numsegs * sizeof(CDoom::Seg))
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    ml = data.as(CDoom::Mapseg*)
+    li = CDoom.segs
+    CDoom.numsegs.times do |i|
+      li.value.v1 = CDoom.vertexes + ml.value.v1
+      li.value.v2 = CDoom.vertexes + ml.value.v2
+
+      li.value.angle = ml.value.angle.to_i32 << 16
+      li.value.offset = ml.value.offset.to_i32 << 16
+      linedef = ml.value.linedef
+      ldef = CDoom.lines + linedef
+      li.value.linedef = ldef
+      side = ml.value.side
+      li.value.sidedef = CDoom.sides + ldef.value.sidenum[side]
+      li.value.frontsector = CDoom.sides[ldef.value.sidenum[side]].sector
+      if ldef.value.flags & CDoom::ML_TWOSIDED != 0
+        li.value.backsector = CDoom.sides[ldef.value.sidenum[side ^ 1]].sector
+      else
+        li.value.backsector = Pointer(CDoom::Sector).null
+      end
+
+      li += 1
+      ml += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_subsectors(lump : LibC::Int)
+    CDoom.numsubsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsubsector)
+    CDoom.subsectors = CDoom.z_malloc(CDoom.numsubsectors * sizeof(CDoom::Subsector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Subsector*)
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    ms = data.as(CDoom::Mapsubsector*)
+    CDoom.doom_memset(CDoom.subsectors, 0, CDoom.numsubsectors * sizeof(CDoom::Subsector))
+    ss = CDoom.subsectors
+
+    CDoom.numsubsectors.times do |i|
+      ss.value.numlines = ms.value.numsegs
+      ss.value.firstline = ms.value.firstseg
+
+      ss += 1
+      ms += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_sectors(lump : LibC::Int)
+    CDoom.numsectors = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsector)
+    CDoom.sectors = CDoom.z_malloc(CDoom.numsectors * sizeof(CDoom::Sector), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Sector*)
+    CDoom.doom_memset(CDoom.sectors, 0, CDoom.numsectors * sizeof(CDoom::Sector))
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    ms = data.as(CDoom::Mapsector*)
+    ss = CDoom.sectors
+
+    CDoom.numsectors.times do |i|
+      ss.value.floorheight = ms.value.floorheight.to_i32 << CDoom::FRACBITS
+      ss.value.ceilingheight = ms.value.ceilingheight.to_i32 << CDoom::FRACBITS
+      ss.value.floorpic = CDoom.r_flat_num_for_name(ms.value.floorpic)
+      ss.value.ceilingpic = CDoom.r_flat_num_for_name(ms.value.ceilingpic)
+      ss.value.lightlevel = ms.value.lightlevel
+      ss.value.special = ms.value.special
+      ss.value.tag = ms.value.tag
+      ss.value.thinglist = Pointer(CDoom::Mobj).null
+
+      ss += 1
+      ms += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_nodes(lump : LibC::Int)
+    CDoom.numnodes = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapnode)
+    CDoom.nodes = CDoom.z_malloc(CDoom.numnodes * sizeof(CDoom::Node), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Node*)
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    mn = data.as(CDoom::Mapnode*)
+    no = CDoom.nodes
+
+    CDoom.numnodes.times do |i|
+      no.value.x = mn.value.x.to_i32 << CDoom::FRACBITS
+      no.value.y = mn.value.y.to_i32 << CDoom::FRACBITS
+      no.value.dx = mn.value.dx.to_i32 << CDoom::FRACBITS
+      no.value.dy = mn.value.dy.to_i32 << CDoom::FRACBITS
+
+      2.times do |j|
+        no.value.children[j] = mn.value.children[j]
+        4.times do |k|
+          ((no.value.bbox.to_unsafe + j).value.to_unsafe + k).value = mn.value.bbox[j][k].to_i32 << CDoom::FRACBITS
+        end
+      end
+
+      no += 1
+      mn += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_things(lump : LibC::Int)
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+    numthings = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapthing)
+
+    mt = data.as(CDoom::Mapthing*)
+
+    numthings.times do |i|
+      spawnt = true
+
+      # Do not spawn cool, new monsters if !commercial
+      if CDoom.gamemode != CDoom::GameMode::Commercial
+        case mt.value.type
+        when 68, # Arachnotron
+             64, # Archvile
+             88, # Boss Brain
+             89, # Boss Shooter
+             69, # Hell Knight
+             67, # Mancubus
+             71, # Pain Elemental
+             65, # Former Human Commando
+             66, # Revenant
+             84, # Wolf SS
+             spawnt = false
+        end
+      end
+
+      if spawnt == false
+        mt += 1
+        next
+      end
+
+      # Do spawn all other stuff.
+      # [ds] Pointless?
+      mt.value.x = mt.value.x
+      mt.value.x = mt.value.x
+      mt.value.angle = mt.value.angle
+      mt.value.type = mt.value.type
+      mt.value.options = mt.value.options
+
+      CDoom.p_spawn_map_thing(mt)
+      mt += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  #
+  # Also counts secret lines for intermissions.
+  #
+  def self.p_load_linedefs(lump : LibC::Int)
+    CDoom.numlines = CDoom.w_lump_length(lump) // sizeof(CDoom::Maplinedef)
+    CDoom.lines = CDoom.z_malloc(CDoom.numlines * sizeof(CDoom::Line), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line*)
+    CDoom.doom_memset(CDoom.lines, 0, CDoom.numlines * sizeof(CDoom::Line))
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    mld = data.as(CDoom::Maplinedef*)
+    ld = CDoom.lines
+
+    CDoom.numlines.times do |i|
+      ld.value.flags = mld.value.flags
+      ld.value.special = mld.value.special
+      ld.value.tag = mld.value.tag
+      v1 = CDoom.vertexes + mld.value.v1
+      ld.value.v1 = v1
+      v2 = CDoom.vertexes + mld.value.v2
+      ld.value.v2 = v2
+      ld.value.dx = v2.value.x - v1.value.x
+      ld.value.dy = v2.value.y - v1.value.y
+
+      if ld.value.dx == 0
+        ld.value.slopetype = CDoom::Slopetype::VERTICAL
+      elsif ld.value.dy == 0
+        ld.value.slopetype = CDoom::Slopetype::HORIZONTAL
+      else
+        if CDoom.fixed_div(ld.value.dy, ld.value.dx) > 0
+          ld.value.slopetype = CDoom::Slopetype::POSITIVE
+        else
+          ld.value.slopetype = CDoom::Slopetype::NEGATIVE
+        end
+      end
+
+      if v1.value.x < v2.value.x
+        ld.value.bbox[CDoom::BOXLEFT] = v1.value.x
+        ld.value.bbox[CDoom::BOXRIGHT] = v2.value.x
+      else
+        ld.value.bbox[CDoom::BOXLEFT] = v2.value.x
+        ld.value.bbox[CDoom::BOXRIGHT] = v1.value.x
+      end
+
+      if v1.value.y < v2.value.y
+        ld.value.bbox[CDoom::BOXBOTTOM] = v1.value.y
+        ld.value.bbox[CDoom::BOXTOP] = v2.value.y
+      else
+        ld.value.bbox[CDoom::BOXBOTTOM] = v2.value.y
+        ld.value.bbox[CDoom::BOXTOP] = v1.value.y
+      end
+
+      ld.value.sidenum[0] = mld.value.sidenum[0]
+      ld.value.sidenum[1] = mld.value.sidenum[1]
+
+      if ld.value.sidenum[0] != -1
+        ld.value.frontsector = CDoom.sides[ld.value.sidenum[0]].sector
+      else
+        ld.value.frontsector = Pointer(CDoom::Sector).null
+      end
+
+      if ld.value.sidenum[1] != -1
+        ld.value.backsector = CDoom.sides[ld.value.sidenum[1]].sector
+      else
+        ld.value.backsector = Pointer(CDoom::Sector).null
+      end
+
+      mld += 1
+      ld += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_sidedefs(lump : LibC::Int)
+    CDoom.numsides = CDoom.w_lump_length(lump) // sizeof(CDoom::Mapsidedef)
+    CDoom.sides = CDoom.z_malloc(CDoom.numsides * sizeof(CDoom::Side), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Side*)
+    CDoom.doom_memset(CDoom.sides, 0, CDoom.numsides * sizeof(CDoom::Side))
+    data = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(CDoom::Byte*)
+
+    msd = data.as(CDoom::Mapsidedef*)
+    sd = CDoom.sides
+
+    CDoom.numsides.times do |i|
+      sd.value.textureoffset = msd.value.textureoffset.to_i32 << CDoom::FRACBITS
+      sd.value.rowoffset = msd.value.rowoffset.to_i32 << CDoom::FRACBITS
+      sd.value.toptexture = CDoom.r_texture_num_for_name(msd.value.toptexture)
+      sd.value.bottomtexture = CDoom.r_texture_num_for_name(msd.value.bottomtexture)
+      sd.value.midtexture = CDoom.r_texture_num_for_name(msd.value.midtexture)
+      sd.value.sector = CDoom.sectors + msd.value.sector
+
+      msd += 1
+      sd += 1
+    end
+
+    CDoom.z_free(data)
+  end
+
+  def self.p_load_blockmap(lump : LibC::Int)
+    CDoom.blockmaplump = CDoom.w_cache_lump_num(lump, CDoom::PU_STATIC).as(Int16*)
+    CDoom.blockmap = CDoom.blockmaplump + 4
+    count = CDoom.w_lump_length(lump) // 2
+
+    count.times do |i|
+      CDoom.blockmaplump[i] = CDoom.blockmaplump[i] # [ds] pointless?
+    end
+
+    CDoom.bmaporgx = CDoom.blockmaplump[0].to_i32 << CDoom::FRACBITS
+    CDoom.bmaporgy = CDoom.blockmaplump[1].to_i32 << CDoom::FRACBITS
+    CDoom.bmapwidth = CDoom.blockmaplump[2]
+    CDoom.bmapheight = CDoom.blockmaplump[3]
+
+    # clear out mobj chains
+    count = sizeof(CDoom::Mobj*) * CDoom.bmapwidth * CDoom.bmapheight
+    CDoom.blocklinks = CDoom.z_malloc(count, CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Mobj**)
+    CDoom.doom_memset(CDoom.blocklinks, 0, count)
+  end
+
+  #
+  # Builds sector line lists and subsector sector numbers.
+  # Finds block bounding boxes for sectors.
+  #
+  def self.p_group_lines
+    # look up sector number for each subsector
+    ss = CDoom.subsectors
+    CDoom.numsubsectors.times do |i|
+      seg = CDoom.segs + ss.value.firstline
+      ss.value.sector = seg.value.sidedef.value.sector
+
+      ss += 1
+    end
+
+    # count number of lines in each sector
+    li = CDoom.lines
+    total = 0
+    CDoom.numlines.times do |i|
+      total += 1
+      li.value.frontsector.value.linecount = li.value.frontsector.value.linecount + 1
+
+      if !li.value.backsector.null? && li.value.backsector != li.value.frontsector
+        li.value.backsector.value.linecount = li.value.backsector.value.linecount + 1
+        total += 1
+      end
+
+      li += 1
+    end
+
+    # build line tables for each sector
+    linebuffer = CDoom.z_malloc(total * sizeof(CDoom::Line*), CDoom::PU_LEVEL, Pointer(Void).null).as(CDoom::Line**)
+    sector = CDoom.sectors
+    bbox = Pointer(CDoom::Fixed).malloc(4)
+    CDoom.numsectors.times do |i|
+      CDoom.m_clear_box(bbox)
+      sector.value.lines = linebuffer
+      li = CDoom.lines
+      CDoom.numlines.times do |j|
+        if li.value.frontsector == sector || li.value.backsector == sector
+          linebuffer.value = li
+          linebuffer += 1
+          CDoom.m_add_to_box(bbox, li.value.v1.value.x, li.value.v1.value.y)
+          CDoom.m_add_to_box(bbox, li.value.v2.value.x, li.value.v2.value.y)
+        end
+
+        li += 1
+      end
+      if (linebuffer - sector.value.lines) != sector.value.linecount
+        CDoom.i_error("Error: p_group_lines: miscounted")
+      end
+
+      # set the degenmobj_t to the middle of the bounding box
+      soundorg = (sector.as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Degenmobj*)
+      soundorg.value.x = (bbox[CDoom::BOXRIGHT] + bbox[CDoom::BOXLEFT]) // 2
+      soundorg.value.y = (bbox[CDoom::BOXTOP] + bbox[CDoom::BOXBOTTOM]) // 2
+
+      # adjust bounding box to map blocks
+      block = (bbox[CDoom::BOXTOP] - CDoom.bmaporgy + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block >= CDoom.bmapheight ? CDoom.bmapheight - 1 : block
+      sector.value.blockbox[CDoom::BOXTOP] = block
+
+      block = (bbox[CDoom::BOXBOTTOM] - CDoom.bmaporgy - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block < 0 ? 0 : block
+      sector.value.blockbox[CDoom::BOXBOTTOM] = block
+
+      block = (bbox[CDoom::BOXRIGHT] - CDoom.bmaporgx + CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block >= CDoom.bmapwidth ? CDoom.bmapwidth - 1 : block
+      sector.value.blockbox[CDoom::BOXRIGHT] = block
+
+      block = (bbox[CDoom::BOXLEFT] - CDoom.bmaporgx - CDoom::MAXRADIUS) >> CDoom::MAPBLOCKSHIFT
+      block = block < 0 ? 0 : block
+      sector.value.blockbox[CDoom::BOXLEFT] = block
+
+      sector += 1
+    end
+  end
+
+  def self.p_setup_level(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : CDoom::Skill)
+    lumpname = Pointer(UInt8).malloc(9)
+
+    CDoom.totalkills = 0
+    CDoom.totalitems = 0
+    CDoom.totalsecret = 0
+    CDoom.wminfo.maxfrags = 0
+    CDoom.wminfo.partime = 180
+    CDoom::MAXPLAYERS.times do |i|
+      (CDoom.players.to_unsafe + i).value.killcount = 0
+      (CDoom.players.to_unsafe + i).value.secretcount = 0
+      (CDoom.players.to_unsafe + i).value.itemcount = 0
+    end
+
+    # Initial height of PointOfView
+    # will be set by player think.
+    (CDoom.players.to_unsafe + CDoom.consoleplayer).value.viewz = 1
+
+    # Make sure all sounds are stopped before Z_FreeTags.
+    CDoom.s_start
+
+    CDoom.z_free_tags(CDoom::PU_LEVEL, CDoom::PU_PURGELEVEL - 1)
+
+    CDoom.p_init_thinkers
+
+    # if working with a devlopment map, reload it
+    CDoom.w_reload
+
+    # find map name
+    if CDoom.gamemode == CDoom::GameMode::Commercial
+      if map < 10
+        CDoom.doom_strcpy(lumpname, "map0")
+        CDoom.doom_concat(lumpname, CDoom.doom_itoa(map, 10))
+      else
+        CDoom.doom_strcpy(lumpname, "map")
+        CDoom.doom_concat(lumpname, CDoom.doom_itoa(map, 10))
+      end
+    else
+      lumpname[0] = 'E'.ord.to_u8
+      lumpname[1] = '0'.ord.to_u8 + episode
+      lumpname[2] = 'M'.ord.to_u8
+      lumpname[3] = '0'.ord.to_u8 + map
+      lumpname[4] = 0
+    end
+
+    lumpnum = CDoom.w_get_num_for_name(lumpname)
+
+    CDoom.leveltime = 0
+
+    # note: most of this ordering is important
+    CDoom.p_load_blockmap(lumpnum + CDoom::ML_BLOCKMAP)
+    CDoom.p_load_vertexes(lumpnum + CDoom::ML_VERTEXES)
+    CDoom.p_load_sectors(lumpnum + CDoom::ML_SECTORS)
+    CDoom.p_load_sidedefs(lumpnum + CDoom::ML_SIDEDEFS)
+
+    CDoom.p_load_linedefs(lumpnum + CDoom::ML_LINEDEFS)
+    CDoom.p_load_subsectors(lumpnum + CDoom::ML_SSECTORS)
+    CDoom.p_load_nodes(lumpnum + CDoom::ML_NODES)
+    CDoom.p_load_segs(lumpnum + CDoom::ML_SEGS)
+
+    CDoom.rejectmatrix = CDoom.w_cache_lump_num(lumpnum + CDoom::ML_REJECT, CDoom::PU_LEVEL).as(UInt8*)
+    CDoom.p_group_lines
+
+    CDoom.bodyqueslot = 0
+    CDoom.deathmatch_p = CDoom.deathmatchstarts.to_unsafe
+    CDoom.p_load_things(lumpnum + CDoom::ML_THINGS)
+
+    # if deathmatch, randomly spawn the active players
+    if CDoom.deathmatch != 0
+      CDoom::MAXPLAYERS.times do |i|
+        if CDoom.playeringame[i] != 0
+          (CDoom.players.to_unsafe + i).value.mo = Pointer(CDoom::Mobj).null
+          CDoom.g_deathmatch_spawn_player(i)
+        end
+      end
+    end
+
+    # clear special respawning que
+    CDoom.iquehead = 0
+    CDoom.iquetail = 0
+
+    # set up world state
+    CDoom.p_spawn_specials
+
+    # preload graphics
+    CDoom.r_precache_level if CDoom.precache != 0
+  end
+
+  def self.p_init
+    CDoom.p_init_switch_list
+    CDoom.p_init_pic_anims
+    CDoom.r_init_sprites(CDoom.sprnames)
+  end
+
+  #
+  # Returns side 0 (front), 1 (back), or 2 (on).
+  #
+  def self.p_divline_side(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Divline*) : LibC::Int
+    if node.value.dx == 0
+      return 2 if x == node.value.x
+
+      return (node.value.dy > 0).to_unsafe if x <= node.value.x
+
+      return (node.value.dy < 0).to_unsafe
+    end
+
+    if node.value.dy == 0
+      return 2 if x == node.value.y
+
+      return (node.value.dx < 0).to_unsafe if y <= node.value.y
+
+      return (node.value.dx > 0).to_unsafe
+    end
+
+    dx = x - node.value.x
+    dy = y - node.value.y
+
+    left = (node.value.dy >> CDoom::FRACBITS) * (dx >> CDoom::FRACBITS)
+    right = (dy >> CDoom::FRACBITS) * (node.value.dx >> CDoom::FRACBITS)
+
+    return 0 if right < left # front side
+
+    return 2 if left == right
+    return 1 # back side
+  end
+
+  #
+  # Returns the fractional intercept point
+  # along the first divline.
+  # This is only called by the addthings and addlines traversers.
+  #
+  def self.p_intercept_vector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+    den = CDoom.fixed_mul(v1.value.dy >> 8, v2.value.dx) - CDoom.fixed_mul(v1.value.dx >> 8, v2.value.dy)
+
+    return 0 if den == 0
+
+    num = CDoom.fixed_mul((v1.value.x - v2.value.x) >> 8, v1.value.dy) +
+          CDoom.fixed_mul((v2.value.y - v1.value.y) >> 8, v1.value.dx)
+    frac = CDoom.fixed_div(num, den)
+
+    return frac
+  end
 end

@@ -2076,3 +2076,59 @@ end
 fun p_unarchive_specials = P_UnArchiveSpecials
   LibDoom.p_unarchive_specials
 end
+
+fun p_load_vertexes = P_LoadVertexes(lump : LibC::Int)
+  LibDoom.p_load_vertexes(lump)
+end
+
+fun p_load_segs = P_LoadSegs(lump : LibC::Int)
+  LibDoom.p_load_segs(lump)
+end
+
+fun p_load_subsectors = P_LoadSubsectors(lump : LibC::Int)
+  LibDoom.p_load_subsectors(lump)
+end
+
+fun p_load_sectors = P_LoadSectors(lump : LibC::Int)
+  LibDoom.p_load_sectors(lump)
+end
+
+fun p_load_nodes = P_LoadNodes(lump : LibC::Int)
+  LibDoom.p_load_nodes(lump)
+end
+
+fun p_load_things = P_LoadThings(lump : LibC::Int)
+  LibDoom.p_load_things(lump)
+end
+
+fun p_load_linedefs = P_LoadLineDefs(lump : LibC::Int)
+  LibDoom.p_load_linedefs(lump)
+end
+
+fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
+  LibDoom.p_load_sidedefs(lump)
+end
+
+fun p_load_blockmap = P_LoadBlockMap(lump : LibC::Int)
+  LibDoom.p_load_blockmap(lump)
+end
+
+fun p_group_lines = P_GroupLines
+  LibDoom.p_group_lines
+end
+
+fun p_setup_level = P_SetupLevel(episode : LibC::Int, map : LibC::Int, playermask : LibC::Int, skill : CDoom::Skill)
+  LibDoom.p_setup_level(episode, map, playermask, skill)
+end
+
+fun p_init = P_Init
+  LibDoom.p_init
+end
+
+fun p_divline_side = P_DivlineSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Divline*) : LibC::Int
+  LibDoom.p_divline_side(x, y, node)
+end
+
+fun p_intercept_vector2 = P_InterceptVector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
+  LibDoom.p_intercept_vector2(v2, v1)
+end

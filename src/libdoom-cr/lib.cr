@@ -7535,4 +7535,27 @@ lib CDoom
     Glow
     End
   end
+
+  MAX_DEATHMATCH_STARTS = 10
+
+  fun p_load_vertexes = P_LoadVertexes(lump : LibC::Int)
+  fun p_load_segs = P_LoadSegs(lump : LibC::Int)
+  fun p_load_subsectors = P_LoadSubsectors(lump : LibC::Int)
+  fun p_load_sectors = P_LoadSectors(lump : LibC::Int)
+  fun p_load_nodes = P_LoadNodes(lump : LibC::Int)
+  fun p_load_things = P_LoadThings(lump : LibC::Int)
+  fun p_load_linedefs = P_LoadLineDefs(lump : LibC::Int)
+  fun p_load_sidedefs = P_LoadSideDefs(lump : LibC::Int)
+  fun p_load_blockmap = P_LoadBlockMap(lump : LibC::Int)
+  fun p_group_lines = P_GroupLines
+
+  $sightzstart : Fixed # eye z of looker
+  $strace : Divline    # from t1 to t2
+  $t2x : Fixed
+  $t2y : Fixed
+
+  $sightcounts : LibC::Int[2]
+
+  fun p_divline_side = P_DivlineSide(x : Fixed, y : Fixed, node : Divline*) : LibC::Int
+  fun p_intercept_vector2 = P_InterceptVector2(v2 : Divline*, v1 : Divline*) : Fixed
 end
