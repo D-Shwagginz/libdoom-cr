@@ -903,7 +903,10 @@ lib CDoom
     prev : Thinker*
     next : Thinker*
     function : Think
-    pad : LibC::LongLong
+    # padded so that Proc#closure_data doesn't overwrite 
+    # the 8 bytes after the function pointer (think) 
+    # This is bullshit
+    pad : LibC::LongLong 
   end
 
   # __DOOM_CONFIG_H__
@@ -3728,6 +3731,7 @@ lib CDoom
     momz : Fixed
 
     # If == validcount, already checked.
+    # increment every time a check is made
     validcount : LibC::Int
 
     type : Mobjtype
@@ -5194,17 +5198,14 @@ lib CDoom
   # Hook in assembler or system specific BLT
   #  here.
   fun r_draw_column = R_DrawColumn
-  fun r_draw_column_low = R_DrawColumnLow
 
   # The Spectre/Invisibility effect.
   fun r_draw_fuzz_column = R_DrawFuzzColumn
-  fun r_draw_fuzz_column_low = R_DrawFuzzColumnLow
 
   # Draw with color translation tables,
   #  for player sprite rendering,
   #  Green/Red/Blue/Indigo shirts.
   fun r_draw_translated_column = R_DrawTranslatedColumn
-  fun r_draw_translated_column_low = R_DrawTranslatedColumnLow
 
   fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
 
@@ -7734,4 +7735,28 @@ lib CDoom
 
   FUZZTABLE = 50
   FUZZOFF   = SCREENWIDTH
+
+  $viewimage : Byte*
+  $ylookup : Byte*[MAXHEIGHT]
+  $columnofs : LibC::Int[MAXWIDTH]
+  
+  # just for profiling
+  $dccount : LibC::Int
+
+  $fuzzoffset : LibC::Int[FUZZTABLE]
+  $fuzzpos : LibC::Int
+
+  # just for profiling
+  $dscount : LibC::Int
+
+  FIELDOFVIEW = 2048 # Fineangles in the SCREENWIDTH wide window.
+  DISTMAP = 2
+
+  # just for profiling purposes
+  $framecount : LibC::Int
+
+  $walllights : Lighttable**
+
+
+
 end

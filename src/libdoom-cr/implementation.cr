@@ -2360,3 +2360,47 @@ end
 fun r_precache_level = R_PrecacheLevel
   LibDoom.r_precache_level
 end
+
+  fun r_draw_column = R_DrawColumn
+LibDoom.r_draw_column
+  end
+
+  fun r_draw_fuzz_column = R_DrawFuzzColumn
+LibDoom.r_draw_fuzz_column
+  end
+
+  fun r_draw_translated_column = R_DrawTranslatedColumn
+LibDoom.r_draw_translated_column
+  end
+
+  fun r_init_translation_tables = R_InitTranslationTables
+LibDoom.r_init_translation_tables
+  end
+
+  fun r_draw_span = R_DrawSpan
+LibDoom.r_draw_span
+  end
+
+  fun r_init_buffer = R_InitBuffer(width : LibC::Int, height : LibC::Int)
+LibDoom.r_init_buffer(width, height)
+  end
+
+  fun r_fill_back_screen = R_FillBackScreen
+LibDoom.r_fill_back_screen
+  end
+
+  fun r_video_erase = R_VideoErase(ofs : LibC::UInt, count : LibC::Int)
+LibDoom.r_video_erase(ofs, count)
+  end
+
+  fun r_draw_view_border = R_DrawViewBorder
+LibDoom.r_draw_view_border
+  end
+
+  fun r_add_point_to_box = R_AddPointToBox(x : LibC::Int, y : LibC::Int, box : CDoom::Fixed*)
+LibDoom.r_add_point_to_box(x, y, box)
+  end
+
+  fun r_point_on_side = R_PointOnSide(x : CDoom::Fixed, y : CDoom::Fixed, node : CDoom::Node*) : LibC::Int
+LibDoom.r_point_on_side(x, y, node)
+  end
