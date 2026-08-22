@@ -7637,7 +7637,101 @@ lib CDoom
   fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
   fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
   fun r_addline = R_AddLine(line : Seg*)
-    fun r_check_bbox = R_CheckBBox(bspcoord : Fixed*) : DoomBool
-      fun r_subsector = R_Subsector(num : LibC::Int)
+  fun r_check_bbox = R_CheckBBox(bspcoord : Fixed*) : DoomBool
+  fun r_subsector = R_Subsector(num : LibC::Int)
 
+  #
+  # Texture definition.
+  # Each texture is composed of one or more patches,
+  # with patches being lumps stored in the WAD.
+  # The lumps are referenced by number, and patched
+  # into the rectangular texture space using origin
+  # and possibly other attributes.
+  #
+  struct Mappatch
+    originx : LibC::Short
+    originy : LibC::Short
+    patch : LibC::Short
+    stepdir : LibC::Short
+    colormap : LibC::Short
+  end
+
+  #
+  # Texture definition.
+  # A DOOM wall texture is a list of patches
+  # which are to be combined in a predefined order.
+  #
+  struct Maptexture
+    name : LibC::Char[8]
+    masked : DoomBool
+    width : LibC::Short
+    height : LibC::Short
+    columndirectory : LibC::Int # [pd] If it's not used, at least make sure it's the right size! Pointers are 8 bytes in x64
+    patchcount : LibC::Short
+    patches : Mappatch[1]
+  end
+
+  # A single patch from a texture definition,
+  # basically a rectangular area within
+  # the texture rectangle.
+  struct Texpatch
+    # Block origin (allways UL),
+    # which has allready accounted
+    # for the internal origin of the patch.
+    originx : LibC::Int
+    originy : LibC::Int
+    patch : LibC::Int
+  end
+
+  # A maptexturedef_t describes a rectangular texture,
+  # which is composed of one or more mappatch_t structures
+  # that arrange graphic patches.
+  struct Texture
+    # Keep name for switch changing, etc.
+    name : LibC::Char[8]
+    width : LibC::Short
+    height : LibC::Short
+
+    # All the patches[patchcount]
+    #  are drawn back to front into the cached texture.
+    patchcount : LibC::Short
+    patches : Texpatch[1]
+  end
+
+  $lastflat : LibC::Int
+  $numflats : LibC::Int
+
+  $firstpatch : LibC::Int
+  $lastpatch : LibC::Int
+  $numpatches : LibC::Int
+
+  $numtextures : LibC::Int
+  $textures : Texture**
+
+  $texturewidthmask : LibC::Int*
+  $texturecompositesize : LibC::Int*
+  $texturecolumnlump : LibC::Short**
+  $texturecolumnofs : LibC::UShort**
+  $texturecomposite : Byte**
+
+  $flatmemory : LibC::Int
+  $texturememory : LibC::Int
+  $spritememory : LibC::Int
+
+  fun r_draw_column_in_cache = R_DrawColumnInCache(patch : Column*, cache : Byte*, originy : LibC::Int, cacheheight : LibC::Int)
+  fun r_generate_composite = R_GenerateComposite(texnum : LibC::Int)
+  fun r_generate_lookup = R_GenerateLookup(texnum : LibC::Int)
+  fun r_init_textures = R_InitTextures
+  fun r_init_flats = R_InitFlats
+  fun r_init_sprite_lumps = R_InitSpriteLumps
+  fun r_init_colormaps = R_InitColormaps
+
+  MAXWIDTH  = 1120
+  MAXHEIGHT =  832
+
+  # status bar height at bottom of screen
+  SBARHEIGHT = 32
+
+  FUZZTABLE = 50
+  FUZZOFF   = SCREENWIDTH
 end

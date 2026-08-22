@@ -4482,10 +4482,12 @@ module LibDoom
       # Ouch
     end
 
+    Raylib.set_trace_log_level(Raylib::TraceLogLevel::Warning)
+
     CDoom.doom_print.call("m_init: Init miscellaneous info.\n".to_unsafe)
     CDoom.m_init
 
-    CDoom.doom_print.call("r_init: Init DOOM refresh daemon - ".to_unsafe)
+    CDoom.doom_print.call("r_init: Init DOOM refresh daemon".to_unsafe)
     CDoom.r_init
 
     CDoom.doom_print.call("\np_init: Init Playloop state.\n".to_unsafe)
@@ -18746,14 +18748,14 @@ module LibDoom
 
     # Closed door.
     if CDoom.backsector.value.ceilingheight <= CDoom.frontsector.value.floorheight ||
-      CDoom.backsector.value.floorheight >= CDoom.frontsector.value.ceilingheight
+       CDoom.backsector.value.floorheight >= CDoom.frontsector.value.ceilingheight
       CDoom.r_clip_solid_wall_segment(x1, x2 - 1)
       return
     end
 
     # Window.
     if CDoom.backsector.value.ceilingheight != CDoom.frontsector.value.ceilingheight ||
-      CDoom.backsector.value.floorheight != CDoom.frontsector.value.floorheight
+       CDoom.backsector.value.floorheight != CDoom.frontsector.value.floorheight
       CDoom.r_clip_pass_wall_segment(x1, x2 - 1)
       return
     end
@@ -18764,9 +18766,9 @@ module LibDoom
     # identical light levels on both sides,
     # and no middle texture.
     if CDoom.backsector.value.ceilingpic == CDoom.frontsector.value.ceilingpic &&
-      CDoom.backsector.value.floorpic == CDoom.frontsector.value.floorpic &&
-      CDoom.backsector.value.lightlevel == CDoom.frontsector.value.lightlevel &&
-      CDoom.curline.value.sidedef.value.midtexture == 0
+       CDoom.backsector.value.floorpic == CDoom.frontsector.value.floorpic &&
+       CDoom.backsector.value.lightlevel == CDoom.frontsector.value.lightlevel &&
+       CDoom.curline.value.sidedef.value.midtexture == 0
       return
     end
 
@@ -18774,69 +18776,68 @@ module LibDoom
     return
   end
 
-
   #
   # Checks BSP node/subtree bounding box.
-# Returns true
-#  if some part of the bbox might be visible.
-#
-    def self.r_check_bbox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
-      # Find the corners of the box
-      # that define the edges from current viewpoint.
-      if CDoom.viewx <= bspcoord[CDoom::BOXLEFT]
-        boxx = 0
-      elsif CDoom.viewx < bspcoord[CDoom::BOXRIGHT]
-        boxx = 1
-      else
-        boxx = 2
-      end
+  # Returns true
+  #  if some part of the bbox might be visible.
+  #
+  def self.r_check_bbox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
+    # Find the corners of the box
+    # that define the edges from current viewpoint.
+    if CDoom.viewx <= bspcoord[CDoom::BOXLEFT]
+      boxx = 0
+    elsif CDoom.viewx < bspcoord[CDoom::BOXRIGHT]
+      boxx = 1
+    else
+      boxx = 2
+    end
 
-      if CDoom.viewy >= bspcoord[CDoom::BOXTOP]
-        boxy = 0
-      elsif CDoom.viewy > bspcoord[CDoom::BOXBOTTOM]
-        boxy = 1
-      else
-        boxy = 2
-      end
+    if CDoom.viewy >= bspcoord[CDoom::BOXTOP]
+      boxy = 0
+    elsif CDoom.viewy > bspcoord[CDoom::BOXBOTTOM]
+      boxy = 1
+    else
+      boxy = 2
+    end
 
-      boxpos = (boxy << 2) + boxx
-      return 1 if boxpos == 5
+    boxpos = (boxy << 2) + boxx
+    return 1 if boxpos == 5
 
-      x1 = bspcoord[CDoom.checkcoord[boxpos][0]]
-      y1 = bspcoord[CDoom.checkcoord[boxpos][1]]
-      x2 = bspcoord[CDoom.checkcoord[boxpos][2]]
-      y2 = bspcoord[CDoom.checkcoord[boxpos][3]]
+    x1 = bspcoord[CDoom.checkcoord[boxpos][0]]
+    y1 = bspcoord[CDoom.checkcoord[boxpos][1]]
+    x2 = bspcoord[CDoom.checkcoord[boxpos][2]]
+    y2 = bspcoord[CDoom.checkcoord[boxpos][3]]
 
-      # check clip list for an open space
-      angle1 = CDoom.r_point_to_angle(x1, y1) &- CDoom.viewangle
-      angle2 = CDoom.r_point_to_angle(x2, y2) &- CDoom.viewangle
+    # check clip list for an open space
+    angle1 = CDoom.r_point_to_angle(x1, y1) &- CDoom.viewangle
+    angle2 = CDoom.r_point_to_angle(x2, y2) &- CDoom.viewangle
 
-      span = angle1 &- angle2
+    span = angle1 &- angle2
 
-      # Sitting on a line?
-      return 1 if span >= CDoom::ANG180
+    # Sitting on a line?
+    return 1 if span >= CDoom::ANG180
 
-      tspan = angle1 &+ CDoom.clipangle
+    tspan = angle1 &+ CDoom.clipangle
 
-      if tspan > 2 * CDoom.clipangle
-        tspan &-= 2 * CDoom.clipangle
+    if tspan > 2 * CDoom.clipangle
+      tspan &-= 2 * CDoom.clipangle
 
-        # Totally off the left edge?
-        return 0 if tspan >= span
+      # Totally off the left edge?
+      return 0 if tspan >= span
 
-        angle1 = CDoom.clipangle
-      end
-      tspan = CDoom.clipangle &- angle2
-      if tspan > 2 * CDoom.clipangle
-        tspan &-= 2 * CDoom.clipangle
+      angle1 = CDoom.clipangle
+    end
+    tspan = CDoom.clipangle &- angle2
+    if tspan > 2 * CDoom.clipangle
+      tspan &-= 2 * CDoom.clipangle
 
-        # Totally off the left edge?
-        return 0 if tspan >= span
+      # Totally off the left edge?
+      return 0 if tspan >= span
 
-        angle2 = -(CDoom.clipangle.to_i32!)
-      end
+      angle2 = -(CDoom.clipangle.to_i32!)
+    end
 
-      # Find the first clippost
+    # Find the first clippost
     #  that touches the source post
     #  (adjacent pixels are touching).
     angle1 = (angle1 &+ CDoom::ANG90) >> CDoom::ANGLETOFINESHIFT
@@ -18854,69 +18855,67 @@ module LibDoom
     end
 
     if sx1 >= start.value.first &&
-      sx2 <= start.value.last
+       sx2 <= start.value.last
       # The clippost contains the new span.
       return 0
     end
 
     return 1
-     end
+  end
 
-
-     #
-     # Determine floor/ceiling planes.
-# Add sprites of things in sector.
-# Draw one or more line segments.
-#
-      def self.r_subsector(num : LibC::Int)
-        {% if @top_level.has_constant?("RANGECHECK") %}
-          if num >= CDoom.numsubsectors
-            CDoom.doom_strcpy(CDoom.error_buf, "Error: r_subsector: ss ")
-            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(num, 10))
-            CDoom.doom_strcpy(CDoom.error_buf, " with numss = ")
-            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.numsubsectors, 10))
-            CDoom.i_error(CDoom.error_buf)
-          end
-        {% end %}
-
-        CDoom.sscount += 1
-        sub = CDoom.subsectors + num
-        CDoom.frontsector = sub.value.sector
-        count = sub.value.numlines
-        line = CDoom.segs + sub.value.firstline
-
-        if CDoom.frontsector.value.floorheight < CDoom.viewz
-          CDoom.floorplane = CDoom.r_find_plane(CDoom.frontsector.value.floorheight,
-          CDoom.frontsector.value.floorpic,
-          CDoom.frontsector.value.lightlevel)
-        else
-          CDoom.floorplane = Pointer(CDoom::Visplane).null
-        end
-
-        if CDoom.frontsector.value.ceilingheight > CDoom.viewz ||
-          CDoom.frontsector.value.ceilingpic == CDoom.skyflatnum
-          CDoom.ceilingplane = CDoom.r_find_plane(CDoom.frontsector.value.ceilingheight,
-          CDoom.frontsector.value.ceilingpic,
-          CDoom.frontsector.value.lightlevel)
-        else
-          CDoom.ceilingplane = Pointer(CDoom::Visplane).null
-        end
-
-        CDoom.r_add_sprites(CDoom.frontsector)
-
-        while count != 0
-          count -= 1
-          CDoom.r_addline(line)
-          line += 1
-        end
+  #
+  # Determine floor/ceiling planes.
+  # Add sprites of things in sector.
+  # Draw one or more line segments.
+  #
+  def self.r_subsector(num : LibC::Int)
+    {% if @top_level.has_constant?("RANGECHECK") %}
+      if num >= CDoom.numsubsectors
+        CDoom.doom_strcpy(CDoom.error_buf, "Error: r_subsector: ss ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(num, 10))
+        CDoom.doom_strcpy(CDoom.error_buf, " with numss = ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.numsubsectors, 10))
+        CDoom.i_error(CDoom.error_buf)
       end
+    {% end %}
 
+    CDoom.sscount += 1
+    sub = CDoom.subsectors + num
+    CDoom.frontsector = sub.value.sector
+    count = sub.value.numlines
+    line = CDoom.segs + sub.value.firstline
 
-      #
-      # Renders all subsectors below a given node,
-#  traversing subtree recursively.
-# Just call with BSP root.
-#
+    if CDoom.frontsector.value.floorheight < CDoom.viewz
+      CDoom.floorplane = CDoom.r_find_plane(CDoom.frontsector.value.floorheight,
+        CDoom.frontsector.value.floorpic,
+        CDoom.frontsector.value.lightlevel)
+    else
+      CDoom.floorplane = Pointer(CDoom::Visplane).null
+    end
+
+    if CDoom.frontsector.value.ceilingheight > CDoom.viewz ||
+       CDoom.frontsector.value.ceilingpic == CDoom.skyflatnum
+      CDoom.ceilingplane = CDoom.r_find_plane(CDoom.frontsector.value.ceilingheight,
+        CDoom.frontsector.value.ceilingpic,
+        CDoom.frontsector.value.lightlevel)
+    else
+      CDoom.ceilingplane = Pointer(CDoom::Visplane).null
+    end
+
+    CDoom.r_add_sprites(CDoom.frontsector)
+
+    while count != 0
+      count -= 1
+      CDoom.r_addline(line)
+      line += 1
+    end
+  end
+
+  #
+  # Renders all subsectors below a given node,
+  #  traversing subtree recursively.
+  # Just call with BSP root.
+  #
   def self.r_render_bsp_node(bspnum : LibC::Int)
     # Found a subsector?
     if bspnum & CDoom::NF_SUBSECTOR != 0
@@ -18940,6 +18939,531 @@ module LibDoom
     CDoom.r_render_bsp_node(bsp.value.children[side ^ 1]) if CDoom.r_check_bbox(bsp.value.bbox[side ^ 1]) != 0
   end
 
+  #
+  # Graphics.
+  # DOOM graphics for walls and sprites
+  # is stored in vertical runs of opaque pixels (posts).
+  # A column is composed of zero or more posts,
+  # a patch or sprite is composed of zero or more columns.
+  #
 
+  #
+  # MAPTEXTURE_T CACHING
+  # When a texture is first needed,
+  #  it counts the number of composite columns
+  #  required in the texture and allocates space
+  #  for a column directory and any new columns.
+  # The directory will simply point inside other patches
+  #  if there is only one patch in a given column,
+  #  but any columns with multiple patches
+  #  will have new column_ts generated.
+  #
+
+  # Clip and draw a column
+  #  from a patch into a cached post.
+  def self.r_draw_column_in_cache(patch : CDoom::Column*, cache : CDoom::Byte*, originy : LibC::Int, cacheheight : LibC::Int)
+    dest = cache + 3
+
+    while patch.value.topdelta != 0xff
+      source = patch.as(CDoom::Byte*) + 3
+      count = patch.value.length
+      position = originy + patch.value.topdelta
+
+      if position < 0
+        count += position
+        position = 0
+      end
+
+      count = cacheheight - position if position + count > cacheheight
+
+      CDoom.doom_memcpy(cache + position, source, count) if count > 0
+
+      patch = (patch.as(CDoom::Byte*) + patch.value.length + 4).as(CDoom::Column*)
+    end
+  end
+
+  # Using the texture definition,
+  #  the composite texture is created from the patches,
+  #  and each column is cached.
+  def self.r_generate_composite(texnum : LibC::Int)
+    texture = CDoom.textures[texnum]
+
+    block = CDoom.z_malloc(CDoom.texturecompositesize[texnum],
+      CDoom::PU_STATIC,
+      CDoom.texturecomposite + texnum).as(CDoom::Byte*)
+
+    collump = CDoom.texturecolumnlump[texnum]
+    colofs = CDoom.texturecolumnofs[texnum]
+
+    # Composite the columns together.
+    patch = texture.value.patches.to_unsafe
+
+    texture.value.patchcount.times do |i|
+      realpatch = CDoom.w_cache_lump_num(patch.value.patch, CDoom::PU_CACHE).as(CDoom::Patch*)
+      x1 = patch.value.originx
+      x2 = x1 + realpatch.value.width
+
+      if x1 < 0
+        x = 0
+      else
+        x = x1
+      end
+
+      x2 = texture.value.width if x2 > texture.value.width
+
+      while x < x2
+        # Column does not have multiple patches?
+        if collump[x] >= 0
+          x += 1
+          next
+        end
+
+        patchcol = (realpatch.as(CDoom::Byte*) + (realpatch.value.columnofs.to_unsafe + (x - x1)).value).as(CDoom::Column*)
+
+        CDoom.r_draw_column_in_cache(patchcol,
+          block + colofs[x],
+          patch.value.originy,
+          texture.value.height)
+
+        x += 1
+      end
+
+      patch += 1
+    end
+
+    # Now that the texture has been built in column cache,
+    #  it is purgable from zone memory.
+    z_change_tag(block, CDoom::PU_CACHE)
+  end
+
+  def self.r_generate_lookup(texnum : LibC::Int)
+    texture = CDoom.textures[texnum]
+
+    # Composited texture not created yet
+    CDoom.texturecomposite[texnum] = Pointer(CDoom::Byte).null
+
+    CDoom.texturecompositesize[texnum] = 0
+    collump = CDoom.texturecolumnlump[texnum]
+    colofs = CDoom.texturecolumnofs[texnum]
+
+    # Now count the number of columns
+    #  that are covered by more than one patch.
+    # Fill in the lump / offset, so columns
+    #  with only a single patch are all done.
+    patchcount = CDoom.doom_malloc.call(texture.value.width.to_i32).as(CDoom::Byte*)
+    CDoom.doom_memset(patchcount, 0, texture.value.width)
+    patch = texture.value.patches.to_unsafe
+
+    texture.value.patchcount.times do |i|
+      realpatch = CDoom.w_cache_lump_num(patch.value.patch, CDoom::PU_CACHE).as(CDoom::Patch*)
+      x1 = patch.value.originx
+      x2 = x1 + realpatch.value.width
+
+      if x1 < 0
+        x = 0
+      else
+        x = x1
+      end
+
+      x2 = texture.value.width if x2 > texture.value.width
+
+      while x < x2
+        patchcount[x] = patchcount[x] + 1
+        collump[x] = patch.value.patch.to_i16!
+        colofs[x] = ((realpatch.value.columnofs.to_unsafe + (x - x1)).value + 3).to_u16!
+
+        x += 1
+      end
+
+      patch += 1
+    end
+
+    texture.value.width.times do |x|
+      if patchcount[x] == 0
+        CDoom.doom_print.call("r_generate_lookup: column without a patch (".to_unsafe)
+        CDoom.doom_print.call(texture.value.name.to_unsafe)
+        CDoom.doom_print.call(")\n".to_unsafe)
+        return
+      end
+
+      if patchcount[x] > 1
+        # Use the cached block.
+        collump[x] = -1
+        colofs[x] = CDoom.texturecompositesize[texnum].to_u16!
+
+        if CDoom.texturecompositesize[texnum] > 0x10000 - texture.value.height
+          CDoom.doom_strcpy(CDoom.error_buf, "Error: r_generate_lookup: texture ")
+          CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(texnum, 10))
+          CDoom.doom_concat(CDoom.error_buf, " is >64k")
+          CDoom.i_error(CDoom.error_buf)
+        end
+
+        CDoom.texturecompositesize[texnum] = CDoom.texturecompositesize[texnum] + texture.value.height
+      end
+    end
+
+    CDoom.doom_free.call(patchcount.as(Void*))
+  end
+
+  def self.r_get_column(tex : LibC::Int, col : LibC::Int) : CDoom::Byte*
+    col &= CDoom.texturewidthmask[tex]
+    lump = CDoom.texturecolumnlump[tex][col]
+    ofs = CDoom.texturecolumnofs[tex][col]
+
+    return CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE).as(CDoom::Byte*) + ofs if lump > 0
+
+    CDoom.r_generate_composite(tex) if CDoom.texturecomposite[tex].null?
+
+    return CDoom.texturecomposite[tex] + ofs
+  end
+
+  #
+  # Initializes the texture list
+  #  with the textures from the world map.
+  #
+  def self.r_init_textures
+    name = Pointer(UInt8).malloc(9)
+
+    # Load the patch names from pnames.lmp.
+    name[8] = 0
+    names = CDoom.w_cache_lump_name("PNAMES", CDoom::PU_STATIC).as(UInt8*)
+    nummappatches = names.as(Int32*).value
+    name_p = names + 4
+    patchlookup = CDoom.doom_malloc.call(nummappatches * sizeof(Int32)).as(Int32*)
+
+    nummappatches.times do |i|
+      CDoom.doom_strncpy(name, name_p + i * 8, 8)
+      patchlookup[i] = CDoom.w_check_num_for_name(name)
+    end
+    CDoom.z_free(names)
+
+    # Load the map texture definitions from textures.lmp.
+    # The data is contained in one or two lumps,
+    #  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
+    maptex = CDoom.w_cache_lump_name("TEXTURE1", CDoom::PU_STATIC).as(Int32*)
+    maptex1 = maptex
+    numtextures1 = maptex.value
+    maxoff = CDoom.w_lump_length(CDoom.w_get_num_for_name("TEXTURE1"))
+    directory = maptex + 1
+
+    if CDoom.w_check_num_for_name("TEXTURE2") != -1
+      maptex2 = CDoom.w_cache_lump_name("TEXTURE2", CDoom::PU_STATIC).as(Int32*)
+      numtextures2 = maptex2.value
+      maxoff2 = CDoom.w_lump_length(CDoom.w_get_num_for_name("TEXTURE2"))
+    else
+      maptex2 = Pointer(Int32).null
+      numtextures2 = 0
+      maxoff2 = 0
+    end
+    CDoom.numtextures = numtextures1 + numtextures2
+
+    CDoom.textures = CDoom.z_malloc(CDoom.numtextures * sizeof(CDoom::Texture*), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Texture**)
+    CDoom.texturecolumnlump = CDoom.z_malloc(CDoom.numtextures * sizeof(Int16*), CDoom::PU_STATIC, Pointer(Void).null).as(Int16**)
+    CDoom.texturecolumnofs = CDoom.z_malloc(CDoom.numtextures * sizeof(UInt16*), CDoom::PU_STATIC, Pointer(Void).null).as(UInt16**)
+    CDoom.texturecomposite = CDoom.z_malloc(CDoom.numtextures * sizeof(CDoom::Byte*), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Byte**)
+    CDoom.texturecompositesize = CDoom.z_malloc(CDoom.numtextures * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
+    CDoom.texturewidthmask = CDoom.z_malloc(CDoom.numtextures * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
+    CDoom.textureheight = CDoom.z_malloc(CDoom.numtextures * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
+
+    totalwidth = 0
+
+    # Really complex printing shit...
+    CDoom.doom_print.call("[".to_unsafe)
+    ((CDoom.numtextures + 63) // 64).times { |i| CDoom.doom_print.call(" ".to_unsafe) }
+    CDoom.doom_print.call("]".to_unsafe)
+    (((CDoom.numtextures + 63) // 64) + 1).times { |i| CDoom.doom_print.call("\b".to_unsafe) }
+
+    CDoom.numtextures.times do |i|
+      CDoom.doom_print.call(".".to_unsafe) if i & 63 == 0
+
+      if i == numtextures1
+        # Start looking in second texture file.
+        maptex = maptex2
+        maxoff = maxoff2
+        directory = maptex + 1
+      end
+
+      offset = directory.value
+
+      CDoom.i_error("Error: r_init_textures: bad texture directory") if offset > maxoff
+
+      mtexture = (maptex.as(CDoom::Byte*) + offset).as(CDoom::Maptexture*)
+
+      texture = CDoom.z_malloc(sizeof(CDoom::Texture) +
+                               sizeof(CDoom::Texpatch) * (mtexture.value.patchcount - 1),
+        CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Texture*)
+      CDoom.textures[i] = texture
+
+      texture.value.width = mtexture.value.width
+      texture.value.height = mtexture.value.height
+      texture.value.patchcount = mtexture.value.patchcount
+
+      CDoom.doom_memcpy(texture.value.name, mtexture.value.name, sizeof(typeof(texture.value.name)))
+      mpatch = mtexture.value.patches.to_unsafe
+      patch = texture.value.patches.to_unsafe
+
+      texture.value.patchcount.times do |j|
+        patch.value.originx = mpatch.value.originx
+        patch.value.originy = mpatch.value.originy
+        patch.value.patch = patchlookup[mpatch.value.patch]
+        if patch.value.patch == -1
+          CDoom.doom_strcpy(CDoom.error_buf, "Error: r_init_textures: Missing patch in texture ")
+          CDoom.doom_concat(CDoom.error_buf, texture.value.name)
+          CDoom.i_error(CDoom.error_buf)
+        end
+
+        mpatch += 1
+        patch += 1
+      end
+      CDoom.texturecolumnlump[i] = CDoom.z_malloc(texture.value.width * sizeof(Int16), CDoom::PU_STATIC, Pointer(Void).null).as(Int16*)
+      CDoom.texturecolumnofs[i] = CDoom.z_malloc(texture.value.width * sizeof(UInt16), CDoom::PU_STATIC, Pointer(Void).null).as(UInt16*)
+
+      j = 1
+      while j * 2 <= texture.value.width
+        j <<= 1
+      end
+
+      CDoom.texturewidthmask[i] = j - 1
+      CDoom.textureheight[i] = texture.value.height.to_i32 << CDoom::FRACBITS
+
+      totalwidth += texture.value.width
+      directory += 1
+    end
+
+    CDoom.z_free(maptex1)
+    CDoom.z_free(maptex2) unless maptex2.null?
+
+    # Precalculate whatever possible.
+    CDoom.numtextures.times { |i| CDoom.r_generate_lookup(i) }
+
+    # Create translation table for global animation.
+    CDoom.texturetranslation = CDoom.z_malloc((CDoom.numtextures + 1) * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
+
+    CDoom.numtextures.times { |i| CDoom.texturetranslation[i] = i }
+
+    CDoom.doom_free.call(patchlookup.as(Void*))
+  end
+
+  def self.r_init_flats
+    CDoom.firstflat = CDoom.w_get_num_for_name("F_START") + 1
+    CDoom.lastflat = CDoom.w_get_num_for_name("F_END") - 1
+    CDoom.numflats = CDoom.lastflat - CDoom.firstflat + 1
+
+    # Create translation table for global animation.
+    CDoom.flattranslation = CDoom.z_malloc((CDoom.numflats + 1) * sizeof(Int32), CDoom::PU_STATIC, Pointer(Void).null).as(Int32*)
+
+    CDoom.doom_print.call("[".to_unsafe)
+    ((CDoom.numflats + 63) // 64).times { |i| CDoom.doom_print.call(" ".to_unsafe) }
+    CDoom.doom_print.call("]".to_unsafe)
+    (((CDoom.numflats + 63) // 64) + 1).times { |i| CDoom.doom_print.call("\b".to_unsafe) }
+
+    CDoom.numflats.times do |i|
+      CDoom.doom_print.call(".".to_unsafe) if i & 63 == 0
+      CDoom.flattranslation[i] = i
+    end
+  end
+
+  #
+  # Finds the width and hoffset of all sprites in the wad,
+  #  so the sprite does not need to be cached completely
+  #  just for having the header info ready during rendering.
+  #
+  def self.r_init_sprite_lumps
+    CDoom.firstspritelump = CDoom.w_get_num_for_name("S_START") + 1
+    CDoom.lastspritelump = CDoom.w_get_num_for_name("S_END") - 1
+
+    CDoom.numspritelumps = CDoom.lastspritelump - CDoom.firstspritelump + 1
+    CDoom.spritewidth = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
+    CDoom.spriteoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
+    CDoom.spritetopoffset = CDoom.z_malloc(CDoom.numspritelumps * sizeof(CDoom::Fixed), CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Fixed*)
+
+    CDoom.doom_print.call("[".to_unsafe)
+    ((CDoom.numspritelumps + 63) // 64).times { |i| CDoom.doom_print.call(" ".to_unsafe) }
+    CDoom.doom_print.call("]".to_unsafe)
+    (((CDoom.numspritelumps + 63) // 64) + 1).times { |i| CDoom.doom_print.call("\b".to_unsafe) }
+
+    CDoom.numspritelumps.times do |i|
+      CDoom.doom_print.call(".".to_unsafe) if i & 63 == 0
+
+      patch = CDoom.w_cache_lump_num(CDoom.firstspritelump + i, CDoom::PU_CACHE).as(CDoom::Patch*)
+      CDoom.spritewidth[i] = patch.value.width.to_i32 << CDoom::FRACBITS
+      CDoom.spriteoffset[i] = patch.value.leftoffset.to_i32 << CDoom::FRACBITS
+      CDoom.spritetopoffset[i] = patch.value.topoffset.to_i32 << CDoom::FRACBITS
+    end
+  end
+
+  def self.r_init_colormaps
+    # Load in the light tables,
+    #  256 byte align tables.
+    lump = CDoom.w_get_num_for_name("COLORMAP")
+    length = CDoom.w_lump_length(lump) + 255
+    CDoom.colormaps = CDoom.z_malloc(length, CDoom::PU_STATIC, Pointer(Void).null).as(CDoom::Lighttable*)
+    CDoom.colormaps = Pointer(CDoom::Lighttable).new(((CDoom.colormaps.address + 255) & ~0xff))
+    CDoom.w_read_lump(lump, CDoom.colormaps)
+    CDoom.doom_print.call("x".to_unsafe)
+  end
+
+  #
+  # Locates all the lumps
+  #  that will be used by all views
+  # Must be called after W_Init.
+  #
+  def self.r_init_data
+    CDoom.doom_print.call("\n  init_textures  - ".to_unsafe)
+    CDoom.r_init_textures
+    CDoom.doom_print.call("\n  init_flats     - ".to_unsafe)
+    CDoom.r_init_flats
+    CDoom.doom_print.call("\n  init_sprites   - ".to_unsafe)
+    CDoom.r_init_sprite_lumps
+    CDoom.doom_print.call("\n  init_colormaps - ".to_unsafe)
+    CDoom.r_init_colormaps
+  end
+
+  #
+  # Retrieval, get a flat number for a flat name.
+  #
+  def self.r_flat_num_for_name(name : LibC::Char*) : LibC::Int
+    namet = uninitialized StaticArray(UInt8, 9)
+
+    i = CDoom.w_check_num_for_name(name)
+
+    if i == -1
+      namet[8] = 0
+      CDoom.doom_memcpy(namet, name, 8)
+
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: r_flat_num_for_name: ")
+      CDoom.doom_concat(CDoom.error_buf, namet)
+      CDoom.doom_concat(CDoom.error_buf, " not found")
+      CDoom.i_error(CDoom.error_buf)
+    end
+    return i - CDoom.firstflat
+  end
+
+  #
+  # Check whether texture is available.
+  # Filter out NoTexture indicator.
+  #
+  def self.r_check_texture_num_for_name(name : LibC::Char*) : LibC::Int
+    # "NoTexture" marker.
+    return 0 if name[0] == '-'.ord
+
+    CDoom.numtextures.times { |i| return i if CDoom.doom_strncasecmp(CDoom.textures[i].value.name, name, 8) == 0 }
+
+    return -1
+  end
+
+  #
+  # Calls R_CheckTextureNumForName,
+  #  aborts with error message.
+  #
+  def self.r_texture_num_for_name(name : LibC::Char*) : LibC::Int
+    i = CDoom.r_check_texture_num_for_name(name)
+
+    if i == -1
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: r_texture_num_for_name: ")
+      CDoom.doom_concat(CDoom.error_buf, name)
+      CDoom.doom_concat(CDoom.error_buf, " not found")
+      CDoom.i_error(CDoom.error_buf)
+    end
+
+    return i
+  end
+
+  #
+  # Preloads all relevant graphics for the level.
+  #
+  def self.r_precache_level
+    return if CDoom.demoplayback != 0
+
+    # Precache flats.
+    flatpresent = CDoom.doom_malloc.call(CDoom.numflats).as(UInt8*)
+    CDoom.doom_memset(flatpresent, 0, CDoom.numflats)
+
+    CDoom.numsectors.times do |i|
+      flatpresent[CDoom.sectors[i].floorpic] = 1
+      flatpresent[CDoom.sectors[i].ceilingpic] = 1
+    end
+
+    CDoom.flatmemory = 0
+
+    CDoom.numflats.times do |i|
+      if flatpresent[i] != 0
+        lump = CDoom.firstflat + i
+        CDoom.flatmemory += CDoom.lumpinfo[lump].size
+        CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
+      end
+    end
+
+    # Precache textures.
+    texturepresent = CDoom.doom_malloc.call(CDoom.numtextures).as(UInt8*)
+    CDoom.doom_memset(texturepresent, 0, CDoom.numtextures)
+
+    CDoom.numsides.times do |i|
+      texturepresent[CDoom.sides[i].toptexture] = 1
+      texturepresent[CDoom.sides[i].midtexture] = 1
+      texturepresent[CDoom.sides[i].bottomtexture] = 1
+    end
+
+    # Sky texture is always present.
+    # Note that F_SKY1 is the name used to
+    #  indicate a sky floor/ceiling as a flat,
+    #  while the sky texture is stored like
+    #  a wall texture, with an episode dependend
+    #  name.
+    texturepresent[CDoom.skytexture] = 1
+
+    CDoom.texturememory = 0
+    CDoom.numtextures.times do |i|
+      next if texturepresent[i] == 0
+
+      texture = CDoom.textures[i]
+
+      texture.value.patchcount.times do |j|
+        lump = (texture.value.patches.to_unsafe + j).value.patch
+        CDoom.texturememory += CDoom.lumpinfo[lump].size
+        CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
+      end
+    end
+
+    # Precache sprites.
+    spritepresent = CDoom.doom_malloc.call(CDoom.numsprites).as(UInt8*)
+    CDoom.doom_memset(spritepresent, 0, CDoom.numsprites)
+
+    th = CDoom.thinkercap.next
+    while th != pointerof(CDoom.thinkercap)
+      if th.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
+        spritepresent[th.as(CDoom::Mobj*).value.sprite.value] = 1
+      end
+
+      th = th.value.next
+    end
+
+    CDoom.spritememory = 0
+    CDoom.numsprites.times do |i|
+      next if spritepresent[i] == 0
+
+      CDoom.sprites[i].numframes.times do |j|
+        sf = (CDoom.sprites + i).value.spriteframes + j
+        8.times do |k|
+          lump = CDoom.firstspritelump + sf.value.lump[k]
+          CDoom.spritememory += CDoom.lumpinfo[lump].size
+          CDoom.w_cache_lump_num(lump, CDoom::PU_CACHE)
+        end
+      end
+    end
+
+    CDoom.doom_free.call(texturepresent.as(Void*))
+    CDoom.doom_free.call(flatpresent.as(Void*))
+    CDoom.doom_free.call(spritepresent.as(Void*))
+  end
+
+  #
+  # All drawing to the view buffer is accomplished in this file.
+  # The other refresh files only know about ccordinates,
+  #  not the architecture of the frame buffer.
+  # Conveniently, the frame buffer is a linear one,
+  #  and we need only the base address,
+  #  and the total size == width*height*depth/8.,
+  #
 
 end

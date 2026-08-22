@@ -26,5 +26,6 @@ add plutonia tnt pack detection for version printing and stuff
 -- Fixed a_vile_target fog using two x's
 -- Fixed p_load_things breaking if Doom 2 monster on non Doom 2 wad instead of continuing to next thing
 -- Fixed p_change_switch_texture playing button sound at location of buttonlist[0] instead of buttonlist[i]
+-- Modified loading print text (InitTexture - [.....])
 
 cast not checking if button is down as well as key (so you can shoot with mouse)

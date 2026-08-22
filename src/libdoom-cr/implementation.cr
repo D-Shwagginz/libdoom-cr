@@ -2297,14 +2297,66 @@ fun r_addline = R_AddLine(line : CDoom::Seg*)
   LibDoom.r_addline(line)
 end
 
-    fun r_check_bbox = R_CheckBBox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
-LibDoom.r_check_bbox(bspcoord)
-    end
+fun r_check_bbox = R_CheckBBox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
+  LibDoom.r_check_bbox(bspcoord)
+end
 
-      fun r_subsector = R_Subsector(num : LibC::Int)
-LibDoom.r_subsector(num)
-      end
+fun r_subsector = R_Subsector(num : LibC::Int)
+  LibDoom.r_subsector(num)
+end
 
-  fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
-LibDoom.r_render_bsp_node(bspnum)
-  end
+fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
+  LibDoom.r_render_bsp_node(bspnum)
+end
+
+fun r_draw_column_in_cache = R_DrawColumnInCache(patch : CDoom::Column*, cache : CDoom::Byte*, originy : LibC::Int, cacheheight : LibC::Int)
+  LibDoom.r_draw_column_in_cache(patch, cache, originy, cacheheight)
+end
+
+fun r_generate_composite = R_GenerateComposite(texnum : LibC::Int)
+  LibDoom.r_generate_composite(texnum)
+end
+
+fun r_generate_lookup = R_GenerateLookup(texnum : LibC::Int)
+  LibDoom.r_generate_lookup(texnum)
+end
+
+fun r_get_column = R_GetColumn(tex : LibC::Int, col : LibC::Int) : CDoom::Byte*
+  LibDoom.r_get_column(tex, col)
+end
+
+fun r_init_textures = R_InitTextures
+  LibDoom.r_init_textures
+end
+
+fun r_init_flats = R_InitFlats
+  LibDoom.r_init_flats
+end
+
+fun r_init_sprite_lumps = R_InitSpriteLumps
+  LibDoom.r_init_sprite_lumps
+end
+
+fun r_init_colormaps = R_InitColormaps
+  LibDoom.r_init_colormaps
+end
+
+fun r_init_data = R_InitData
+  LibDoom.r_init_data
+end
+
+fun r_flat_num_for_name = R_FlatNumForName(name : LibC::Char*) : LibC::Int
+  LibDoom.r_flat_num_for_name(name)
+end
+
+fun r_check_texture_num_for_name = R_CheckTextureNumForName(name : LibC::Char*) : LibC::Int
+  LibDoom.r_check_texture_num_for_name(name)
+end
+
+fun r_texture_num_for_name = R_TextureNumForName(name : LibC::Char*) : LibC::Int
+  LibDoom.r_texture_num_for_name(name)
+end
+
+fun r_precache_level = R_PrecacheLevel
+  LibDoom.r_precache_level
+end
