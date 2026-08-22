@@ -5627,8 +5627,8 @@ void P_SpawnGlowingLight(sector_t* sector);
 //
 typedef struct
 {
-    char name1[9];
-    char name2[9];
+    char* name1;
+    char* name2;
     short episode;
 } switchlist_t;
 
@@ -16128,129 +16128,7 @@ extern fixed_t P_InterceptVector2(divline_t* v2, divline_t* v1);
 // Returns true
 //  if strace crosses the given subsector successfully.
 //
-doom_boolean P_CrossSubsector(int num)
-{
-    seg_t* seg;
-    line_t* line;
-    int s1;
-    int s2;
-    int count;
-    subsector_t* sub;
-    sector_t* front;
-    sector_t* back;
-    fixed_t opentop;
-    fixed_t openbottom;
-    divline_t divl;
-    vertex_t* v1;
-    vertex_t* v2;
-    fixed_t frac;
-    fixed_t slope;
-
-#ifdef RANGECHECK
-    if (num >= numsubsectors)
-    {
-        //I_Error("Error: P_CrossSubsector: ss %i with numss = %i",
-        //        num,
-        //        numsubsectors);
-        
-        doom_strcpy(error_buf, "Error: P_CrossSubsector: ss ");
-        doom_concat(error_buf, doom_itoa(num, 10));
-        doom_concat(error_buf, " with numss = ");
-        doom_concat(error_buf, doom_itoa(numsubsectors, 10));
-        I_Error(error_buf);
-    }
-#endif
-
-    sub = &subsectors[num];
-
-    // check lines
-    count = sub->numlines;
-    seg = &segs[sub->firstline];
-
-    for (; count; seg++, count--)
-    {
-        line = seg->linedef;
-
-        // allready checked other side?
-        if (line->validcount == validcount)
-            continue;
-
-        line->validcount = validcount;
-
-        v1 = line->v1;
-        v2 = line->v2;
-        s1 = P_DivlineSide(v1->x, v1->y, &strace);
-        s2 = P_DivlineSide(v2->x, v2->y, &strace);
-
-        // line isn't crossed?
-        if (s1 == s2)
-            continue;
-
-        divl.x = v1->x;
-        divl.y = v1->y;
-        divl.dx = v2->x - v1->x;
-        divl.dy = v2->y - v1->y;
-        s1 = P_DivlineSide(strace.x, strace.y, &divl);
-        s2 = P_DivlineSide(t2x, t2y, &divl);
-
-        // line isn't crossed?
-        if (s1 == s2)
-            continue;
-
-        // stop because it is not two sided anyway
-        // might do this after updating validcount?
-        if (!(line->flags & ML_TWOSIDED))
-            return false;
-
-        // crosses a two sided line
-        front = seg->frontsector;
-        back = seg->backsector;
-
-        // no wall to block sight with?
-        if (front->floorheight == back->floorheight
-            && front->ceilingheight == back->ceilingheight)
-            continue;
-
-        // possible occluder
-        // because of ceiling height differences
-        if (front->ceilingheight < back->ceilingheight)
-            opentop = front->ceilingheight;
-        else
-            opentop = back->ceilingheight;
-
-        // because of ceiling height differences
-        if (front->floorheight > back->floorheight)
-            openbottom = front->floorheight;
-        else
-            openbottom = back->floorheight;
-
-        // quick test for totally closed doors
-        if (openbottom >= opentop)
-            return false; // stop
-
-        frac = P_InterceptVector2(&strace, &divl);
-
-        if (front->floorheight != back->floorheight)
-        {
-            slope = FixedDiv(openbottom - sightzstart, frac);
-            if (slope > bottomslope)
-                bottomslope = slope;
-        }
-
-        if (front->ceilingheight != back->ceilingheight)
-        {
-            slope = FixedDiv(opentop - sightzstart, frac);
-            if (slope < topslope)
-                topslope = slope;
-        }
-
-        if (topslope <= bottomslope)
-            return false; // stop                                
-    }
-
-    // passed the subsector ok
-    return true;
-}
+extern doom_boolean P_CrossSubsector(int num);
 
 
 //
@@ -16258,40 +16136,7 @@ doom_boolean P_CrossSubsector(int num)
 // Returns true
 //  if strace crosses the given node successfully.
 //
-doom_boolean P_CrossBSPNode(int bspnum)
-{
-    node_t* bsp;
-    int side;
-
-    if (bspnum & NF_SUBSECTOR)
-    {
-        if (bspnum == -1)
-            return P_CrossSubsector(0);
-        else
-            return P_CrossSubsector(bspnum & (~NF_SUBSECTOR));
-    }
-
-    bsp = &nodes[bspnum];
-
-    // decide which side the start point is on
-    side = P_DivlineSide(strace.x, strace.y, (divline_t*)bsp);
-    if (side == 2)
-        side = 0; // an "on" should cross both sides
-
-    // cross the starting side
-    if (!P_CrossBSPNode(bsp->children[side]))
-        return false;
-
-    // the partition plane is crossed here
-    if (side == P_DivlineSide(t2x, t2y, (divline_t*)bsp))
-    {
-        // the line doesn't touch the other side
-        return true;
-    }
-
-    // cross the ending side                
-    return P_CrossBSPNode(bsp->children[side ^ 1]);
-}
+extern doom_boolean P_CrossBSPNode(int bspnum);
 
 
 //
@@ -16300,52 +16145,7 @@ doom_boolean P_CrossBSPNode(int bspnum)
 //  if a straight line between t1 and t2 is unobstructed.
 // Uses REJECT.
 //
-doom_boolean P_CheckSight(mobj_t* t1, mobj_t* t2)
-{
-    int s1;
-    int s2;
-    int pnum;
-    int bytenum;
-    int bitnum;
-
-    // First check for trivial rejection.
-
-    // Determine subsector entries in REJECT table.
-    s1 = (int)(t1->subsector->sector - sectors);
-    s2 = (int)(t2->subsector->sector - sectors);
-    pnum = s1 * numsectors + s2;
-    bytenum = pnum >> 3;
-    bitnum = 1 << (pnum & 7);
-
-    // Check in REJECT table.
-    if (rejectmatrix[bytenum] & bitnum)
-    {
-        sightcounts[0]++;
-
-        // can't possibly be connected
-        return false;
-    }
-
-    // An unobstructed LOS is possible.
-    // Now look from eyes of t1 to any part of t2.
-    sightcounts[1]++;
-
-    validcount++;
-
-    sightzstart = t1->z + t1->height - (t1->height >> 2);
-    topslope = (t2->z + t2->height) - sightzstart;
-    bottomslope = (t2->z) - sightzstart;
-
-    strace.x = t1->x;
-    strace.y = t1->y;
-    t2x = t2->x;
-    t2y = t2->y;
-    strace.dx = t2->x - t1->x;
-    strace.dy = t2->y - t1->y;
-
-    // the head node is the last node output
-    return P_CrossBSPNode(numnodes - 1);
-}
+extern doom_boolean P_CheckSight(mobj_t* t1, mobj_t* t2);
 #define MAXANIMS 32
 #define MAXLINEANIMS 64
 
@@ -16372,8 +16172,8 @@ typedef struct
 typedef struct
 {
     doom_boolean istexture; // if false, it is a flat
-    char endname[9];
-    char startname[9];
+    char* endname;
+    char* startname;
     int speed;
 } animdef_t;
 
@@ -16401,38 +16201,7 @@ extern anim_t* lastanim;
 //  and end entry, in the order found in
 //  the WAD file.
 //
-animdef_t animdefs[] =
-{
-    {false,       "NUKAGE3",      "NUKAGE1",      8},
-    {false,       "FWATER4",      "FWATER1",      8},
-    {false,       "SWATER4",      "SWATER1",      8},
-    {false,       "LAVA4",        "LAVA1",        8},
-    {false,       "BLOOD3",       "BLOOD1",       8},
-
-    // DOOM II flat animations.
-    {false,       "RROCK08",      "RROCK05",      8},
-    {false,       "SLIME04",      "SLIME01",      8},
-    {false,       "SLIME08",      "SLIME05",      8},
-    {false,       "SLIME12",      "SLIME09",      8},
-
-    {true,        "BLODGR4",      "BLODGR1",      8},
-    {true,        "SLADRIP3",     "SLADRIP1",     8},
-
-    {true,        "BLODRIP4",     "BLODRIP1",     8},
-    {true,        "FIREWALL",     "FIREWALA",     8},
-    {true,        "GSTFONT3",     "GSTFONT1",     8},
-    {true,        "FIRELAVA",     "FIRELAV3",     8},
-    {true,        "FIREMAG3",     "FIREMAG1",     8},
-    {true,        "FIREBLU2",     "FIREBLU1",     8},
-    {true,        "ROCKRED3",     "ROCKRED1",     8},
-
-    {true,        "BFALL4",       "BFALL1",       8},
-    {true,        "SFALL4",       "SFALL1",       8},
-    {true,        "WFALL4",       "WFALL1",       8},
-    {true,        "DBRAIN4",      "DBRAIN1",      8},
-
-    {-1}
-};
+animdef_t* animdefs;
 
 anim_t anims[MAXANIMS];
 anim_t* lastanim;
@@ -16446,52 +16215,7 @@ extern short numlinespecials;
 extern line_t* linespeciallist[MAXLINEANIMS];
 
 
-void P_InitPicAnims(void)
-{
-    int i;
-
-    // Init animation
-    lastanim = anims;
-    for (i = 0; animdefs[i].istexture != (doom_boolean)-1; i++)
-    {
-        if (animdefs[i].istexture)
-        {
-            // different episode ?
-            if (R_CheckTextureNumForName(animdefs[i].startname) == -1)
-                continue;
-
-            lastanim->picnum = R_TextureNumForName(animdefs[i].endname);
-            lastanim->basepic = R_TextureNumForName(animdefs[i].startname);
-        }
-        else
-        {
-            if (W_CheckNumForName(animdefs[i].startname) == -1)
-                continue;
-
-            lastanim->picnum = R_FlatNumForName(animdefs[i].endname);
-            lastanim->basepic = R_FlatNumForName(animdefs[i].startname);
-        }
-
-        lastanim->istexture = animdefs[i].istexture;
-        lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
-
-        if (lastanim->numpics < 2)
-        {
-            //I_Error("Error: P_InitPicAnims: bad cycle from %s to %s",
-            //        animdefs[i].startname,
-            //        animdefs[i].endname);
-            
-            doom_strcpy(error_buf, "Error: P_InitPicAnims: bad cycle from ");
-            doom_concat(error_buf, animdefs[i].startname);
-            doom_concat(error_buf, " to ");
-            doom_concat(error_buf, animdefs[i].endname);
-            I_Error(error_buf);
-        }
-
-        lastanim->speed = animdefs[i].speed;
-        lastanim++;
-    }
-}
+extern void P_InitPicAnims(void);
 
 
 //
@@ -16504,11 +16228,7 @@ void P_InitPicAnims(void)
 //  given the number of the current sector,
 //  the line number, and the side (0/1) that you want.
 //
-side_t* getSide(int currentSector, int line, int side)
-{
-    return &sides[(sectors[currentSector].lines[line])->sidenum[side]];
-}
-
+extern side_t* getSide(int currentSector, int line, int side);
 
 //
 // getSector()
@@ -16516,10 +16236,7 @@ side_t* getSide(int currentSector, int line, int side)
 //  given the number of the current sector,
 //  the line number and the side (0/1) that you want.
 //
-sector_t* getSector(int currentSector, int line, int side)
-{
-    return sides[(sectors[currentSector].lines[line])->sidenum[side]].sector;
-}
+extern sector_t* getSector(int currentSector, int line, int side);
 
 
 //
@@ -16527,10 +16244,7 @@ sector_t* getSector(int currentSector, int line, int side)
 // Given the sector number and the line number,
 //  it will tell you whether the line is two-sided or not.
 //
-int twoSided(int sector, int line)
-{
-    return (sectors[sector].lines[line])->flags & ML_TWOSIDED;
-}
+extern int twoSided(int sector, int line);
 
 
 //
@@ -16538,214 +16252,52 @@ int twoSided(int sector, int line)
 // Return sector_t * of sector next to current.
 // 0 if not two-sided line
 //
-sector_t* getNextSector(line_t* line, sector_t* sec)
-{
-    if (!(line->flags & ML_TWOSIDED))
-        return 0;
-
-    if (line->frontsector == sec)
-        return line->backsector;
-
-    return line->frontsector;
-}
+extern sector_t* getNextSector(line_t* line, sector_t* sec);
 
 
 //
 // P_FindLowestFloorSurrounding()
 // FIND LOWEST FLOOR HEIGHT IN SURROUNDING SECTORS
 //
-fixed_t P_FindLowestFloorSurrounding(sector_t* sec)
-{
-    int i;
-    line_t* check;
-    sector_t* other;
-    fixed_t floor = sec->floorheight;
-
-    for (i = 0; i < sec->linecount; i++)
-    {
-        check = sec->lines[i];
-        other = getNextSector(check, sec);
-
-        if (!other)
-            continue;
-
-        if (other->floorheight < floor)
-            floor = other->floorheight;
-    }
-
-    return floor;
-}
+extern fixed_t P_FindLowestFloorSurrounding(sector_t* sec);
 
 
 //
 // P_FindHighestFloorSurrounding()
 // FIND HIGHEST FLOOR HEIGHT IN SURROUNDING SECTORS
 //
-fixed_t P_FindHighestFloorSurrounding(sector_t* sec)
-{
-    int i;
-    line_t* check;
-    sector_t* other;
-    fixed_t floor = -500 * FRACUNIT;
-
-    for (i = 0; i < sec->linecount; i++)
-    {
-        check = sec->lines[i];
-        other = getNextSector(check, sec);
-
-        if (!other)
-            continue;
-
-        if (other->floorheight > floor)
-            floor = other->floorheight;
-    }
-
-    return floor;
-}
+extern fixed_t P_FindHighestFloorSurrounding(sector_t* sec);
 
 
 //
 // P_FindNextHighestFloor
 // FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
 // Note: this should be doable w/o a fixed array.
-fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
-{
-    int i;
-    int h;
-    int min;
-    line_t* check;
-    sector_t* other;
-    fixed_t height = currentheight;
-
-    fixed_t heightlist[MAX_ADJOINING_SECTORS];
-
-    for (i = 0, h = 0; i < sec->linecount; i++)
-    {
-        check = sec->lines[i];
-        other = getNextSector(check, sec);
-
-        if (!other)
-            continue;
-
-        if (other->floorheight > height)
-            heightlist[h++] = other->floorheight;
-
-        // Check for overflow. Exit.
-        if (h >= MAX_ADJOINING_SECTORS)
-        {
-            doom_print(
-                    "Sector with more than 20 adjoining sectors\n");
-            break;
-        }
-    }
-
-    // Find lowest height in list
-    if (!h)
-        return currentheight;
-
-    min = heightlist[0];
-
-    // Range checking? 
-    for (i = 1; i < h; i++)
-        if (heightlist[i] < min)
-            min = heightlist[i];
-
-    return min;
-}
+extern fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight);
 
 
 //
 // FIND LOWEST CEILING IN THE SURROUNDING SECTORS
 //
-fixed_t P_FindLowestCeilingSurrounding(sector_t* sec)
-{
-    int i;
-    line_t* check;
-    sector_t* other;
-    fixed_t height = DOOM_MAXINT;
-
-    for (i = 0; i < sec->linecount; i++)
-    {
-        check = sec->lines[i];
-        other = getNextSector(check, sec);
-
-        if (!other)
-            continue;
-
-        if (other->ceilingheight < height)
-            height = other->ceilingheight;
-    }
-
-    return height;
-}
+extern fixed_t P_FindLowestCeilingSurrounding(sector_t* sec);
 
 
 //
 // FIND HIGHEST CEILING IN THE SURROUNDING SECTORS
 //
-fixed_t P_FindHighestCeilingSurrounding(sector_t* sec)
-{
-    int i;
-    line_t* check;
-    sector_t* other;
-    fixed_t height = 0;
-
-    for (i = 0; i < sec->linecount; i++)
-    {
-        check = sec->lines[i];
-        other = getNextSector(check, sec);
-
-        if (!other)
-            continue;
-
-        if (other->ceilingheight > height)
-            height = other->ceilingheight;
-    }
-
-    return height;
-}
+extern fixed_t P_FindHighestCeilingSurrounding(sector_t* sec);
 
 
 //
 // RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
 //
-int P_FindSectorFromLineTag(line_t* line, int start)
-{
-    int i;
-
-    for (i = start + 1; i < numsectors; i++)
-        if (sectors[i].tag == line->tag)
-            return i;
-
-    return -1;
-}
+extern int P_FindSectorFromLineTag(line_t* line, int start);
 
 
 //
 // Find minimum light from an adjacent sector
 //
-int P_FindMinSurroundingLight(sector_t* sector, int max)
-{
-    int i;
-    int min;
-    line_t* line;
-    sector_t* check;
-
-    min = max;
-    for (i = 0; i < sector->linecount; i++)
-    {
-        line = sector->lines[i];
-        check = getNextSector(line, sector);
-
-        if (!check)
-            continue;
-
-        if (check->lightlevel < min)
-            min = check->lightlevel;
-    }
-
-    return min;
-}
+extern int P_FindMinSurroundingLight(sector_t* sector, int max);
 
 
 //
@@ -16759,507 +16311,14 @@ int P_FindMinSurroundingLight(sector_t* sector, int max)
 // Called every time a thing origin is about
 //  to cross a line with a non 0 special.
 //
-void P_CrossSpecialLine(int linenum, int side, mobj_t* thing)
-{
-    line_t* line;
-    int ok;
-
-    line = &lines[linenum];
-
-    //        Triggers that other things can activate
-    if (!thing->player)
-    {
-        // Things that should NOT trigger specials...
-        switch (thing->type)
-        {
-            case MT_ROCKET:
-            case MT_PLASMA:
-            case MT_BFG:
-            case MT_TROOPSHOT:
-            case MT_HEADSHOT:
-            case MT_BRUISERSHOT:
-                return;
-                break;
-
-            default: break;
-        }
-
-        ok = 0;
-        switch (line->special)
-        {
-            case 39:        // TELEPORT TRIGGER
-            case 97:        // TELEPORT RETRIGGER
-            case 125:        // TELEPORT MONSTERONLY TRIGGER
-            case 126:        // TELEPORT MONSTERONLY RETRIGGER
-            case 4:        // RAISE DOOR
-            case 10:        // PLAT DOWN-WAIT-UP-STAY TRIGGER
-            case 88:        // PLAT DOWN-WAIT-UP-STAY RETRIGGER
-                ok = 1;
-                break;
-        }
-        if (!ok)
-            return;
-    }
-
-    // Note: could use some const's here.
-    switch (line->special)
-    {
-        // TRIGGERS.
-        // All from here to RETRIGGERS.
-        case 2:
-            // Open Door
-            EV_DoDoor(line, door_open);
-            line->special = 0;
-            break;
-
-        case 3:
-            // Close Door
-            EV_DoDoor(line, door_close);
-            line->special = 0;
-            break;
-
-        case 4:
-            // Raise Door
-            EV_DoDoor(line, door_normal);
-            line->special = 0;
-            break;
-
-        case 5:
-            // Raise Floor
-            EV_DoFloor(line, raiseFloor);
-            line->special = 0;
-            break;
-
-        case 6:
-            // Fast Ceiling Crush & Raise
-            EV_DoCeiling(line, fastCrushAndRaise);
-            line->special = 0;
-            break;
-
-        case 8:
-            // Build Stairs
-            EV_BuildStairs(line, build8);
-            line->special = 0;
-            break;
-
-        case 10:
-            // PlatDownWaitUp
-            EV_DoPlat(line, downWaitUpStay, 0);
-            line->special = 0;
-            break;
-
-        case 12:
-            // Light Turn On - brightest near
-            EV_LightTurnOn(line, 0);
-            line->special = 0;
-            break;
-
-        case 13:
-            // Light Turn On 255
-            EV_LightTurnOn(line, 255);
-            line->special = 0;
-            break;
-
-        case 16:
-            // Close Door 30
-            EV_DoDoor(line, close30ThenOpen);
-            line->special = 0;
-            break;
-
-        case 17:
-            // Start Light Strobing
-            EV_StartLightStrobing(line);
-            line->special = 0;
-            break;
-
-        case 19:
-            // Lower Floor
-            EV_DoFloor(line, lowerFloor);
-            line->special = 0;
-            break;
-
-        case 22:
-            // Raise floor to nearest height and change texture
-            EV_DoPlat(line, raiseToNearestAndChange, 0);
-            line->special = 0;
-            break;
-
-        case 25:
-            // Ceiling Crush and Raise
-            EV_DoCeiling(line, crushAndRaise);
-            line->special = 0;
-            break;
-
-        case 30:
-            // Raise floor to shortest texture height
-            //  on either side of lines.
-            EV_DoFloor(line, raiseToTexture);
-            line->special = 0;
-            break;
-
-        case 35:
-            // Lights Very Dark
-            EV_LightTurnOn(line, 35);
-            line->special = 0;
-            break;
-
-        case 36:
-            // Lower Floor (TURBO)
-            EV_DoFloor(line, turboLower);
-            line->special = 0;
-            break;
-
-        case 37:
-            // LowerAndChange
-            EV_DoFloor(line, lowerAndChange);
-            line->special = 0;
-            break;
-
-        case 38:
-            // Lower Floor To Lowest
-            EV_DoFloor(line, lowerFloorToLowest);
-            line->special = 0;
-            break;
-
-        case 39:
-            // TELEPORT!
-            EV_Teleport(line, side, thing);
-            line->special = 0;
-            break;
-
-        case 40:
-            // RaiseCeilingLowerFloor
-            EV_DoCeiling(line, raiseToHighest);
-            EV_DoFloor(line, lowerFloorToLowest);
-            line->special = 0;
-            break;
-
-        case 44:
-            // Ceiling Crush
-            EV_DoCeiling(line, lowerAndCrush);
-            line->special = 0;
-            break;
-
-        case 52:
-            // EXIT!
-            G_ExitLevel();
-            break;
-
-        case 53:
-            // Perpetual Platform Raise
-            EV_DoPlat(line, perpetualRaise, 0);
-            line->special = 0;
-            break;
-
-        case 54:
-            // Platform Stop
-            EV_StopPlat(line);
-            line->special = 0;
-            break;
-
-        case 56:
-            // Raise Floor Crush
-            EV_DoFloor(line, raiseFloorCrush);
-            line->special = 0;
-            break;
-
-        case 57:
-            // Ceiling Crush Stop
-            EV_CeilingCrushStop(line);
-            line->special = 0;
-            break;
-
-        case 58:
-            // Raise Floor 24
-            EV_DoFloor(line, raiseFloor24);
-            line->special = 0;
-            break;
-
-        case 59:
-            // Raise Floor 24 And Change
-            EV_DoFloor(line, raiseFloor24AndChange);
-            line->special = 0;
-            break;
-
-        case 104:
-            // Turn lights off in sector(tag)
-            EV_TurnTagLightsOff(line);
-            line->special = 0;
-            break;
-
-        case 108:
-            // Blazing Door Raise (faster than TURBO!)
-            EV_DoDoor(line, blazeRaise);
-            line->special = 0;
-            break;
-
-        case 109:
-            // Blazing Door Open (faster than TURBO!)
-            EV_DoDoor(line, blazeOpen);
-            line->special = 0;
-            break;
-
-        case 100:
-            // Build Stairs Turbo 16
-            EV_BuildStairs(line, turbo16);
-            line->special = 0;
-            break;
-
-        case 110:
-            // Blazing Door Close (faster than TURBO!)
-            EV_DoDoor(line, blazeClose);
-            line->special = 0;
-            break;
-
-        case 119:
-            // Raise floor to nearest surr. floor
-            EV_DoFloor(line, raiseFloorToNearest);
-            line->special = 0;
-            break;
-
-        case 121:
-            // Blazing PlatDownWaitUpStay
-            EV_DoPlat(line, blazeDWUS, 0);
-            line->special = 0;
-            break;
-
-        case 124:
-            // Secret EXIT
-            G_SecretExitLevel();
-            break;
-
-        case 125:
-            // TELEPORT MonsterONLY
-            if (!thing->player)
-            {
-                EV_Teleport(line, side, thing);
-                line->special = 0;
-            }
-            break;
-
-        case 130:
-            // Raise Floor Turbo
-            EV_DoFloor(line, raiseFloorTurbo);
-            line->special = 0;
-            break;
-
-        case 141:
-            // Silent Ceiling Crush & Raise
-            EV_DoCeiling(line, silentCrushAndRaise);
-            line->special = 0;
-            break;
-
-            // RETRIGGERS.  All from here till end.
-        case 72:
-            // Ceiling Crush
-            EV_DoCeiling(line, lowerAndCrush);
-            break;
-
-        case 73:
-            // Ceiling Crush and Raise
-            EV_DoCeiling(line, crushAndRaise);
-            break;
-
-        case 74:
-            // Ceiling Crush Stop
-            EV_CeilingCrushStop(line);
-            break;
-
-        case 75:
-            // Close Door
-            EV_DoDoor(line, door_close);
-            break;
-
-        case 76:
-            // Close Door 30
-            EV_DoDoor(line, close30ThenOpen);
-            break;
-
-        case 77:
-            // Fast Ceiling Crush & Raise
-            EV_DoCeiling(line, fastCrushAndRaise);
-            break;
-
-        case 79:
-            // Lights Very Dark
-            EV_LightTurnOn(line, 35);
-            break;
-
-        case 80:
-            // Light Turn On - brightest near
-            EV_LightTurnOn(line, 0);
-            break;
-
-        case 81:
-            // Light Turn On 255
-            EV_LightTurnOn(line, 255);
-            break;
-
-        case 82:
-            // Lower Floor To Lowest
-            EV_DoFloor(line, lowerFloorToLowest);
-            break;
-
-        case 83:
-            // Lower Floor
-            EV_DoFloor(line, lowerFloor);
-            break;
-
-        case 84:
-            // LowerAndChange
-            EV_DoFloor(line, lowerAndChange);
-            break;
-
-        case 86:
-            // Open Door
-            EV_DoDoor(line, door_open);
-            break;
-
-        case 87:
-            // Perpetual Platform Raise
-            EV_DoPlat(line, perpetualRaise, 0);
-            break;
-
-        case 88:
-            // PlatDownWaitUp
-            EV_DoPlat(line, downWaitUpStay, 0);
-            break;
-
-        case 89:
-            // Platform Stop
-            EV_StopPlat(line);
-            break;
-
-        case 90:
-            // Raise Door
-            EV_DoDoor(line, door_normal);
-            break;
-
-        case 91:
-            // Raise Floor
-            EV_DoFloor(line, raiseFloor);
-            break;
-
-        case 92:
-            // Raise Floor 24
-            EV_DoFloor(line, raiseFloor24);
-            break;
-
-        case 93:
-            // Raise Floor 24 And Change
-            EV_DoFloor(line, raiseFloor24AndChange);
-            break;
-
-        case 94:
-            // Raise Floor Crush
-            EV_DoFloor(line, raiseFloorCrush);
-            break;
-
-        case 95:
-            // Raise floor to nearest height
-            // and change texture.
-            EV_DoPlat(line, raiseToNearestAndChange, 0);
-            break;
-
-        case 96:
-            // Raise floor to shortest texture height
-            // on either side of lines.
-            EV_DoFloor(line, raiseToTexture);
-            break;
-
-        case 97:
-            // TELEPORT!
-            EV_Teleport(line, side, thing);
-            break;
-
-        case 98:
-            // Lower Floor (TURBO)
-            EV_DoFloor(line, turboLower);
-            break;
-
-        case 105:
-            // Blazing Door Raise (faster than TURBO!)
-            EV_DoDoor(line, blazeRaise);
-            break;
-
-        case 106:
-            // Blazing Door Open (faster than TURBO!)
-            EV_DoDoor(line, blazeOpen);
-            break;
-
-        case 107:
-            // Blazing Door Close (faster than TURBO!)
-            EV_DoDoor(line, blazeClose);
-            break;
-
-        case 120:
-            // Blazing PlatDownWaitUpStay.
-            EV_DoPlat(line, blazeDWUS, 0);
-            break;
-
-        case 126:
-            // TELEPORT MonsterONLY.
-            if (!thing->player)
-                EV_Teleport(line, side, thing);
-            break;
-
-        case 128:
-            // Raise To Nearest Floor
-            EV_DoFloor(line, raiseFloorToNearest);
-            break;
-
-        case 129:
-            // Raise Floor Turbo
-            EV_DoFloor(line, raiseFloorTurbo);
-            break;
-    }
-}
+extern void P_CrossSpecialLine(int linenum, int side, mobj_t* thing);
 
 
 //
 // P_ShootSpecialLine - IMPACT SPECIALS
 // Called when a thing shoots a special line.
 //
-void P_ShootSpecialLine(mobj_t* thing, line_t* line)
-{
-    int ok;
-
-    // Impacts that other things can activate.
-    if (!thing->player)
-    {
-        ok = 0;
-        switch (line->special)
-        {
-            case 46:
-                // OPEN DOOR IMPACT
-                ok = 1;
-                break;
-        }
-        if (!ok)
-            return;
-    }
-
-    switch (line->special)
-    {
-        case 24:
-            // RAISE FLOOR
-            EV_DoFloor(line, raiseFloor);
-            P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 46:
-            // OPEN DOOR
-            EV_DoDoor(line, door_open);
-            P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 47:
-            // RAISE FLOOR NEAR AND CHANGE
-            EV_DoPlat(line, raiseToNearestAndChange, 0);
-            P_ChangeSwitchTexture(line, 0);
-            break;
-    }
-}
+extern void P_ShootSpecialLine(mobj_t* thing, line_t* line);
 
 
 //
@@ -17267,219 +16326,20 @@ void P_ShootSpecialLine(mobj_t* thing, line_t* line)
 // Called every tic frame
 //  that the player origin is in a special sector
 //
-void P_PlayerInSpecialSector(player_t* player)
-{
-    sector_t* sector;
-
-    sector = player->mo->subsector->sector;
-
-    // Falling, not all the way down yet?
-    if (player->mo->z != sector->floorheight)
-        return;
-
-    // Has hitten ground.
-    switch (sector->special)
-    {
-        case 5:
-            // HELLSLIME DAMAGE
-            if (!player->powers[pw_ironfeet])
-                if (!(leveltime & 0x1f))
-                    P_DamageMobj(player->mo, 0, 0, 10);
-            break;
-
-        case 7:
-            // NUKAGE DAMAGE
-            if (!player->powers[pw_ironfeet])
-                if (!(leveltime & 0x1f))
-                    P_DamageMobj(player->mo, 0, 0, 5);
-            break;
-
-        case 16:
-            // SUPER HELLSLIME DAMAGE
-        case 4:
-            // STROBE HURT
-            if (!player->powers[pw_ironfeet]
-                || (P_Random() < 5))
-            {
-                if (!(leveltime & 0x1f))
-                    P_DamageMobj(player->mo, 0, 0, 20);
-            }
-            break;
-
-        case 9:
-            // SECRET SECTOR
-            player->secretcount++;
-            player->message = "A secret is revealed!";
-            S_StartSound(0, sfx_getpow);
-            sector->special = 0;
-            break;
-
-        case 11:
-            // EXIT SUPER DAMAGE! (for E1M8 finale)
-            player->cheats &= ~CF_GODMODE;
-
-            if (!(leveltime & 0x1f))
-                P_DamageMobj(player->mo, 0, 0, 20);
-
-            if (player->health <= 10)
-                G_ExitLevel();
-            break;
-
-        default:
-        {
-            //I_Error("Error: P_PlayerInSpecialSector: "
-            //        "unknown special %i",
-            //        sector->special);
-            
-            
-            doom_strcpy(error_buf, "Error: P_PlayerInSpecialSector: unknown special ");
-            doom_concat(error_buf, doom_itoa(sector->special, 10));
-            I_Error(error_buf);
-            break;
-        }
-    };
-}
+extern void P_PlayerInSpecialSector(player_t* player);
 
 
 //
 // P_UpdateSpecials
 // Animate planes, scroll walls, etc.
 //
-void P_UpdateSpecials(void)
-{
-    anim_t* anim;
-    int pic;
-    int i;
-    line_t* line;
-
-    // LEVEL TIMER
-    if (levelTimer == true)
-    {
-        levelTimeCount--;
-        if (!levelTimeCount)
-            G_ExitLevel();
-    }
-
-    // ANIMATE FLATS AND TEXTURES GLOBALLY
-    for (anim = anims; anim < lastanim; anim++)
-    {
-        for (i = anim->basepic; i < anim->basepic + anim->numpics; i++)
-        {
-            pic = anim->basepic + ((leveltime / anim->speed + i) % anim->numpics);
-            if (anim->istexture)
-                texturetranslation[i] = pic;
-            else
-                flattranslation[i] = pic;
-        }
-    }
-
-    // ANIMATE LINE SPECIALS
-    for (i = 0; i < numlinespecials; i++)
-    {
-        line = linespeciallist[i];
-        switch (line->special)
-        {
-            case 48:
-                // EFFECT FIRSTCOL SCROLL +
-                sides[line->sidenum[0]].textureoffset += FRACUNIT;
-                break;
-        }
-    }
-
-    // DO BUTTONS
-    for (i = 0; i < MAXBUTTONS; i++)
-        if (buttonlist[i].btimer)
-        {
-            buttonlist[i].btimer--;
-            if (!buttonlist[i].btimer)
-            {
-                switch (buttonlist[i].where)
-                {
-                    case top:
-                        sides[buttonlist[i].line->sidenum[0]].toptexture =
-                            buttonlist[i].btexture;
-                        break;
-
-                    case middle:
-                        sides[buttonlist[i].line->sidenum[0]].midtexture =
-                            buttonlist[i].btexture;
-                        break;
-
-                    case bottom:
-                        sides[buttonlist[i].line->sidenum[0]].bottomtexture =
-                            buttonlist[i].btexture;
-                        break;
-                }
-                S_StartSound((mobj_t*)&buttonlist[i].soundorg, sfx_swtchn);
-                doom_memset(&buttonlist[i], 0, sizeof(button_t));
-            }
-        }
-}
+extern void P_UpdateSpecials(void);
 
 
 //
 // Special Stuff that can not be categorized
 //
-int EV_DoDonut(line_t* line)
-{
-    sector_t* s1;
-    sector_t* s2;
-    sector_t* s3;
-    int secnum;
-    int rtn;
-    int i;
-    floormove_t* floor;
-
-    secnum = -1;
-    rtn = 0;
-    while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
-    {
-        s1 = &sectors[secnum];
-
-        // ALREADY MOVING?  IF SO, KEEP GOING...
-        if (s1->specialdata)
-            continue;
-
-        rtn = 1;
-        s2 = getNextSector(s1->lines[0], s1);
-        for (i = 0; i < s2->linecount; i++)
-        {
-            if ((!(s2->lines[i]->flags & ML_TWOSIDED)) ||
-                (s2->lines[i]->backsector == s1))
-                continue;
-            s3 = s2->lines[i]->backsector;
-
-            //        Spawn rising slime
-            floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
-            P_AddThinker(&floor->thinker);
-            s2->specialdata = floor;
-            floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
-            floor->type = donutRaise;
-            floor->crush = false;
-            floor->direction = 1;
-            floor->sector = s2;
-            floor->speed = FLOORSPEED / 2;
-            floor->texture = s3->floorpic;
-            floor->newspecial = 0;
-            floor->floordestheight = s3->floorheight;
-
-            //        Spawn lowering donut-hole
-            floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
-            P_AddThinker(&floor->thinker);
-            s1->specialdata = floor;
-            floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
-            floor->type = lowerFloor;
-            floor->crush = false;
-            floor->direction = -1;
-            floor->sector = s1;
-            floor->speed = FLOORSPEED / 2;
-            floor->floordestheight = s3->floorheight;
-            break;
-        }
-    }
-
-    return rtn;
-}
+extern int EV_DoDonut(line_t* line);
 
 
 //
@@ -17493,177 +16353,8 @@ int EV_DoDonut(line_t* line)
 //
 
 // Parses command line parameters.
-void P_SpawnSpecials(void)
-{
-    sector_t* sector;
-    int i;
-    int episode;
-
-    episode = 1;
-    if (W_CheckNumForName("texture2") >= 0)
-        episode = 2;
-
-
-    // See if -TIMER needs to be used.
-    levelTimer = false;
-
-    i = M_CheckParm("-avg");
-    if (i && deathmatch)
-    {
-        levelTimer = true;
-        levelTimeCount = 20 * 60 * 35;
-    }
-
-    i = M_CheckParm("-timer");
-    if (i && deathmatch)
-    {
-        int time;
-        time = doom_atoi(myargv[i + 1]) * 60 * 35;
-        levelTimer = true;
-        levelTimeCount = time;
-    }
-
-    //        Init special SECTORs.
-    sector = sectors;
-    for (i = 0; i < numsectors; i++, sector++)
-    {
-        if (!sector->special)
-            continue;
-
-        switch (sector->special)
-        {
-            case 1:
-                // FLICKERING LIGHTS
-                P_SpawnLightFlash(sector);
-                break;
-
-            case 2:
-                // STROBE FAST
-                P_SpawnStrobeFlash(sector, FASTDARK, 0);
-                break;
-
-            case 3:
-                // STROBE SLOW
-                P_SpawnStrobeFlash(sector, SLOWDARK, 0);
-                break;
-
-            case 4:
-                // STROBE FAST/DEATH SLIME
-                P_SpawnStrobeFlash(sector, FASTDARK, 0);
-                sector->special = 4;
-                break;
-
-            case 8:
-                // GLOWING LIGHT
-                P_SpawnGlowingLight(sector);
-                break;
-            case 9:
-                // SECRET SECTOR
-                totalsecret++;
-                break;
-
-            case 10:
-                // DOOR CLOSE IN 30 SECONDS
-                P_SpawnDoorCloseIn30(sector);
-                break;
-
-            case 12:
-                // SYNC STROBE SLOW
-                P_SpawnStrobeFlash(sector, SLOWDARK, 1);
-                break;
-
-            case 13:
-                // SYNC STROBE FAST
-                P_SpawnStrobeFlash(sector, FASTDARK, 1);
-                break;
-
-            case 14:
-                // DOOR RAISE IN 5 MINUTES
-                P_SpawnDoorRaiseIn5Mins(sector, i);
-                break;
-
-            case 17:
-                P_SpawnFireFlicker(sector);
-                break;
-        }
-    }
-
-
-    // Init line EFFECTs
-    numlinespecials = 0;
-    for (i = 0; i < numlines; i++)
-    {
-        switch (lines[i].special)
-        {
-            case 48:
-                // EFFECT FIRSTCOL SCROLL+
-                linespeciallist[numlinespecials] = &lines[i];
-                numlinespecials++;
-                break;
-        }
-    }
-
-
-    // Init other misc stuff
-    for (i = 0; i < MAXCEILINGS; i++)
-        activeceilings[i] = 0;
-
-    for (i = 0; i < MAXPLATS; i++)
-        activeplats[i] = 0;
-
-    for (i = 0; i < MAXBUTTONS; i++)
-        doom_memset(&buttonlist[i], 0, sizeof(button_t));
-}
-switchlist_t alphSwitchList[] =
-{
-    // Doom shareware episode 1 switches
-    {"SW1BRCOM",    "SW2BRCOM", 1},
-    {"SW1BRN1",     "SW2BRN1",  1},
-    {"SW1BRN2",     "SW2BRN2",  1},
-    {"SW1BRNGN",    "SW2BRNGN", 1},
-    {"SW1BROWN",    "SW2BROWN", 1},
-    {"SW1COMM",     "SW2COMM",  1},
-    {"SW1COMP",     "SW2COMP",  1},
-    {"SW1DIRT",     "SW2DIRT",  1},
-    {"SW1EXIT",     "SW2EXIT",  1},
-    {"SW1GRAY",     "SW2GRAY",  1},
-    {"SW1GRAY1",    "SW2GRAY1", 1},
-    {"SW1METAL",    "SW2METAL", 1},
-    {"SW1PIPE",     "SW2PIPE",  1},
-    {"SW1SLAD",     "SW2SLAD",  1},
-    {"SW1STARG",    "SW2STARG", 1},
-    {"SW1STON1",    "SW2STON1", 1},
-    {"SW1STON2",    "SW2STON2", 1},
-    {"SW1STONE",    "SW2STONE", 1},
-    {"SW1STRTN",    "SW2STRTN", 1},
-
-    // Doom registered episodes 2&3 switches
-    {"SW1BLUE",     "SW2BLUE",  2},
-    {"SW1CMT",      "SW2CMT",   2},
-    {"SW1GARG",     "SW2GARG",  2},
-    {"SW1GSTON",    "SW2GSTON", 2},
-    {"SW1HOT",      "SW2HOT",   2},
-    {"SW1LION",     "SW2LION",  2},
-    {"SW1SATYR",    "SW2SATYR", 2},
-    {"SW1SKIN",     "SW2SKIN",  2},
-    {"SW1VINE",     "SW2VINE",  2},
-    {"SW1WOOD",     "SW2WOOD",  2},
-
-    // Doom II switches
-    {"SW1PANEL",    "SW2PANEL", 3},
-    {"SW1ROCK",     "SW2ROCK",  3},
-    {"SW1MET2",     "SW2MET2",  3},
-    {"SW1WDMET",    "SW2WDMET", 3},
-    {"SW1BRIK",     "SW2BRIK",  3},
-    {"SW1MOD1",     "SW2MOD1",  3},
-    {"SW1ZIM",      "SW2ZIM",   3},
-    {"SW1STON6",    "SW2STON6", 3},
-    {"SW1TEK",      "SW2TEK",   3},
-    {"SW1MARB",     "SW2MARB",  3},
-    {"SW1SKULL",    "SW2SKULL", 3},
-
-    {"\0",          "\0",       0}
-};
+extern void P_SpawnSpecials(void);
+switchlist_t* alphSwitchList;
 
 int switchlist[MAXSWITCHES * 2];
 int numswitches;
@@ -17674,138 +16365,20 @@ button_t buttonlist[MAXBUTTONS];
 // P_InitSwitchList
 // Only called at game initialization.
 //
-void P_InitSwitchList(void)
-{
-    int i;
-    int index;
-    int episode;
-
-    episode = 1;
-
-    if (gamemode == registered || gamemode == retail)
-        episode = 2;
-    else
-        if (gamemode == commercial)
-            episode = 3;
-
-    for (index = 0, i = 0; i < MAXSWITCHES; i++)
-    {
-        if (!alphSwitchList[i].episode)
-        {
-            numswitches = index / 2;
-            switchlist[index] = -1;
-            break;
-        }
-
-        if (alphSwitchList[i].episode <= episode)
-        {
-            switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name1);
-            switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name2);
-        }
-    }
-}
+extern void P_InitSwitchList(void);
 
 
 //
 // Start a button counting down till it turns off.
 //
-void P_StartButton(line_t* line, bwhere_e w, int texture, int time)
-{
-    int i;
-
-    // See if button is already pressed
-    for (i = 0; i < MAXBUTTONS; i++)
-    {
-        if (buttonlist[i].btimer
-            && buttonlist[i].line == line)
-        {
-
-            return;
-        }
-    }
-
-    for (i = 0; i < MAXBUTTONS; i++)
-    {
-        if (!buttonlist[i].btimer)
-        {
-            buttonlist[i].line = line;
-            buttonlist[i].where = w;
-            buttonlist[i].btexture = texture;
-            buttonlist[i].btimer = time;
-            buttonlist[i].soundorg = (mobj_t*)&line->frontsector->soundorg;
-            return;
-        }
-    }
-
-    I_Error("Error: P_StartButton: no button slots left!");
-}
+extern void P_StartButton(line_t* line, bwhere_e w, int texture, int time);
 
 
 //
 // Function that changes wall texture.
 // Tell it if switch is ok to use again (1=yes, it's a button).
 //
-void P_ChangeSwitchTexture(line_t* line, int useAgain)
-{
-    int     texTop;
-    int     texMid;
-    int     texBot;
-    int     i;
-    int     sound;
-
-    if (!useAgain)
-        line->special = 0;
-
-    texTop = sides[line->sidenum[0]].toptexture;
-    texMid = sides[line->sidenum[0]].midtexture;
-    texBot = sides[line->sidenum[0]].bottomtexture;
-    sound = sfx_swtchn;
-
-    // EXIT SWITCH?
-    if (line->special == 11)
-        sound = sfx_swtchx;
-
-    for (i = 0; i < numswitches * 2; i++)
-    {
-
-        if (switchlist[i] == texTop)
-        {
-            S_StartSound(buttonlist->soundorg, sound);
-            sides[line->sidenum[0]].toptexture = switchlist[i ^ 1];
-
-            if (useAgain)
-                P_StartButton(line, top, switchlist[i], BUTTONTIME);
-
-            return;
-        }
-        else
-        {
-            if (switchlist[i] == texMid)
-            {
-                S_StartSound(buttonlist->soundorg, sound);
-                sides[line->sidenum[0]].midtexture = switchlist[i ^ 1];
-
-                if (useAgain)
-                    P_StartButton(line, middle, switchlist[i], BUTTONTIME);
-
-                return;
-            }
-            else
-            {
-                if (switchlist[i] == texBot)
-                {
-                    S_StartSound(buttonlist->soundorg, sound);
-                    sides[line->sidenum[0]].bottomtexture = switchlist[i ^ 1];
-
-                    if (useAgain)
-                        P_StartButton(line, bottom, switchlist[i], BUTTONTIME);
-
-                    return;
-                }
-            }
-        }
-    }
-}
+extern void P_ChangeSwitchTexture(line_t* line, int useAgain);
 
 
 //
@@ -17813,460 +16386,8 @@ void P_ChangeSwitchTexture(line_t* line, int useAgain)
 // Called when a thing uses a special line.
 // Only the front sides of lines are usable.
 //
-doom_boolean P_UseSpecialLine(mobj_t* thing, line_t* line, int side)
-{
-    // Err...
-    // Use the back sides of VERY SPECIAL lines...
-    if (side)
-    {
-        switch (line->special)
-        {
-            case 124:
-                // Sliding door open&close
-                // UNUSED?
-                break;
-
-            default:
-                return false;
-                break;
-        }
-    }
-
-
-    // Switches that other things can activate.
-    if (!thing->player)
-    {
-        // never open secret doors
-        if (line->flags & ML_SECRET)
-            return false;
-
-        switch (line->special)
-        {
-            case 1:         // MANUAL DOOR RAISE
-            case 32:        // MANUAL BLUE
-            case 33:        // MANUAL RED
-            case 34:        // MANUAL YELLOW
-                break;
-
-            default:
-                return false;
-                break;
-        }
-    }
-
-
-    // do something  
-    switch (line->special)
-    {
-        // MANUALS
-        case 1:                // Vertical Door
-        case 26:                // Blue Door/Locked
-        case 27:                // Yellow Door /Locked
-        case 28:                // Red Door /Locked
-
-        case 31:                // Manual door open
-        case 32:                // Blue locked door open
-        case 33:                // Red locked door open
-        case 34:                // Yellow locked door open
-
-        case 117:                // Blazing door raise
-        case 118:                // Blazing door open
-            EV_VerticalDoor(line, thing);
-            break;
-
-            //UNUSED - Door Slide Open&Close
-            // case 124:
-            // EV_SlidingDoor (line, thing);
-            // break;
-
-            // SWITCHES
-        case 7:
-            // Build Stairs
-            if (EV_BuildStairs(line, build8))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 9:
-            // Change Donut
-            if (EV_DoDonut(line))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 11:
-            // Exit level
-            P_ChangeSwitchTexture(line, 0);
-            G_ExitLevel();
-            break;
-
-        case 14:
-            // Raise Floor 32 and change texture
-            if (EV_DoPlat(line, raiseAndChange, 32))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 15:
-            // Raise Floor 24 and change texture
-            if (EV_DoPlat(line, raiseAndChange, 24))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 18:
-            // Raise Floor to next highest floor
-            if (EV_DoFloor(line, raiseFloorToNearest))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 20:
-            // Raise Plat next highest floor and change texture
-            if (EV_DoPlat(line, raiseToNearestAndChange, 0))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 21:
-            // PlatDownWaitUpStay
-            if (EV_DoPlat(line, downWaitUpStay, 0))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 23:
-            // Lower Floor to Lowest
-            if (EV_DoFloor(line, lowerFloorToLowest))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 29:
-            // Raise Door
-            if (EV_DoDoor(line, door_normal))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 41:
-            // Lower Ceiling to Floor
-            if (EV_DoCeiling(line, lowerToFloor))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 71:
-            // Turbo Lower Floor
-            if (EV_DoFloor(line, turboLower))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 49:
-            // Ceiling Crush And Raise
-            if (EV_DoCeiling(line, crushAndRaise))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 50:
-            // Close Door
-            if (EV_DoDoor(line, door_close))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 51:
-            // Secret EXIT
-            P_ChangeSwitchTexture(line, 0);
-            G_SecretExitLevel();
-            break;
-
-        case 55:
-            // Raise Floor Crush
-            if (EV_DoFloor(line, raiseFloorCrush))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 101:
-            // Raise Floor
-            if (EV_DoFloor(line, raiseFloor))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 102:
-            // Lower Floor to Surrounding floor height
-            if (EV_DoFloor(line, lowerFloor))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 103:
-            // Open Door
-            if (EV_DoDoor(line, door_open))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 111:
-            // Blazing Door Raise (faster than TURBO!)
-            if (EV_DoDoor(line, blazeRaise))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 112:
-            // Blazing Door Open (faster than TURBO!)
-            if (EV_DoDoor(line, blazeOpen))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 113:
-            // Blazing Door Close (faster than TURBO!)
-            if (EV_DoDoor(line, blazeClose))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 122:
-            // Blazing PlatDownWaitUpStay
-            if (EV_DoPlat(line, blazeDWUS, 0))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 127:
-            // Build Stairs Turbo 16
-            if (EV_BuildStairs(line, turbo16))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 131:
-            // Raise Floor Turbo
-            if (EV_DoFloor(line, raiseFloorTurbo))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 133:
-            // BlzOpenDoor BLUE
-        case 135:
-            // BlzOpenDoor RED
-        case 137:
-            // BlzOpenDoor YELLOW
-            if (EV_DoLockedDoor(line, blazeOpen, thing))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-        case 140:
-            // Raise Floor 512
-            if (EV_DoFloor(line, raiseFloor512))
-                P_ChangeSwitchTexture(line, 0);
-            break;
-
-            // BUTTONS
-        case 42:
-            // Close Door
-            if (EV_DoDoor(line, door_close))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 43:
-            // Lower Ceiling to Floor
-            if (EV_DoCeiling(line, lowerToFloor))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 45:
-            // Lower Floor to Surrounding floor height
-            if (EV_DoFloor(line, lowerFloor))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 60:
-            // Lower Floor to Lowest
-            if (EV_DoFloor(line, lowerFloorToLowest))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 61:
-            // Open Door
-            if (EV_DoDoor(line, door_open))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 62:
-            // PlatDownWaitUpStay
-            if (EV_DoPlat(line, downWaitUpStay, 1))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 63:
-            // Raise Door
-            if (EV_DoDoor(line, door_normal))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 64:
-            // Raise Floor to ceiling
-            if (EV_DoFloor(line, raiseFloor))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 66:
-            // Raise Floor 24 and change texture
-            if (EV_DoPlat(line, raiseAndChange, 24))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 67:
-            // Raise Floor 32 and change texture
-            if (EV_DoPlat(line, raiseAndChange, 32))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 65:
-            // Raise Floor Crush
-            if (EV_DoFloor(line, raiseFloorCrush))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 68:
-            // Raise Plat to next highest floor and change texture
-            if (EV_DoPlat(line, raiseToNearestAndChange, 0))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 69:
-            // Raise Floor to next highest floor
-            if (EV_DoFloor(line, raiseFloorToNearest))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 70:
-            // Turbo Lower Floor
-            if (EV_DoFloor(line, turboLower))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 114:
-            // Blazing Door Raise (faster than TURBO!)
-            if (EV_DoDoor(line, blazeRaise))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 115:
-            // Blazing Door Open (faster than TURBO!)
-            if (EV_DoDoor(line, blazeOpen))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 116:
-            // Blazing Door Close (faster than TURBO!)
-            if (EV_DoDoor(line, blazeClose))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 123:
-            // Blazing PlatDownWaitUpStay
-            if (EV_DoPlat(line, blazeDWUS, 0))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 132:
-            // Raise Floor Turbo
-            if (EV_DoFloor(line, raiseFloorTurbo))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 99:
-            // BlzOpenDoor BLUE
-        case 134:
-            // BlzOpenDoor RED
-        case 136:
-            // BlzOpenDoor YELLOW
-            if (EV_DoLockedDoor(line, blazeOpen, thing))
-                P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 138:
-            // Light Turn On
-            EV_LightTurnOn(line, 255);
-            P_ChangeSwitchTexture(line, 1);
-            break;
-
-        case 139:
-            // Light Turn Off
-            EV_LightTurnOn(line, 35);
-            P_ChangeSwitchTexture(line, 1);
-            break;
-    }
-
-    return true;
-}
-int EV_Teleport(line_t* line, int side, mobj_t* thing)
-{
-    int i;
-    int tag;
-    mobj_t* m;
-    mobj_t* fog;
-    unsigned an;
-    thinker_t* thinker;
-    sector_t* sector;
-    fixed_t oldx;
-    fixed_t oldy;
-    fixed_t oldz;
-
-    // don't teleport missiles
-    if (thing->flags & MF_MISSILE)
-        return 0;
-
-    // Don't teleport if hit back of line,
-    //  so you can get out of teleporter.
-    if (side == 1)
-        return 0;
-
-    tag = line->tag;
-    for (i = 0; i < numsectors; i++)
-    {
-        if (sectors[i].tag == tag)
-        {
-            thinker = thinkercap.next;
-            for (thinker = thinkercap.next;
-                 thinker != &thinkercap;
-                 thinker = thinker->next)
-            {
-                // not a mobj
-                if (thinker->function.acp1 != (actionf_p1)P_MobjThinker)
-                    continue;
-
-                m = (mobj_t*)thinker;
-
-                // not a teleportman
-                if (m->type != MT_TELEPORTMAN)
-                    continue;
-
-                sector = m->subsector->sector;
-                // wrong sector
-                if (sector - sectors != i)
-                    continue;
-
-                oldx = thing->x;
-                oldy = thing->y;
-                oldz = thing->z;
-
-                if (!P_TeleportMove(thing, m->x, m->y))
-                    return 0;
-
-                thing->z = thing->floorz;  //fixme: not needed?
-                if (thing->player)
-                    thing->player->viewz = thing->z + thing->player->viewheight;
-
-                // spawn teleport fog at source and destination
-                fog = P_SpawnMobj(oldx, oldy, oldz, MT_TFOG);
-                S_StartSound(fog, sfx_telept);
-                an = m->angle >> ANGLETOFINESHIFT;
-                fog = P_SpawnMobj(m->x + 20 * finecosine[an], m->y + 20 * finesine[an]
-                                  , thing->z, MT_TFOG);
-
-                // emit sound, where?
-                S_StartSound(fog, sfx_telept);
-
-                // don't move for a bit
-                if (thing->player)
-                    thing->reactiontime = 18;
-
-                thing->angle = m->angle;
-                thing->momx = thing->momy = thing->momz = 0;
-                return 1;
-            }
-        }
-    }
-
-    return 0;
-}
+extern doom_boolean P_UseSpecialLine(mobj_t* thing, line_t* line, int side);
+extern int EV_Teleport(line_t* line, int side, mobj_t* thing);
 int leveltime;
 
 //
@@ -18284,10 +16405,7 @@ thinker_t thinkercap;
 //
 // P_InitThinkers
 //
-void P_InitThinkers(void)
-{
-    thinkercap.prev = thinkercap.next = &thinkercap;
-}
+extern void P_InitThinkers(void);
 
 
 //
@@ -18308,70 +16426,19 @@ void P_AddThinker(thinker_t* thinker)
 // Deallocation is lazy -- it will not actually be freed
 // until its thinking turn comes up.
 //
-void P_RemoveThinker(thinker_t* thinker)
-{
-    // FIXME: NOP.
-    thinker->function.acv = (actionf_v)(-1);
-}
+extern void P_RemoveThinker(thinker_t* thinker);
 
 
 //
 // P_RunThinkers
 //
-void P_RunThinkers(void)
-{
-    thinker_t* currentthinker;
-
-    currentthinker = thinkercap.next;
-    while (currentthinker != &thinkercap)
-    {
-        if (currentthinker->function.acv == (actionf_v)(-1))
-        {
-            // time to remove it
-            currentthinker->next->prev = currentthinker->prev;
-            currentthinker->prev->next = currentthinker->next;
-            Z_Free(currentthinker);
-        }
-        else
-        {
-            if (currentthinker->function.acp1)
-                currentthinker->function.acp1(currentthinker);
-        }
-        currentthinker = currentthinker->next;
-    }
-}
+extern void P_RunThinkers(void);
 
 
 //
 // P_Ticker
 //
-void P_Ticker(void)
-{
-    int i;
-
-    // run the tic
-    if (paused)
-        return;
-
-    // pause if in menu and at least one tic has been run
-    if (!netgame
-        && menuactive
-        && !demoplayback
-        && players[consoleplayer].viewz != 1)
-    {
-        return;
-    }
-    for (i = 0; i < MAXPLAYERS; i++)
-        if (playeringame[i])
-            P_PlayerThink(&players[i]);
-
-    P_RunThinkers();
-    P_UpdateSpecials();
-    P_RespawnSpecials();
-
-    // for par times
-    leveltime++;
-}
+extern void P_Ticker(void);
 #define INVERSECOLORMAP 32
 
 // 16 pixels of bob
@@ -18391,113 +16458,19 @@ doom_boolean onground;
 // P_Thrust
 // Moves the given origin along a given angle.
 //
-void P_Thrust(player_t* player, angle_t angle, fixed_t move)
-{
-    angle >>= ANGLETOFINESHIFT;
-
-    player->mo->momx += FixedMul(move, finecosine[angle]);
-    player->mo->momy += FixedMul(move, finesine[angle]);
-}
+extern void P_Thrust(player_t* player, angle_t angle, fixed_t move);
 
 
 //
 // P_CalcHeight
 // Calculate the walking / running height adjustment
 //
-void P_CalcHeight(player_t* player)
-{
-    int angle;
-    fixed_t bob;
-
-    // Regular movement bobbing
-    // (needs to be calculated for gun swing
-    // even if not on ground)
-    // OPTIMIZE: tablify angle
-    // Note: a LUT allows for effects
-    //  like a ramp with low health.
-    player->bob =
-        FixedMul(player->mo->momx, player->mo->momx)
-        + FixedMul(player->mo->momy, player->mo->momy);
-
-    player->bob >>= 2;
-
-    if (player->bob > MAXBOB)
-        player->bob = MAXBOB;
-
-    if ((player->cheats & CF_NOMOMENTUM) || !onground)
-    {
-        player->viewz = player->mo->z + VIEWHEIGHT;
-
-        if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT)
-            player->viewz = player->mo->ceilingz - 4 * FRACUNIT;
-
-        player->viewz = player->mo->z + player->viewheight;
-        return;
-    }
-
-    angle = (FINEANGLES / 20 * leveltime) & FINEMASK;
-    bob = FixedMul(player->bob / 2, finesine[angle]);
-
-
-    // move viewheight
-    if (player->playerstate == PST_LIVE)
-    {
-        player->viewheight += player->deltaviewheight;
-
-        if (player->viewheight > VIEWHEIGHT)
-        {
-            player->viewheight = VIEWHEIGHT;
-            player->deltaviewheight = 0;
-        }
-
-        if (player->viewheight < VIEWHEIGHT / 2)
-        {
-            player->viewheight = VIEWHEIGHT / 2;
-            if (player->deltaviewheight <= 0)
-                player->deltaviewheight = 1;
-        }
-
-        if (player->deltaviewheight)
-        {
-            player->deltaviewheight += FRACUNIT / 4;
-            if (!player->deltaviewheight)
-                player->deltaviewheight = 1;
-        }
-    }
-    player->viewz = player->mo->z + player->viewheight + bob;
-
-    if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT)
-        player->viewz = player->mo->ceilingz - 4 * FRACUNIT;
-}
-
+extern void P_CalcHeight(player_t* player);
 
 //
 // P_MovePlayer
 //
-void P_MovePlayer(player_t* player)
-{
-    ticcmd_t* cmd;
-
-    cmd = &player->cmd;
-
-    player->mo->angle += (cmd->angleturn << 16);
-
-    // Do not let the player control movement
-    //  if not onground.
-    onground = (player->mo->z <= player->mo->floorz);
-
-    if (cmd->forwardmove && onground)
-        P_Thrust(player, player->mo->angle, cmd->forwardmove * 2048);
-
-    if (cmd->sidemove && onground)
-        P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * 2048);
-
-    if ((cmd->forwardmove || cmd->sidemove)
-        && player->mo->state == &states[S_PLAY])
-    {
-        P_SetMobjState(player->mo, S_PLAY_RUN1);
-    }
-}
+extern void P_MovePlayer(player_t* player);
 
 
 //
@@ -18505,208 +16478,13 @@ void P_MovePlayer(player_t* player)
 // Fall on your face when dying.
 // Decrease POV height to floor height.
 //
-void P_DeathThink(player_t* player)
-{
-    angle_t angle;
-    angle_t delta;
-
-    P_MovePsprites(player);
-
-    // fall to the ground
-    if (player->viewheight > 6 * FRACUNIT)
-        player->viewheight -= FRACUNIT;
-
-    if (player->viewheight < 6 * FRACUNIT)
-        player->viewheight = 6 * FRACUNIT;
-
-    player->deltaviewheight = 0;
-    onground = (player->mo->z <= player->mo->floorz);
-    P_CalcHeight(player);
-
-    if (player->attacker && player->attacker != player->mo)
-    {
-        angle = R_PointToAngle2(player->mo->x,
-                                player->mo->y,
-                                player->attacker->x,
-                                player->attacker->y);
-
-        delta = angle - player->mo->angle;
-
-        if (delta < ANG5 || delta >(unsigned) - ANG5)
-        {
-            // Looking at killer,
-            //  so fade damage flash down.
-            player->mo->angle = angle;
-
-            if (player->damagecount)
-                player->damagecount--;
-        }
-        else if (delta < ANG180)
-            player->mo->angle += ANG5;
-        else
-            player->mo->angle -= ANG5;
-    }
-    else if (player->damagecount)
-        player->damagecount--;
-
-
-    if (player->cmd.buttons & BT_USE)
-        player->playerstate = PST_REBORN;
-}
+extern void P_DeathThink(player_t* player);
 
 
 //
 // P_PlayerThink
 //
-void P_PlayerThink(player_t* player)
-{
-    ticcmd_t* cmd;
-    weapontype_t newweapon;
-
-    // fixme: do this in the cheat code
-    if (player->cheats & CF_NOCLIP)
-        player->mo->flags |= MF_NOCLIP;
-    else
-        player->mo->flags &= ~MF_NOCLIP;
-
-    // chain saw run forward
-    cmd = &player->cmd;
-    if (player->mo->flags & MF_JUSTATTACKED)
-    {
-        cmd->angleturn = 0;
-        cmd->forwardmove = 0xc800 / 512;
-        cmd->sidemove = 0;
-        player->mo->flags &= ~MF_JUSTATTACKED;
-    }
-
-
-    if (player->playerstate == PST_DEAD)
-    {
-        P_DeathThink(player);
-        return;
-    }
-
-    // Move around.
-    // Reactiontime is used to prevent movement
-    //  for a bit after a teleport.
-    if (player->mo->reactiontime)
-        player->mo->reactiontime--;
-    else
-        P_MovePlayer(player);
-
-    P_CalcHeight(player);
-
-    if (player->mo->subsector->sector->special)
-        P_PlayerInSpecialSector(player);
-
-    // Check for weapon change.
-
-    // A special event has no other buttons.
-    if (cmd->buttons & BT_SPECIAL)
-        cmd->buttons = 0;
-
-    if (cmd->buttons & BT_CHANGE)
-    {
-        // The actual changing of the weapon is done
-        //  when the weapon psprite can do it
-        //  (read: not in the middle of an attack).
-        newweapon = (cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT;
-
-        if (newweapon == wp_fist
-            && player->weaponowned[wp_chainsaw]
-            && !(player->readyweapon == wp_chainsaw
-                 && player->powers[pw_strength]))
-        {
-            newweapon = wp_chainsaw;
-        }
-
-        if ((gamemode == commercial)
-            && newweapon == wp_shotgun
-            && player->weaponowned[wp_supershotgun]
-            && player->readyweapon != wp_supershotgun)
-        {
-            newweapon = wp_supershotgun;
-        }
-
-
-        if (player->weaponowned[newweapon]
-            && newweapon != player->readyweapon)
-        {
-            // Do not go to plasma or BFG in shareware,
-            //  even if cheated.
-            if ((newweapon != wp_plasma
-                 && newweapon != wp_bfg)
-                || (gamemode != shareware))
-            {
-                player->pendingweapon = newweapon;
-            }
-        }
-    }
-
-    // check for use
-    if (cmd->buttons & BT_USE)
-    {
-        if (!player->usedown)
-        {
-            P_UseLines(player);
-            player->usedown = true;
-        }
-    }
-    else
-        player->usedown = false;
-
-    // cycle psprites
-    P_MovePsprites(player);
-
-    // Counters, time dependend power ups.
-
-    // Strength counts up to diminish fade.
-    if (player->powers[pw_strength])
-        player->powers[pw_strength]++;
-
-    if (player->powers[pw_invulnerability])
-        player->powers[pw_invulnerability]--;
-
-    if (player->powers[pw_invisibility])
-        if (!--player->powers[pw_invisibility])
-            player->mo->flags &= ~MF_SHADOW;
-
-    if (player->powers[pw_infrared])
-        player->powers[pw_infrared]--;
-
-    if (player->powers[pw_ironfeet])
-        player->powers[pw_ironfeet]--;
-
-    if (player->damagecount)
-        player->damagecount--;
-
-    if (player->bonuscount)
-        player->bonuscount--;
-
-
-    // Handling colormaps.
-    if (player->powers[pw_invulnerability])
-    {
-        if (player->powers[pw_invulnerability] > 4 * 32
-            || (player->powers[pw_invulnerability] & 8))
-            player->fixedcolormap = INVERSECOLORMAP;
-        else
-            player->fixedcolormap = 0;
-    }
-    else if (player->powers[pw_infrared])
-    {
-        if (player->powers[pw_infrared] > 4 * 32
-            || (player->powers[pw_infrared] & 8))
-        {
-            // almost full bright
-            player->fixedcolormap = 1;
-        }
-        else
-            player->fixedcolormap = 0;
-    }
-    else
-        player->fixedcolormap = 0;
-}
+extern void P_PlayerThink(player_t* player);
 #define MAXSEGS 32
 
 
@@ -18735,20 +16513,7 @@ drawseg_t* ds_p;
 cliprange_t* newend;
 cliprange_t solidsegs[MAXSEGS];
 
-int checkcoord[12][4] =
-{
-    {3,0,2,1},
-    {3,0,2,0},
-    {3,1,2,0},
-    {0},
-    {2,0,2,1},
-    {0,0,0,0},
-    {3,1,3,0},
-    {0},
-    {2,0,3,1},
-    {2,1,3,1},
-    {2,1,3,0}
-};
+int checkcoord[12][4];
 
 
 void R_StoreWallRange(int start, int stop);
@@ -18757,10 +16522,7 @@ void R_StoreWallRange(int start, int stop);
 //
 // R_ClearDrawSegs
 //
-void R_ClearDrawSegs(void)
-{
-    ds_p = drawsegs;
-}
+extern void R_ClearDrawSegs(void);
 
 
 //
@@ -18769,87 +16531,7 @@ void R_ClearDrawSegs(void)
 //  e.g. single sided LineDefs (middle texture)
 //  that entirely block the view.
 // 
-void R_ClipSolidWallSegment(int first, int last)
-{
-    cliprange_t* next;
-    cliprange_t* start;
-
-    // Find the first range that touches the range
-    //  (adjacent pixels are touching).
-    start = solidsegs;
-    while (start->last < first - 1)
-        start++;
-
-    if (first < start->first)
-    {
-        if (last < start->first - 1)
-        {
-            // Post is entirely visible (above start),
-            //  so insert a new clippost.
-            R_StoreWallRange(first, last);
-            next = newend;
-            newend++;
-
-            while (next != start)
-            {
-                *next = *(next - 1);
-                next--;
-            }
-            next->first = first;
-            next->last = last;
-            return;
-        }
-
-        // There is a fragment above *start.
-        R_StoreWallRange(first, start->first - 1);
-        // Now adjust the clip size.
-        start->first = first;
-    }
-
-    // Bottom contained in start?
-    if (last <= start->last)
-        return;
-
-    next = start;
-    while (last >= (next + 1)->first - 1)
-    {
-        // There is a fragment between two posts.
-        R_StoreWallRange(next->last + 1, (next + 1)->first - 1);
-        next++;
-
-        if (last <= next->last)
-        {
-            // Bottom is contained in next.
-            // Adjust the clip size.
-            start->last = next->last;
-            goto crunch;
-        }
-    }
-
-    // There is a fragment after *next.
-    R_StoreWallRange(next->last + 1, last);
-    // Adjust the clip size.
-    start->last = last;
-
-    // Remove start+1 to next from the clip list,
-    // because start now covers their area.
-crunch:
-    if (next == start)
-    {
-        // Post just extended past the bottom of one post.
-        return;
-    }
-
-
-    while (next++ != newend)
-    {
-        // Remove a post.
-        *++start = *next;
-    }
-
-    newend = start + 1;
-}
-
+extern void R_ClipSolidWallSegment(int first, int last);
 
 //
 // R_ClipPassWallSegment
@@ -18858,168 +16540,19 @@ crunch:
 // Does handle windows,
 //  e.g. LineDefs with upper and lower texture.
 //
-void R_ClipPassWallSegment(int first, int last)
-{
-    cliprange_t* start;
-
-    // Find the first range that touches the range
-    //  (adjacent pixels are touching).
-    start = solidsegs;
-    while (start->last < first - 1)
-        start++;
-
-    if (first < start->first)
-    {
-        if (last < start->first - 1)
-        {
-            // Post is entirely visible (above start).
-            R_StoreWallRange(first, last);
-            return;
-        }
-
-        // There is a fragment above *start.
-        R_StoreWallRange(first, start->first - 1);
-    }
-
-    // Bottom contained in start?
-    if (last <= start->last)
-        return;
-
-    while (last >= (start + 1)->first - 1)
-    {
-        // There is a fragment between two posts.
-        R_StoreWallRange(start->last + 1, (start + 1)->first - 1);
-        start++;
-
-        if (last <= start->last)
-            return;
-    }
-
-    // There is a fragment after *next.
-    R_StoreWallRange(start->last + 1, last);
-}
-
+extern void R_ClipPassWallSegment(int first, int last);
 
 //
 // R_ClearClipSegs
 //
-void R_ClearClipSegs(void)
-{
-    solidsegs[0].first = -0x7fffffff;
-    solidsegs[0].last = -1;
-    solidsegs[1].first = viewwidth;
-    solidsegs[1].last = 0x7fffffff;
-    newend = solidsegs + 2;
-}
-
+extern void R_ClearClipSegs(void);
 
 //
 // R_AddLine
 // Clips the given segment
 // and adds any visible pieces to the line list.
 //
-void R_AddLine(seg_t* line)
-{
-    int x1;
-    int x2;
-    angle_t angle1;
-    angle_t angle2;
-    angle_t span;
-    angle_t tspan;
-
-    curline = line;
-
-    // OPTIMIZE: quickly reject orthogonal back sides.
-    angle1 = R_PointToAngle(line->v1->x, line->v1->y);
-    angle2 = R_PointToAngle(line->v2->x, line->v2->y);
-
-    // Clip to view edges.
-    // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
-    span = angle1 - angle2;
-
-    // Back side? I.e. backface culling?
-    if (span >= ANG180)
-        return;
-
-    // Global angle needed by segcalc.
-    rw_angle1 = angle1;
-    angle1 -= viewangle;
-    angle2 -= viewangle;
-
-    tspan = angle1 + clipangle;
-    if (tspan > 2 * clipangle)
-    {
-        tspan -= 2 * clipangle;
-
-        // Totally off the left edge?
-        if (tspan >= span)
-            return;
-
-        angle1 = clipangle;
-    }
-    tspan = clipangle - angle2;
-    if (tspan > 2 * clipangle)
-    {
-        tspan -= 2 * clipangle;
-
-        // Totally off the left edge?
-        if (tspan >= span)
-            return;
-#pragma warning(push)
-#pragma warning(disable : 4146)
-        angle2 = -clipangle;
-#pragma warning(pop)
-    }
-
-    // The seg is in the view range,
-    // but not necessarily visible.
-    angle1 = (angle1 + ANG90) >> ANGLETOFINESHIFT;
-    angle2 = (angle2 + ANG90) >> ANGLETOFINESHIFT;
-    x1 = viewangletox[angle1];
-    x2 = viewangletox[angle2];
-
-    // Does not cross a pixel?
-    if (x1 == x2)
-        return;
-
-    backsector = line->backsector;
-
-    // Single sided line?
-    if (!backsector)
-        goto clipsolid;
-
-    // Closed door.
-    if (backsector->ceilingheight <= frontsector->floorheight
-        || backsector->floorheight >= frontsector->ceilingheight)
-        goto clipsolid;
-
-    // Window.
-    if (backsector->ceilingheight != frontsector->ceilingheight
-        || backsector->floorheight != frontsector->floorheight)
-        goto clippass;
-
-    // Reject empty lines used for triggers
-    //  and special events.
-    // Identical floor and ceiling on both sides,
-    // identical light levels on both sides,
-    // and no middle texture.
-    if (backsector->ceilingpic == frontsector->ceilingpic
-        && backsector->floorpic == frontsector->floorpic
-        && backsector->lightlevel == frontsector->lightlevel
-        && curline->sidedef->midtexture == 0)
-    {
-        return;
-    }
-
-
-clippass:
-    R_ClipPassWallSegment(x1, x2 - 1);
-    return;
-
-clipsolid:
-    R_ClipSolidWallSegment(x1, x2 - 1);
-}
-
+extern void R_AddLine(seg_t* line);
 
 //
 // R_CheckBBox
@@ -19027,117 +16560,7 @@ clipsolid:
 // Returns true
 //  if some part of the bbox might be visible.
 //
-doom_boolean R_CheckBBox(fixed_t* bspcoord)
-{
-    int boxx;
-    int boxy;
-    int boxpos;
-
-    fixed_t x1;
-    fixed_t y1;
-    fixed_t x2;
-    fixed_t y2;
-
-    angle_t angle1;
-    angle_t angle2;
-    angle_t span;
-    angle_t tspan;
-
-    cliprange_t* start;
-
-    int sx1;
-    int sx2;
-
-    // Find the corners of the box
-    // that define the edges from current viewpoint.
-    if (viewx <= bspcoord[BOXLEFT])
-        boxx = 0;
-    else if (viewx < bspcoord[BOXRIGHT])
-        boxx = 1;
-    else
-        boxx = 2;
-
-    if (viewy >= bspcoord[BOXTOP])
-        boxy = 0;
-    else if (viewy > bspcoord[BOXBOTTOM])
-        boxy = 1;
-    else
-        boxy = 2;
-
-    boxpos = (boxy << 2) + boxx;
-    if (boxpos == 5)
-        return true;
-
-    x1 = bspcoord[checkcoord[boxpos][0]];
-    y1 = bspcoord[checkcoord[boxpos][1]];
-    x2 = bspcoord[checkcoord[boxpos][2]];
-    y2 = bspcoord[checkcoord[boxpos][3]];
-
-    // check clip list for an open space
-    angle1 = R_PointToAngle(x1, y1) - viewangle;
-    angle2 = R_PointToAngle(x2, y2) - viewangle;
-
-    span = angle1 - angle2;
-
-    // Sitting on a line?
-    if (span >= ANG180)
-        return true;
-
-    tspan = angle1 + clipangle;
-
-    if (tspan > 2 * clipangle)
-    {
-        tspan -= 2 * clipangle;
-
-        // Totally off the left edge?
-        if (tspan >= span)
-            return false;
-
-        angle1 = clipangle;
-    }
-    tspan = clipangle - angle2;
-    if (tspan > 2 * clipangle)
-    {
-        tspan -= 2 * clipangle;
-
-        // Totally off the left edge?
-        if (tspan >= span)
-            return false;
-
-#pragma warning(push)
-#pragma warning(disable : 4146)
-        angle2 = -clipangle;
-#pragma warning(pop)
-    }
-
-
-    // Find the first clippost
-    //  that touches the source post
-    //  (adjacent pixels are touching).
-    angle1 = (angle1 + ANG90) >> ANGLETOFINESHIFT;
-    angle2 = (angle2 + ANG90) >> ANGLETOFINESHIFT;
-    sx1 = viewangletox[angle1];
-    sx2 = viewangletox[angle2];
-
-    // Does not cross a pixel.
-    if (sx1 == sx2)
-        return false;
-    sx2--;
-
-    start = solidsegs;
-    while (start->last < sx2)
-        start++;
-
-    if (sx1 >= start->first
-        && sx2 <= start->last)
-    {
-        // The clippost contains the new span.
-        return false;
-    }
-
-    return true;
-}
-
+extern doom_boolean R_CheckBBox(fixed_t* bspcoord);
 
 //
 // R_Subsector
@@ -19145,61 +16568,7 @@ doom_boolean R_CheckBBox(fixed_t* bspcoord)
 // Add sprites of things in sector.
 // Draw one or more line segments.
 //
-void R_Subsector(int num)
-{
-    int count;
-    seg_t* line;
-    subsector_t* sub;
-
-#ifdef RANGECHECK
-    if (num >= numsubsectors)
-    {
-        //I_Error("Error: R_Subsector: ss %i with numss = %i",
-        //        num,
-        //        numsubsectors);
-
-        
-        doom_strcpy(error_buf, "Error: R_Subsector: ss ");
-        doom_concat(error_buf, doom_itoa(num, 10));
-        doom_concat(error_buf, " with numss = ");
-        doom_concat(error_buf, doom_itoa(numsubsectors, 10));
-        I_Error(error_buf);
-    }
-#endif
-
-    sscount++;
-    sub = &subsectors[num];
-    frontsector = sub->sector;
-    count = sub->numlines;
-    line = &segs[sub->firstline];
-
-    if (frontsector->floorheight < viewz)
-    {
-        floorplane = R_FindPlane(frontsector->floorheight,
-                                 frontsector->floorpic,
-                                 frontsector->lightlevel);
-    }
-    else
-        floorplane = 0;
-
-    if (frontsector->ceilingheight > viewz
-        || frontsector->ceilingpic == skyflatnum)
-    {
-        ceilingplane = R_FindPlane(frontsector->ceilingheight,
-                                   frontsector->ceilingpic,
-                                   frontsector->lightlevel);
-    }
-    else
-        ceilingplane = 0;
-
-    R_AddSprites(frontsector);
-
-    while (count--)
-    {
-        R_AddLine(line);
-        line++;
-    }
-}
+extern void R_Subsector(int num);
 
 
 //
@@ -19207,33 +16576,7 @@ void R_Subsector(int num)
 // Renders all subsectors below a given node,
 //  traversing subtree recursively.
 // Just call with BSP root.
-void R_RenderBSPNode(int bspnum)
-{
-    node_t* bsp;
-    int side;
-
-    // Found a subsector?
-    if (bspnum & NF_SUBSECTOR)
-    {
-        if (bspnum == -1)
-            R_Subsector(0);
-        else
-            R_Subsector(bspnum & (~NF_SUBSECTOR));
-        return;
-    }
-
-    bsp = &nodes[bspnum];
-
-    // Decide which side the view point is on.
-    side = R_PointOnSide(viewx, viewy, bsp);
-
-    // Recursively divide front space.
-    R_RenderBSPNode(bsp->children[side]);
-
-    // Possibly divide back space.
-    if (R_CheckBBox(bsp->bbox[side ^ 1]))
-        R_RenderBSPNode(bsp->children[side ^ 1]);
-}
+extern void R_RenderBSPNode(int bspnum);
 #if defined(DOOM_WIN32)
 
 // #define strncasecmp strnicmp

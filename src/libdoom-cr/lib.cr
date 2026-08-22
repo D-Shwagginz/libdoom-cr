@@ -986,10 +986,6 @@ lib CDoom
     Unknown
   end
 
-  # If rangecheck is undefined,
-  # most parameter validation debugging code will not be compiled
-  RANGECHECK = true
-
   #
   # For resize of screen, at start of game.
   # It will not work dynamically, see visplanes.
@@ -4916,8 +4912,8 @@ lib CDoom
   # P_SWITCH
   #
   struct Switchlist
-    name1 : LibC::Char[9]
-    name2 : LibC::Char[9]
+    name1 : LibC::Char*
+    name2 : LibC::Char*
     episode : LibC::Short
   end
 
@@ -4942,7 +4938,7 @@ lib CDoom
   MAXBUTTONS = 16
 
   # 1 second, in ticks.
-  BUTTONTIMES = 35
+  BUTTONTIME = 35
 
   $buttonlist : Button[MAXBUTTONS]
 
@@ -5148,7 +5144,7 @@ lib CDoom
   #
   # P_TELEPT
   #
-  fun ev_teleport = EV_Teleport(line : Line*, side : LibC::Int, think : Mobj*) : LibC::Int
+  fun ev_teleport = EV_Teleport(line : Line*, side : LibC::Int, thing : Mobj*) : LibC::Int
 
   # __R_BSP__
   $curline : Seg*
@@ -7558,4 +7554,90 @@ lib CDoom
 
   fun p_divline_side = P_DivlineSide(x : Fixed, y : Fixed, node : Divline*) : LibC::Int
   fun p_intercept_vector2 = P_InterceptVector2(v2 : Divline*, v1 : Divline*) : Fixed
+  fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : DoomBool
+  fun p_cross_bsp_node = P_CrossBSPNode(bspnum : LibC::Int) : DoomBool
+
+  MAXANIMS     = 32
+  MAXLINEANIMS = 64
+
+  # 20 adjoining sectors max! [dsl] Useless comment is useless [ds] Useless comment addition is useless
+  MAX_ADJOINING_SECTORS = 20
+
+  #
+  # Animating textures and planes
+  # There is another anim_t used in wi_stuff, unrelated.
+  #
+  struct Anim
+    istexture : DoomBool
+    picnum : LibC::Int
+    basepic : LibC::Int
+    numpics : LibC::Int
+    speed : LibC::Int
+  end
+
+  #
+  # source animation definition
+  #
+  struct Animdef
+    istexture : DoomBool # if false, it is a flat
+    endname : LibC::Char*
+    startname : LibC::Char*
+    speed : LibC::Int
+  end
+
+  $numlinespecials : LibC::Short
+  $linespeciallist : Line*[MAXLINEANIMS]
+
+  $anims : Anim[MAXANIMS]
+  $lastanim : Anim*
+
+  $animdefs : Animdef*
+
+  $alph_switch_list = alphSwitchList : Switchlist*
+
+  SWITCHLIST_SIZE = MAXSWITCHES * 2
+  $switchlist : LibC::Int[SWITCHLIST_SIZE]
+  $numswitches : LibC::Int
+  $buttonlist : Button[MAXBUTTONS]
+
+  fun p_start_button = P_StartButton(line : Line*, w : Bwhere, texture : LibC::Int, time : LibC::Int)
+  fun p_run_thinkers = P_RunThinkers
+  INVERSECOLORMAP = 32
+
+  # 16 pixels of bob
+  MAXBOB = 0x100000
+
+  ANG5 = ANG90//18
+
+  $onground : DoomBool
+
+  fun p_thrust = P_Thrust(player : Player*, angle : Angle, move : Fixed)
+  fun p_calc_height = P_CalcHeight(player : Player*)
+  fun p_move_player = P_MovePlayer(player : Player*)
+  fun p_death_think = P_DeathThink(player : Player*)
+
+  MAXSEGS = 32
+
+  #
+  # Clips the given range of columns
+  # and includes it in the new clip list.
+  #
+  struct Cliprange
+    first : LibC::Int
+    last : LibC::Int
+  end
+
+  # newend is one past the last valid seg
+  $newend : Cliprange*
+  $solidsegs : Cliprange[MAXSEGS]
+
+  $checkcoord : LibC::Int[4][12]
+
+  fun r_store_wall_range = R_StoreWallRange(start : LibC::Int, stop : LibC::Int)
+  fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
+  fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
+  fun r_addline = R_AddLine(line : Seg*)
+    fun r_check_bbox = R_CheckBBox(bspcoord : Fixed*) : DoomBool
+      fun r_subsector = R_Subsector(num : LibC::Int)
+
 end

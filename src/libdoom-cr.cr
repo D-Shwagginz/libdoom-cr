@@ -15,6 +15,10 @@ MIDI_TICK_TIME   = 1.0 / 140.0
 MIDI_BANK        = 16
 Fiber::ExecutionContext.default.resize(maximum: System.cpu_count)
 
+# If rangecheck is undefined,
+# most parameter validation debugging code will not be compiled
+RANGECHECK = true
+
 macro poll_key(doomkey, raylibkey)
   CDoom.doom_key_up(CDoom::DoomKey::{{doomkey}}) if Raylib::KeyboardKey::{{raylibkey}}.released?
   CDoom.doom_key_down(CDoom::DoomKey::{{doomkey}}) if Raylib::KeyboardKey::{{raylibkey}}.pressed?

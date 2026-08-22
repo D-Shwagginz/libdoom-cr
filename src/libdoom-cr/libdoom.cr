@@ -2325,6 +2325,124 @@ module LibDoom
   c_array(CDoom.yspeed, 0, 47000, CDoom::FRACUNIT, 47000, 0, -47000, -CDoom::FRACUNIT, -47000)
   CDoom.traceangle = 0xc000000
 
+  # Floor/ceiling animation sequences,
+  #  defined by first and last frame,
+  #  i.e. the flat (64x64 tile) name to
+  #  be used.
+  # The full animation sequence is given
+  #  using all the flats between the start
+  #  and end entry, in the order found in
+  #  the WAD file.
+  @@animdef_data : Array(Tuple(CDoom::DoomBool, String, String, Int32)) = [
+    {0, "NUKAGE3", "NUKAGE1", 8},
+    {0, "FWATER4", "FWATER1", 8},
+    {0, "SWATER4", "SWATER1", 8},
+    {0, "LAVA4", "LAVA1", 8},
+    {0, "BLOOD3", "BLOOD1", 8},
+
+    # DOOM II flat animations.
+    {0, "RROCK08", "RROCK05", 8},
+    {0, "SLIME04", "SLIME01", 8},
+    {0, "SLIME08", "SLIME05", 8},
+    {0, "SLIME12", "SLIME09", 8},
+
+    {1, "BLODGR4", "BLODGR1", 8},
+    {1, "SLADRIP3", "SLADRIP1", 8},
+
+    {1, "BLODRIP4", "BLODRIP1", 8},
+    {1, "FIREWALL", "FIREWALA", 8},
+    {1, "GSTFONT3", "GSTFONT1", 8},
+    {1, "FIRELAVA", "FIRELAV3", 8},
+    {1, "FIREMAG3", "FIREMAG1", 8},
+    {1, "FIREBLU2", "FIREBLU1", 8},
+    {1, "ROCKRED3", "ROCKRED1", 8},
+
+    {1, "BFALL4", "BFALL1", 8},
+    {1, "SFALL4", "SFALL1", 8},
+    {1, "WFALL4", "WFALL1", 8},
+    {1, "DBRAIN4", "DBRAIN1", 8},
+
+    {-1, "", "", -1},
+  ]
+  @@animdefs : Array(CDoom::Animdef) = Array.new(@@animdef_data.size, CDoom::Animdef.new)
+  @@animdef_data.each_with_index do |elm, i|
+    (@@animdefs.to_unsafe + i).value.istexture = elm[0]
+    (@@animdefs.to_unsafe + i).value.endname = elm[1].to_unsafe
+    (@@animdefs.to_unsafe + i).value.startname = elm[2].to_unsafe
+    (@@animdefs.to_unsafe + i).value.speed = elm[3]
+  end
+  CDoom.animdefs = @@animdefs.to_unsafe
+
+  @@alph_switch_list_data : Array(Tuple(String, String, Int32)) = [
+    # Doom shareware episode 1 switches
+    {"SW1BRCOM", "SW2BRCOM", 1},
+    {"SW1BRN1", "SW2BRN1", 1},
+    {"SW1BRN2", "SW2BRN2", 1},
+    {"SW1BRNGN", "SW2BRNGN", 1},
+    {"SW1BROWN", "SW2BROWN", 1},
+    {"SW1COMM", "SW2COMM", 1},
+    {"SW1COMP", "SW2COMP", 1},
+    {"SW1DIRT", "SW2DIRT", 1},
+    {"SW1EXIT", "SW2EXIT", 1},
+    {"SW1GRAY", "SW2GRAY", 1},
+    {"SW1GRAY1", "SW2GRAY1", 1},
+    {"SW1METAL", "SW2METAL", 1},
+    {"SW1PIPE", "SW2PIPE", 1},
+    {"SW1SLAD", "SW2SLAD", 1},
+    {"SW1STARG", "SW2STARG", 1},
+    {"SW1STON1", "SW2STON1", 1},
+    {"SW1STON2", "SW2STON2", 1},
+    {"SW1STONE", "SW2STONE", 1},
+    {"SW1STRTN", "SW2STRTN", 1},
+
+    # Doom registered episodes 2&3 switches
+    {"SW1BLUE", "SW2BLUE", 2},
+    {"SW1CMT", "SW2CMT", 2},
+    {"SW1GARG", "SW2GARG", 2},
+    {"SW1GSTON", "SW2GSTON", 2},
+    {"SW1HOT", "SW2HOT", 2},
+    {"SW1LION", "SW2LION", 2},
+    {"SW1SATYR", "SW2SATYR", 2},
+    {"SW1SKIN", "SW2SKIN", 2},
+    {"SW1VINE", "SW2VINE", 2},
+    {"SW1WOOD", "SW2WOOD", 2},
+
+    # Doom II switches
+    {"SW1PANEL", "SW2PANEL", 3},
+    {"SW1ROCK", "SW2ROCK", 3},
+    {"SW1MET2", "SW2MET2", 3},
+    {"SW1WDMET", "SW2WDMET", 3},
+    {"SW1BRIK", "SW2BRIK", 3},
+    {"SW1MOD1", "SW2MOD1", 3},
+    {"SW1ZIM", "SW2ZIM", 3},
+    {"SW1STON6", "SW2STON6", 3},
+    {"SW1TEK", "SW2TEK", 3},
+    {"SW1MARB", "SW2MARB", 3},
+    {"SW1SKULL", "SW2SKULL", 3},
+
+    {"\0", "\0", 0},
+  ]
+  @@alph_switch_list : Array(CDoom::Switchlist) = Array.new(@@alph_switch_list_data.size, CDoom::Switchlist.new)
+  @@alph_switch_list_data.each_with_index do |elm, i|
+    (@@alph_switch_list.to_unsafe + i).value.name1 = elm[0].to_unsafe
+    (@@alph_switch_list.to_unsafe + i).value.name2 = elm[1].to_unsafe
+    (@@alph_switch_list.to_unsafe + i).value.episode = elm[2]
+  end
+  CDoom.alph_switch_list = @@alph_switch_list.to_unsafe
+
+  c_array((CDoom.checkcoord.to_unsafe).value, 3, 0, 2, 1)
+  c_array((CDoom.checkcoord.to_unsafe + 1).value, 3, 0, 2, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 2).value, 3, 1, 2, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 3).value, 0, 0, 0, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 4).value, 2, 0, 2, 1)
+  c_array((CDoom.checkcoord.to_unsafe + 5).value, 0, 0, 0, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 6).value, 3, 1, 3, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 7).value, 0, 0, 0, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 8).value, 2, 0, 3, 1)
+  c_array((CDoom.checkcoord.to_unsafe + 9).value, 2, 1, 3, 1)
+  c_array((CDoom.checkcoord.to_unsafe + 10).value, 2, 1, 3, 0)
+  c_array((CDoom.checkcoord.to_unsafe + 11).value, 0, 0, 0, 0)
+
   def self.doom_print_impl(str : UInt8*)
     print String.new(str)
   end
@@ -3864,7 +3982,7 @@ module LibDoom
     CDoom.doom_concat(doom2wad, "/doom2.wad")
 
     # Retail.
-    doomuwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 8 + 1).as(UInt8*)
+    doomuwad = CDoom.doom_malloc.call(CDoom.doom_strlen(doomwaddir) + 1 + 9 + 1).as(UInt8*)
     CDoom.doom_strcpy(doomuwad, doomwaddir)
     CDoom.doom_concat(doomuwad, "/doomu.wad")
 
@@ -16244,8 +16362,8 @@ module LibDoom
              71, # Pain Elemental
              65, # Former Human Commando
              66, # Revenant
-             84, # Wolf SS
-             spawnt = false
+             84  # Wolf SS
+          spawnt = false
         end
       end
 
@@ -16605,4 +16723,2223 @@ module LibDoom
 
     return frac
   end
+
+  #
+  # Returns true
+  #  if strace crosses the given subsector successfully.
+  #
+  def self.p_cross_subsector(num : LibC::Int) : CDoom::DoomBool
+    {% if @top_level.has_constant?("RANGECHECK") %}
+      if num >= CDoom.numsubsectors
+        CDoom.doom_strcpy(CDoom.error_buf, "Error: p_cross_subsector: ss ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(num, 10))
+        CDoom.doom_strcpy(CDoom.error_buf, " with numss = ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.numsubsectors, 10))
+        CDoom.i_error(CDoom.error_buf)
+      end
+    {% end %}
+
+    sub = CDoom.subsectors + num
+
+    # check lines
+    count = sub.value.numlines
+    seg = CDoom.segs + sub.value.firstline
+
+    divl = CDoom::Divline.new
+
+    while count != 0
+      line = seg.value.linedef
+
+      # allready checked other size?
+      if line.value.validcount == CDoom.validcount
+        seg += 1
+        count -= 1
+        next
+      end
+
+      line.value.validcount = CDoom.validcount
+
+      v1 = line.value.v1
+      v2 = line.value.v2
+      s1 = CDoom.p_divline_side(v1.value.x, v1.value.y, pointerof(CDoom.strace))
+      s2 = CDoom.p_divline_side(v2.value.x, v2.value.y, pointerof(CDoom.strace))
+
+      # line isn't crossed?
+      if s1 == s2
+        seg += 1
+        count -= 1
+        next
+      end
+
+      divl.x = v1.value.x
+      divl.y = v1.value.y
+      divl.dx = v2.value.x - v1.value.x
+      divl.dy = v2.value.y - v1.value.y
+      s1 = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, pointerof(divl))
+      s2 = CDoom.p_divline_side(CDoom.t2x, CDoom.t2y, pointerof(divl))
+
+      # line isn't crossed?
+      if s1 == s2
+        seg += 1
+        count -= 1
+        next
+      end
+
+      # stop because it is not two sided anyway
+      # might do this after updating validcount?
+      return 0 if line.value.flags & CDoom::ML_TWOSIDED == 0
+
+      # crosses a two sided line
+      front = seg.value.frontsector
+      back = seg.value.backsector
+
+      # no wall to block sight with?
+      if front.value.floorheight == back.value.floorheight &&
+         front.value.ceilingheight == back.value.ceilingheight
+        seg += 1
+        count -= 1
+        next
+      end
+
+      # possible occluder
+      # because of ceiling height differences
+      if front.value.ceilingheight < back.value.ceilingheight
+        opentop = front.value.ceilingheight
+      else
+        opentop = back.value.ceilingheight
+      end
+
+      # because of ceiling height differences
+      if front.value.floorheight > back.value.floorheight
+        openbottom = front.value.floorheight
+      else
+        openbottom = back.value.floorheight
+      end
+
+      # quick test for totally closed doors
+      return 0 if openbottom >= opentop # stop
+
+      frac = CDoom.p_intercept_vector2(pointerof(CDoom.strace), pointerof(divl))
+
+      if front.value.floorheight != back.value.floorheight
+        slope = CDoom.fixed_div(openbottom - CDoom.sightzstart, frac)
+        CDoom.bottomslope = slope if slope > CDoom.bottomslope
+      end
+
+      if front.value.ceilingheight != back.value.ceilingheight
+        slope = CDoom.fixed_div(opentop - CDoom.sightzstart, frac)
+        CDoom.topslope = slope if slope < CDoom.topslope
+      end
+
+      return 0 if CDoom.topslope <= CDoom.bottomslope # stop
+
+      seg += 1
+      count -= 1
+    end
+
+    # passed the subsector ok
+    return 1
+  end
+
+  #
+  # Returns true
+  #  if strace crosses the given node successfully.
+  #
+  def self.p_cross_bsp_node(bspnum : LibC::Int) : CDoom::DoomBool
+    if bspnum & CDoom::NF_SUBSECTOR != 0
+      if bspnum == -1
+        return CDoom.p_cross_subsector(0)
+      else
+        return CDoom.p_cross_subsector(bspnum & (~CDoom::NF_SUBSECTOR))
+      end
+    end
+
+    bsp = CDoom.nodes + bspnum
+
+    # decide which side the start point is on
+    side = CDoom.p_divline_side(CDoom.strace.x, CDoom.strace.y, bsp.as(CDoom::Divline*))
+    side = 0 if side == 2 # an "on" should cross both sides
+
+    # cross the starting side
+    return 0 if CDoom.p_cross_bsp_node(bsp.value.children[side]) == 0
+
+    # the partition plane is crossed here
+    if side == CDoom.p_divline_side(CDoom.t2x, CDoom.t2y, bsp.as(CDoom::Divline*))
+      # the line doesn't touch the other side
+      return 1
+    end
+
+    # cross the ending side
+    return CDoom.p_cross_bsp_node(bsp.value.children[side ^ 1])
+  end
+
+  #
+  # Returns true
+  #  if a straight line between t1 and t2 is unobstructed.
+  # Uses REJECT.
+  #
+  def self.p_check_sight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : CDoom::DoomBool
+    # First check for trivial rejection.
+
+    # Determine subsector entries in REJECT table.
+    s1 = t1.value.subsector.value.sector - CDoom.sectors
+    s2 = t2.value.subsector.value.sector - CDoom.sectors
+    pnum = s1 * CDoom.numsectors + s2
+    bytenum = pnum >> 3
+    bitnum = 1 << (pnum & 7)
+
+    # Check in REJECT table.
+    if CDoom.rejectmatrix[bytenum] & bitnum != 0
+      CDoom.sightcounts[0] = CDoom.sightcounts[0] + 1
+
+      # can't possibly be connected
+      return 0
+    end
+
+    # An unobstructed LOS is possible.
+    # Now look from eyes of t1 to any part of t2.
+    CDoom.sightcounts[1] = CDoom.sightcounts[1] + 1
+
+    CDoom.validcount += 1
+
+    CDoom.sightzstart = t1.value.z + t1.value.height - (t1.value.height >> 2)
+    CDoom.topslope = (t2.value.z + t2.value.height) - CDoom.sightzstart
+    CDoom.bottomslope = (t2.value.z) - CDoom.sightzstart
+
+    CDoom.strace.x = t1.value.x
+    CDoom.strace.y = t1.value.y
+    CDoom.t2x = t2.value.x
+    CDoom.t2y = t2.value.y
+    CDoom.strace.dx = t2.value.x - t1.value.x
+    CDoom.strace.dy = t2.value.y - t1.value.y
+
+    # the head node is the last node output
+    return CDoom.p_cross_bsp_node(CDoom.numnodes - 1)
+  end
+
+  def self.p_init_pic_anims
+    # Init animation
+    CDoom.lastanim = CDoom.anims
+    i = 0
+    while CDoom.animdefs[i].istexture != -1
+      if CDoom.animdefs[i].istexture != 0
+        # different episode ?
+        if CDoom.r_check_texture_num_for_name(CDoom.animdefs[i].startname) == -1
+          i += 1
+          next
+        end
+
+        CDoom.lastanim.value.picnum = CDoom.r_texture_num_for_name(CDoom.animdefs[i].endname)
+        CDoom.lastanim.value.basepic = CDoom.r_texture_num_for_name(CDoom.animdefs[i].startname)
+      else
+        if CDoom.w_check_num_for_name(CDoom.animdefs[i].startname) == -1
+          i += 1
+          next
+        end
+
+        CDoom.lastanim.value.picnum = CDoom.r_flat_num_for_name(CDoom.animdefs[i].endname)
+        CDoom.lastanim.value.basepic = CDoom.r_flat_num_for_name(CDoom.animdefs[i].startname)
+      end
+
+      CDoom.lastanim.value.istexture = CDoom.animdefs[i].istexture
+      CDoom.lastanim.value.numpics = CDoom.lastanim.value.picnum - CDoom.lastanim.value.basepic + 1
+
+      if CDoom.lastanim.value.numpics < 2
+        CDoom.doom_strcpy(CDoom.error_buf, "Error: p_init_pic_anims: bad cycle from ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.animdefs[i].startname)
+        CDoom.doom_concat(CDoom.error_buf, " to ")
+        CDoom.doom_concat(CDoom.error_buf, CDoom.animdefs[i].endname)
+        CDoom.i_error(CDoom.error_buf)
+      end
+
+      CDoom.lastanim.value.speed = CDoom.animdefs[i].speed
+      CDoom.lastanim += 1
+
+      i += 1
+    end
+  end
+
+  #
+  # Will return a side_t*
+  #  given the number of the current sector,
+  #  the line number, and the side (0/1) that you want.
+  #
+  def self.get_side(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
+    return CDoom.sides + CDoom.sectors[current_sector].lines[line].value.sidenum[side]
+  end
+
+  #
+  # Will return a sector_t*
+  #  given the number of the current sector,
+  #  the line number and the side (0/1) that you want.
+  #
+  def self.get_sector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
+    return CDoom.sides[CDoom.sectors[current_sector].lines[line].value.sidenum[side]].sector
+  end
+
+  #
+  # Given the sector number and the line number,
+  #  it will tell you whether the line is two-sided or not.
+  #
+  def self.two_sided(sector : LibC::Int, line : LibC::Int) : LibC::Int
+    return CDoom.sectors[sector].lines[line].value.flags.to_i32 & CDoom::ML_TWOSIDED
+  end
+
+  #
+  # Return sector_t * of sector next to current.
+  # 0 if not two-sided line
+  #
+  def self.get_next_sector(line : CDoom::Line*, sec : CDoom::Sector*) : CDoom::Sector*
+    return Pointer(CDoom::Sector).null if line.value.flags & CDoom::ML_TWOSIDED == 0
+
+    return line.value.backsector if line.value.frontsector == sec
+
+    return line.value.frontsector
+  end
+
+  #
+  # FIND LOWEST FLOOR HEIGHT IN SURROUNDING SECTORS
+  #
+  def self.p_find_lowest_floor_surrounding(sec : CDoom::Sector*) : CDoom::Fixed
+    floor = sec.value.floorheight
+
+    sec.value.linecount.times do |i|
+      check = sec.value.lines[i]
+      other = CDoom.get_next_sector(check, sec)
+
+      next if other.null?
+
+      floor = other.value.floorheight if other.value.floorheight < floor
+    end
+
+    return floor
+  end
+
+  #
+  # FIND HIGHEST FLOOR HEIGHT IN SURROUNDING SECTORS
+  #
+  def self.p_find_highest_floor_surrounding(sec : CDoom::Sector*) : CDoom::Fixed
+    floor = -500 * CDoom::FRACUNIT
+
+    sec.value.linecount.times do |i|
+      check = sec.value.lines[i]
+      other = CDoom.get_next_sector(check, sec)
+
+      next if other.null?
+
+      floor = other.value.floorheight if other.value.floorheight > floor
+    end
+
+    return floor
+  end
+
+  #
+  # FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
+  # Note: this should be doable w/o a fixed array.
+  #
+  def self.p_find_next_highest_floor(sec : CDoom::Sector*, currentheight : LibC::Int) : CDoom::Fixed
+    height = currentheight
+
+    heightlist = uninitialized StaticArray(CDoom::Fixed, CDoom::MAX_ADJOINING_SECTORS)
+
+    h = 0
+    sec.value.linecount.times do |i|
+      check = sec.value.lines[i]
+      other = CDoom.get_next_sector(check, sec)
+
+      next if other.null?
+
+      if other.value.floorheight > height
+        heightlist[h] = other.value.floorheight
+        h += 1
+      end
+
+      # Check for overflow. Exit.
+      if h >= CDoom::MAX_ADJOINING_SECTORS
+        CDoom.doom_print.call("Sector with more than 20 adjoining sectors\n".to_unsafe)
+        break
+      end
+    end
+
+    # Find lowest height in list
+    return currentheight if h == 0
+
+    min = heightlist[0]
+
+    # Range checking?
+    i = 1
+    while i < h
+      min = heightlist[i] if heightlist[i] < min
+      i += 1
+    end
+
+    return min
+  end
+
+  #
+  # FIND LOWEST CEILING IN THE SURROUNDING SECTORS
+  #
+  def self.p_find_lowest_ceiling_surrounding(sec : CDoom::Sector*) : CDoom::Fixed
+    height = Int32::MAX
+
+    sec.value.linecount.times do |i|
+      check = sec.value.lines[i]
+      other = CDoom.get_next_sector(check, sec)
+
+      next if other.null?
+
+      height = other.value.ceilingheight if other.value.ceilingheight < height
+    end
+
+    return height
+  end
+
+  #
+  # FIND HIGHEST CEILING IN THE SURROUNDING SECTORS
+  #
+  def self.p_find_highest_ceiling_surrounding(sec : CDoom::Sector*) : CDoom::Fixed
+    height = 0
+
+    sec.value.linecount.times do |i|
+      check = sec.value.lines[i]
+      other = CDoom.get_next_sector(check, sec)
+
+      next if other.null?
+
+      height = other.value.ceilingheight if other.value.ceilingheight > height
+    end
+
+    return height
+  end
+
+  #
+  # RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
+  #
+  def self.p_find_sector_from_line_tag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
+    i = start + 1
+    while i < CDoom.numsectors
+      return i if CDoom.sectors[i].tag == line.value.tag
+      i += 1
+    end
+
+    return -1
+  end
+
+  #
+  # Find minimum light from an adjacent sector
+  #
+  def self.p_find_min_surrounding_light(sector : CDoom::Sector*, max : LibC::Int) : LibC::Int
+    min = max
+    sector.value.linecount.times do |i|
+      line = sector.value.lines[i]
+      check = CDoom.get_next_sector(line, sector)
+
+      next if check.null?
+
+      min = check.value.lightlevel.to_i32 if check.value.lightlevel < min
+    end
+
+    return min
+  end
+
+  #
+  # EVENTS
+  # Events are operations triggered by using, crossing,
+  # or shooting special lines, or by timed thinkers.
+  #
+
+  #
+  # Called every time a thing origin is about
+  #  to cross a line with a non 0 special.
+  #
+  def self.p_cross_special_line(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
+    line = CDoom.lines + linenum
+
+    #        Triggers that other things can activate
+    if thing.value.player.null?
+      # Things that should NOT trigger specials...
+      case thing.value.type
+      when CDoom::Mobjtype::MT_ROCKET,
+           CDoom::Mobjtype::MT_PLASMA,
+           CDoom::Mobjtype::MT_BFG,
+           CDoom::Mobjtype::MT_TROOPSHOT,
+           CDoom::Mobjtype::MT_HEADSHOT,
+           CDoom::Mobjtype::MT_BRUISERSHOT
+        return
+      end
+
+      # [ds] Point of ok?
+      ok = 0
+      case line.value.special
+      when 39,  # TELEPORT TRIGGER
+           97,  # TELEPORT RETRIGGER
+           125, # TELEPORT MONSTERONLY TRIGGER
+           126, # TELEPORT MONSTERONLY RETRIGGER
+           4,   # RAISE DOOR
+           10,  # PLAT DOWN-WAIT-UP-STAY TRIGGER
+           88   # PLAT DOWN-WAIT-UP-STAY RETRIGGER
+        ok = 1
+      end
+
+      return if ok == 0
+    end
+
+    # Note: could use some const's here.
+    case line.value.special
+    # TRIGGERS.
+    # All from here to RETRIGGERS.
+    when 2
+      # Open Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorOpen)
+      line.value.special = 0
+    when 3
+      # Close Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorClose)
+      line.value.special = 0
+    when 4
+      # Raise Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorNormal)
+      line.value.special = 0
+    when 5
+      # Raise Floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor)
+      line.value.special = 0
+    when 6
+      # Fast Ceiling Crush & Raise
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::FastCrushAndRaise)
+      line.value.special = 0
+    when 8
+      # Build Stairs
+      CDoom.ev_build_stairs(line, CDoom::Stairenum::Build8)
+      line.value.special = 0
+    when 10
+      # PlatDownWaitUp
+      CDoom.ev_do_plat(line, CDoom::Plattype::DownWaitUpStay, 0)
+      line.value.special = 0
+    when 12
+      # Light Turn On - brightest near
+      CDoom.ev_light_turn_on(line, 0)
+      line.value.special = 0
+    when 13
+      # Light Turn On 255
+      CDoom.ev_light_turn_on(line, 255)
+      line.value.special = 0
+    when 16
+      # Close Door 30
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::Close30ThenOpen)
+      line.value.special = 0
+    when 17
+      # Start Light Strobing
+      CDoom.ev_start_light_strobing(line)
+      line.value.special = 0
+    when 19
+      # Lower Floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloor)
+      line.value.special = 0
+    when 22
+      # Raise floor to nearest height and change texture
+      CDoom.ev_do_plat(line, CDoom::Plattype::RaiseToNearestAndChange, 0)
+      line.value.special = 0
+    when 25
+      # Ceiling Crush and Raise
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::CrushAndRaise)
+      line.value.special = 0
+    when 30
+      # Raise floor to shortest texture height
+      #  on either side of lines.
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseToTexture)
+      line.value.special = 0
+    when 35
+      # Lights Very Dark
+      CDoom.ev_light_turn_on(line, 35)
+      line.value.special = 0
+    when 36
+      # Lower Floor (TURBO)
+      CDoom.ev_do_floor(line, CDoom::Floorenum::TurboLower)
+      line.value.special = 0
+    when 37
+      # LowerAndChange
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerAndChange)
+      line.value.special = 0
+    when 38
+      # Lower Floor to Lowest
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloorToLowest)
+      line.value.special = 0
+    when 39
+      # TELEPORT!
+      CDoom.ev_teleport(line, side, thing)
+      line.value.special = 0
+    when 40
+      # RaiseCeilingLowerFloor
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::RaiseToHighest)
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloorToLowest)
+      line.value.special = 0
+    when 44
+      # Ceiling Crush
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::LowerAndCrush)
+      line.value.special = 0
+    when 52
+      # EXIT!
+      CDoom.g_exit_level
+    when 53
+      # Perpetual Platform Raise
+      CDoom.ev_do_plat(line, CDoom::Plattype::PerpetualRaise, 0)
+      line.value.special = 0
+    when 54
+      # Platform Stop
+      CDoom.ev_stop_plat(line)
+      line.value.special = 0
+    when 56
+      # Raise Floor Crush
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorCrush)
+      line.value.special = 0
+    when 57
+      # Ceiling Crush Stop
+      CDoom.ev_ceiling_crush_stop(line)
+      line.value.special = 0
+    when 58
+      # Raise Floor 24
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor24)
+      line.value.special = 0
+    when 59
+      # Raise Floor 24 And Change
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor24AndChange)
+      line.value.special = 0
+    when 104
+      # Turn lights off in sector(tag)
+      CDoom.ev_turn_tag_lights_off(line)
+      line.value.special = 0
+    when 108
+      # Blazing Door Raise (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeRaise)
+      line.value.special = 0
+    when 109
+      # Blazing Door Open (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeOpen)
+      line.value.special = 0
+    when 100
+      # Build Stairs Turbo 16
+      CDoom.ev_build_stairs(line, CDoom::Stairenum::Turbo16)
+      line.value.special = 0
+    when 110
+      # Blazing Door Close (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeClose)
+      line.value.special = 0
+    when 119
+      # Raise floor to nearest surr. floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorToNearest)
+      line.value.special = 0
+    when 121
+      # Blazing PlatDownWaitUpStay
+      CDoom.ev_do_plat(line, CDoom::Plattype::BlazeDWUS, 0)
+      line.value.special = 0
+    when 124
+      # Secret EXIT
+      CDoom.g_secret_exit_level
+    when 125
+      # TELEPORT MonsterONLY
+      if thing.value.player.null?
+        CDoom.ev_teleport(line, side, thing)
+        line.value.special = 0
+      end
+    when 130
+      # Raise Floor Turbo
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorTurbo)
+      line.value.special = 0
+    when 141
+      # Silent Ceiling Crush & Raise
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::SilentCrushAndRaise)
+      line.value.special = 0
+      # RETRIGGERS.  All from here till end.
+    when 72
+      # Ceiling Crush
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::LowerAndCrush)
+    when 73
+      # Ceiling Crush and Raise
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::CrushAndRaise)
+    when 74
+      # Ceiling Crush Stop
+      CDoom.ev_ceiling_crush_stop(line)
+    when 75
+      # Close Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorClose)
+    when 76
+      # Close Door 30
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::Close30ThenOpen)
+    when 77
+      # FastCeiling Crush & Raise
+      CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::FastCrushAndRaise)
+    when 79
+      # Lights Very Dark
+      CDoom.ev_light_turn_on(line, 35)
+    when 80
+      # Light Turn On - brightest near
+      CDoom.ev_light_turn_on(line, 0)
+    when 81
+      # Light Turn On 255
+      CDoom.ev_light_turn_on(line, 255)
+    when 82
+      # Lower Floor To Lowest
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloorToLowest)
+    when 83
+      # Lower Floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloor)
+    when 84
+      # LowerAndChange
+      CDoom.ev_do_floor(line, CDoom::Floorenum::LowerAndChange)
+    when 86
+      # Open Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorOpen)
+    when 87
+      # Perpetual Platform Raise
+      CDoom.ev_do_plat(line, CDoom::Plattype::PerpetualRaise, 0)
+    when 88
+      # PlatDownWaitUp
+      CDoom.ev_do_plat(line, CDoom::Plattype::DownWaitUpStay, 0)
+    when 89
+      # Platform Stop
+      CDoom.ev_stop_plat(line)
+    when 90
+      # Raise Door
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorNormal)
+    when 91
+      # Raise Floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor)
+    when 92
+      # Raise Floor 24
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor24)
+    when 93
+      # Raise Floor 24 And Change
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor24AndChange)
+    when 94
+      # Raise Floor Crush
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorCrush)
+    when 95
+      # Raise floor to nearest height
+      # and change texture.
+      CDoom.ev_do_plat(line, CDoom::Plattype::RaiseToNearestAndChange, 0)
+    when 96
+      # Raise floor to shortest texture height
+      # on either side of lines.
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseToTexture)
+    when 97
+      # TELEPORT !
+      CDoom.ev_teleport(line, side, thing)
+    when 98
+      # Lower Floor (TURBO)
+      CDoom.ev_do_floor(line, CDoom::Floorenum::TurboLower)
+    when 105
+      # Blazing Door Raise (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeRaise)
+    when 106
+      # Blazing Door Open (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeOpen)
+    when 107
+      # Blazing Door Close (faster than TURBO!)
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeClose)
+    when 120
+      # Blazing PlatDownWaitUpStay.
+      CDoom.ev_do_plat(line, CDoom::Plattype::BlazeDWUS, 0)
+    when 126
+      # TELEPORT MonsterONLY>
+      if thing.value.player.null?
+        CDoom.ev_teleport(line, side, thing)
+      end
+    when 128
+      # Raise to Nearest Floor
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorToNearest)
+    when 129
+      # Raise Floor Turbo
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorTurbo)
+    end
+  end
+
+  #
+  # Called when a thing shoots a special line.
+  #
+  def self.p_shoot_special_line(thing : CDoom::Mobj*, line : CDoom::Line*)
+    # Impacts that other things can activate.
+    if thing.value.player.null?
+      ok = 0 # [ds] Pointless ok again?
+      case line.value.special
+      when 46
+        # OPEN DOOR IMPACT
+        ok = 1
+      end
+      return if ok == 0
+    end
+
+    case line.value.special
+    when 24
+      # RAISE FLOOR
+      CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor)
+      CDoom.p_change_switch_texture(line, 0)
+    when 46
+      # OPEN DOOR
+      CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorOpen)
+      CDoom.p_change_switch_texture(line, 1)
+    when 47
+      # RAISE FLOOR NEAR AND CHANGE
+      CDoom.ev_do_plat(line, CDoom::Plattype::RaiseToNearestAndChange, 0)
+      CDoom.p_change_switch_texture(line, 0)
+    end
+  end
+
+  #
+  # Called every tic frame
+  #  that the player origin is in a special sector
+  #
+  def self.p_player_in_special_sector(player : CDoom::Player*)
+    sector = player.value.mo.value.subsector.value.sector
+
+    # Falling, not all the way down yet?
+    return if player.value.mo.value.z != sector.value.floorheight
+
+    # Has hitten ground.
+    case sector.value.special
+    when 5
+      # HELLSLIME DAMAGE
+      if player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 &&
+         CDoom.leveltime & 0x1f == 0
+        CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 10)
+      end
+    when 7
+      # NUKAGE DAMAGE
+      if player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 &&
+         CDoom.leveltime & 0x1f == 0
+        CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 5)
+      end
+    when 16, # SUPER HELLSLIME DAMAGE
+         4   # STROBE HURT
+      if (player.value.powers[CDoom::Powertype::Ironfeet.value] == 0 ||
+         CDoom.p_random < 5) && CDoom.leveltime & 0x1f == 0
+        CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 20)
+      end
+    when 9
+      # SECRET SECTOR
+      player.value.secretcount = player.value.secretcount + 1
+      player.value.message = "A secret is revealed!"
+      CDoom.s_start_sound(Pointer(Void).null, CDoom::Sfxenum::SFX_getpow.value)
+      sector.value.special = 0
+    when 11
+      # EXIT SUPER DAMAGE! (for E1M8 finale)
+      player.value.cheats = player.value.cheats & ~CDoom::Cheat::CF_GODMODE.value
+
+      CDoom.p_damage_mobj(player.value.mo, Pointer(CDoom::Mobj).null, Pointer(CDoom::Mobj).null, 20) if CDoom.leveltime & 0x1f == 0
+
+      CDoom.g_exit_level if player.value.health <= 10
+    else
+      CDoom.doom_strcpy(CDoom.error_buf, "Error: p_player_in_special_sector: unknown special ")
+      CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(sector.value.special, 10))
+      CDoom.i_error(CDoom.error_buf)
+    end
+  end
+
+  #
+  # Animate planes, scroll walls, etc.
+  #
+  def self.p_update_specials
+    # LEVEL TIMER
+    if CDoom.level_timer != 0
+      CDoom.level_time_count -= 1
+      CDoom.g_exit_level if CDoom.level_time_count == 0
+    end
+
+    # ANIMATE FLATS AND TEXTURES GLOBALLY
+    anim = CDoom.anims.to_unsafe
+    while anim < CDoom.lastanim
+      i = anim.value.basepic
+      while i < anim.value.basepic + anim.value.numpics
+        pic = anim.value.basepic + ((CDoom.leveltime // anim.value.speed + i) % anim.value.numpics)
+        if anim.value.istexture != 0
+          CDoom.texturetranslation[i] = pic
+        else
+          CDoom.flattranslation[i] = pic
+        end
+
+        i += 1
+      end
+
+      anim += 1
+    end
+
+    # ANIMATE LINE SPECIALS
+    CDoom.numlinespecials.times do |i|
+      line = CDoom.linespeciallist[i]
+      case line.value.special
+      when 48
+        # EFFECT FIRSTCOL SCROLL +
+        (CDoom.sides + line.value.sidenum[0]).value.textureoffset = CDoom.sides[line.value.sidenum[0]].textureoffset + CDoom::FRACUNIT
+      end
+    end
+
+    # DO BUTTONS
+    CDoom::MAXBUTTONS.times do |i|
+      if CDoom.buttonlist[i].btimer != 0
+        (CDoom.buttonlist.to_unsafe + i).value.btimer = CDoom.buttonlist[i].btimer - 1
+        if CDoom.buttonlist[i].btimer == 0
+          case CDoom.buttonlist[i].where
+          when CDoom::Bwhere::Top
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.toptexture =
+              CDoom.buttonlist[i].btexture
+          when CDoom::Bwhere::Middle
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.midtexture =
+              CDoom.buttonlist[i].btexture
+          when CDoom::Bwhere::Bottom
+            (CDoom.sides + CDoom.buttonlist[i].line.value.sidenum[0]).value.bottomtexture =
+              CDoom.buttonlist[i].btexture
+          end
+          CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+            CDoom::Sfxenum::SFX_swtchn.value)
+          CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button))
+        end
+      end
+    end
+  end
+
+  #
+  # Special Stuff that can not be categorized
+  #
+  def self.ev_do_donut(line : CDoom::Line*) : LibC::Int
+    secnum = -1
+    rtn = 0
+    while (secnum = CDoom.p_find_sector_from_line_tag(line, secnum)) >= 0
+      s1 = CDoom.sectors + secnum
+
+      # ALREADY MOVING?  IF SO, KEEP GOING...
+      next if !s1.value.specialdata.null?
+
+      rtn = 1
+      s2 = CDoom.get_next_sector(s1.value.lines[0], s1)
+      s2.value.linecount.times do |i|
+        if s2.value.lines[i].value.flags & CDoom::ML_TWOSIDED == 0 ||
+           s2.value.lines[i].value.backsector == s1
+          next
+        end
+        s3 = s2.value.lines[i].value.backsector
+
+        #        Spawn rising slime
+        floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
+        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        s2.value.specialdata = floor
+        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        floor.value.type = CDoom::Floorenum::DonutRaise
+        floor.value.crush = 0
+        floor.value.direction = 1
+        floor.value.sector = s2
+        floor.value.speed = CDoom::FLOORSPEED // 2
+        floor.value.texture = s3.value.floorpic
+        floor.value.newspecial = 0
+        floor.value.floordestheight = s3.value.floorheight
+
+        #        Spawn lowering donut-hole
+        floor = CDoom.z_malloc(sizeof(CDoom::Floormove), CDoom::PU_LEVSPEC, Pointer(Void).null).as(CDoom::Floormove*)
+        CDoom.p_add_thinker((floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker)).as(CDoom::Thinker*))
+        s1.value.specialdata = floor
+        (floor.as(UInt8*) + offsetof(CDoom::Floormove, @thinker) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfP1*).value = CDoom::ActionfP1.new((->CDoom.t_move_floor).pointer, Pointer(Void).null)
+        floor.value.type = CDoom::Floorenum::LowerFloor
+        floor.value.crush = 0
+        floor.value.direction = -1
+        floor.value.sector = s1
+        floor.value.speed = CDoom::FLOORSPEED // 2
+        floor.value.floordestheight = s3.value.floorheight
+        break
+      end
+    end
+
+    return rtn
+  end
+
+  #
+  # SPECIAL SPAWNING
+  #
+
+  #
+  # After the map has been loaded, scan for specials
+  #  that spawn thinkers
+  #
+
+  # Parses command line parameters.
+  def self.p_spawn_specials
+    episode = 1
+    episode = 2 if CDoom.w_check_num_for_name("texture2") >= 0
+
+    # See if -TIMER needs to be used.
+    CDoom.level_timer = 0
+
+    i = CDoom.m_check_parm("-avg")
+    if i != 0 && CDoom.deathmatch != 0
+      CDoom.level_timer = 1
+      CDoom.level_time_count = 20 * 60 * 35
+    end
+
+    i = CDoom.m_check_parm("-timer")
+    if i != 0 && CDoom.deathmatch != 0
+      time = CDoom.doom_atoi(CDoom.myargv[i + 1]) * 60 * 35
+      CDoom.level_timer = 1
+      CDoom.level_time_count = time
+    end
+
+    #        Init special SECTORs.
+    sector = CDoom.sectors
+    CDoom.numsectors.times do |i|
+      if sector.value.special == 0
+        sector += 1
+        next
+      end
+
+      case sector.value.special
+      when 1
+        # FLICKERING LIGHTS
+        CDoom.p_spawn_light_flash(sector)
+      when 2
+        # STROBE FAST
+        CDoom.p_spawn_strobe_flash(sector, CDoom::FASTDARK, 0)
+      when 3
+        # STROBE SLOW
+        CDoom.p_spawn_strobe_flash(sector, CDoom::SLOWDARK, 0)
+      when 4
+        CDoom.p_spawn_strobe_flash(sector, CDoom::FASTDARK, 0)
+        sector.value.special = 4
+      when 8
+        # GLOWING LIGHT
+        CDoom.p_spawn_glowing_light(sector)
+      when 9
+        # SECRET SECTOR
+        CDoom.totalsecret += 1
+      when 10
+        # DOOR CLOSE IN 30 SECONDS
+        CDoom.p_spawn_door_close_in_30(sector)
+      when 12
+        # SYNC STROBE SLOW
+        CDoom.p_spawn_strobe_flash(sector, CDoom::SLOWDARK, 1)
+      when 13
+        # SYNC STROBE FAST
+        CDoom.p_spawn_strobe_flash(sector, CDoom::FASTDARK, 1)
+      when 14
+        # DOOR RAISE IN 5 MINUTES
+        CDoom.p_spawn_door_raise_in_5_mins(sector, i)
+      when 17
+        CDoom.p_spawn_fire_flicker(sector)
+      end
+
+      sector += 1
+    end
+
+    # Init line EFFECTs
+    CDoom.numlinespecials = 0
+    CDoom.numlines.times do |i|
+      case CDoom.lines[i].special
+      when 48
+        # EFFECT FIRSTCOL SCROLL+
+        CDoom.linespeciallist[CDoom.numlinespecials] = CDoom.lines + i
+        CDoom.numlinespecials += 1
+      end
+    end
+
+    # Init other misc stuff
+    CDoom::MAXCEILINGS.times { |i| CDoom.activeceilings[i] = Pointer(CDoom::Ceiling).null }
+
+    CDoom::MAXPLATS.times { |i| CDoom.activeplats[i] = Pointer(CDoom::Plat).null }
+
+    CDoom::MAXBUTTONS.times { |i| CDoom.doom_memset(CDoom.buttonlist.to_unsafe + i, 0, sizeof(CDoom::Button)) }
+  end
+
+  #
+  # Only called at game initialization
+  #
+  def self.p_init_switch_list
+    episode = 1
+
+    if CDoom.gamemode == CDoom::GameMode::Registered || CDoom.gamemode == CDoom::GameMode::Retail
+      episode = 2
+    else
+      episode = 3 if CDoom.gamemode == CDoom::GameMode::Commercial
+    end
+
+    index = 0
+    CDoom::MAXSWITCHES.times do |i|
+      if CDoom.alph_switch_list[i].episode == 0
+        CDoom.numswitches = index // 2
+        CDoom.switchlist[index] = -1
+        break
+      end
+
+      if CDoom.alph_switch_list[i].episode <= episode
+        CDoom.switchlist[index] = CDoom.r_texture_num_for_name(CDoom.alph_switch_list[i].name1)
+        index += 1
+        CDoom.switchlist[index] = CDoom.r_texture_num_for_name(CDoom.alph_switch_list[i].name2)
+        index += 1
+      end
+    end
+  end
+
+  #
+  # Start a button counting down till it turns off.
+  #
+  def self.p_start_button(line : CDoom::Line*, w : CDoom::Bwhere, texture : LibC::Int, time : LibC::Int)
+    # See if button is already pressed
+    CDoom::MAXBUTTONS.times do |i|
+      return if CDoom.buttonlist[i].btimer != 0 &&
+                CDoom.buttonlist[i].line == line
+    end
+
+    CDoom::MAXBUTTONS.times do |i|
+      if CDoom.buttonlist[i].btimer == 0
+        (CDoom.buttonlist.to_unsafe + i).value.line = line
+        (CDoom.buttonlist.to_unsafe + i).value.where = w
+        (CDoom.buttonlist.to_unsafe + i).value.btexture = texture
+        (CDoom.buttonlist.to_unsafe + i).value.btimer = time
+        (CDoom.buttonlist.to_unsafe + i).value.soundorg = ((line.value.frontsector).as(UInt8*) + offsetof(CDoom::Sector, @soundorg)).as(CDoom::Mobj*)
+        return
+      end
+    end
+
+    CDoom.i_error("Error: p_start_button: no button slots left!")
+  end
+
+  #
+  # Function that changes wall texture.
+  # Tell it if switch is ok to use again (1=yes, it's a button).
+  #
+  def self.p_change_switch_texture(line : CDoom::Line*, use_again : LibC::Int)
+    line.value.special = 0 if use_again == 0
+
+    tex_top = CDoom.sides[line.value.sidenum[0]].toptexture
+    tex_mid = CDoom.sides[line.value.sidenum[0]].midtexture
+    tex_bot = CDoom.sides[line.value.sidenum[0]].bottomtexture
+    sound = CDoom::Sfxenum::SFX_swtchn.value
+
+    # EXIT SWITCH?
+    if line.value.special == 11
+      sound = CDoom::Sfxenum::SFX_swtchx.value
+    end
+
+    (CDoom.numswitches * 2).times do |i|
+      if CDoom.switchlist[i] == tex_top
+        CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+          sound)
+        (CDoom.sides + line.value.sidenum[0]).value.toptexture = CDoom.switchlist[i ^ 1]
+
+        CDoom.p_start_button(line, CDoom::Bwhere::Top, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+
+        return
+      elsif CDoom.switchlist[i] == tex_mid
+        CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+          sound)
+        (CDoom.sides + line.value.sidenum[0]).value.midtexture = CDoom.switchlist[i ^ 1]
+
+        CDoom.p_start_button(line, CDoom::Bwhere::Top, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+
+        return
+      elsif CDoom.switchlist[i] == tex_bot
+        CDoom.s_start_sound(((CDoom.buttonlist.to_unsafe + i).as(UInt8*) + offsetof(CDoom::Button, @soundorg)).as(CDoom::Mobj*),
+          sound)
+        (CDoom.sides + line.value.sidenum[0]).value.bottomtexture = CDoom.switchlist[i ^ 1]
+
+        CDoom.p_start_button(line, CDoom::Bwhere::Top, CDoom.switchlist[i], CDoom::BUTTONTIME) if use_again != 0
+
+        return
+      end
+    end
+  end
+
+  #
+  # Called when a thing uses a special line.
+  # Only the front sides of lines are usable.
+  #
+  def self.p_use_special_line(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : CDoom::DoomBool
+    # Err...
+    # Use the back sides of VERY SPECIAL lines...
+    if side != 0
+      case line.value.special
+      when 124
+        # Sliding door open&close
+        # UNUSED?
+      else
+        return 0
+      end
+    end
+
+    # Switches that other things can activate.
+    if thing.value.player.null?
+      # never open secret doors
+      return 0 if line.value.flags & CDoom::ML_SECRET != 0
+
+      case line.value.special
+      when 1,  # MANUAL DOOR RAISE
+           32, # MANUAL BLUE
+           33, # MANUAL RED
+           34  # MANUAL YELLOW
+      else
+        return 0
+      end
+    end
+
+    # do something
+    case line.value.special
+    # MANUALS
+    when 1,  # Vertical Door
+         26, # Blue Door/Locked
+         27, # Yellow Door /Locked
+         28, # Red Door /Locked
+
+         31, # Manual door open
+         32, # Blue locked door open
+         33, # Red locked door open
+         34, # Yellow locked door open
+
+         117, # Blazing door raise
+         118  # Blazing door open
+      CDoom.ev_vertical_door(line, thing)
+      # UNUSED - Door Slide Open&Close
+      # when 124
+      # CDoom.ev_sliding_door(line, thing)
+
+      # SWITCHES
+    when 7
+      # Build Stairs
+      if CDoom.ev_build_stairs(line, CDoom::Stairenum::Build8) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 9
+      # Change Donut
+      if CDoom.ev_do_donut(line) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 11
+      # Exit level
+      CDoom.p_change_switch_texture(line, 0)
+      CDoom.g_exit_level
+    when 14
+      # Raise Floor 32 and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseAndChange, 32) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 15
+      # Raise Floor 24 and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseAndChange, 24) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 18
+      # Raise Floor to next highest floor
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorToNearest) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 20
+      # Raise Plat next highest floor and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseToNearestAndChange, 0) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 21
+      # PlatDownWaitUpStay
+      if CDoom.ev_do_plat(line, CDoom::Plattype::DownWaitUpStay, 0) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 23
+      # Lower Floor to Lowest
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloorToLowest) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 29
+      # Raise Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorNormal) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 41
+      # Lower Ceiling to Floor
+      if CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::LowerToFloor) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 71
+      # Turbo Lower Floor
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::TurboLower) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 49
+      # Ceiling Crush And Raise
+      if CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::CrushAndRaise) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 50
+      # Close Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorClose) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 51
+      # Secret EXIT
+      CDoom.p_change_switch_texture(line, 0)
+      CDoom.g_secret_exit_level
+    when 55
+      # Raise Floor Crush
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorCrush) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 101
+      # Raise Floor
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 102
+      # Lower Floor to Surrounding floor height
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloor) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 103
+      # Open Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorOpen) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 111
+      # Blazing Door Raise (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeRaise) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 112
+      # Blazing Door Open (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeOpen) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 113
+      # Blazing Door Raise (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeClose) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 122
+      # Blazing PlatDownWaitUpStay
+      if CDoom.ev_do_plat(line, CDoom::Plattype::BlazeDWUS, 0) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 127
+      # Build Stairs Turbo 16
+      if CDoom.ev_build_stairs(line, CDoom::Stairenum::Turbo16) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 131
+      # Raise Floor Turbo
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorTurbo) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 133, # BlzOpenDoor BLUE
+         135, # BlzOpenDoor RED
+         137  # BlzOpenDoor YELLOW
+      if CDoom.ev_do_locked_door(line, CDoom::Vldoorenum::BlazeOpen, thing) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+    when 140
+      # Raise Floor 512
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor512) != 0
+        CDoom.p_change_switch_texture(line, 0)
+      end
+      # BUTTONS
+    when 42
+      # Close Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorClose) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 43
+      # Lower Ceiling to Floor
+      if CDoom.ev_do_ceiling(line, CDoom::Ceilingenum::LowerToFloor) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 60
+      # Raise Floor to Lowest
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::LowerFloorToLowest) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 61
+      # Open Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorOpen) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 62
+      # PlatDownWaitUpStay
+      if CDoom.ev_do_plat(line, CDoom::Plattype::DownWaitUpStay, 1) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 63
+      # Raise Door
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::DoorNormal) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 64
+      # Raise Floor to ceiling
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloor) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 66
+      # Raise Floor 24 and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseAndChange, 24) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 67
+      # Raise Floor 32 and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseAndChange, 32) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 65
+      # Raise Floor Crush
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorCrush) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 68
+      # Raise Plat to next highest floor and change texture
+      if CDoom.ev_do_plat(line, CDoom::Plattype::RaiseToNearestAndChange, 0) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 69
+      # Raise Floor to next highest floor
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorToNearest) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 70
+      # Turbo Lower Floor
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::TurboLower) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 114
+      # Blazing Door Raise (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeRaise) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 115
+      # Blazing Door Open (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeOpen) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 116
+      # Blazing Door Close (faster than TURBO!)
+      if CDoom.ev_do_door(line, CDoom::Vldoorenum::BlazeClose) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 123
+      # Blazing PlatDownWaitUpStay
+      if CDoom.ev_do_plat(line, CDoom::Plattype::BlazeDWUS, 0) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 132
+      # Raise Floor Turbo
+      if CDoom.ev_do_floor(line, CDoom::Floorenum::RaiseFloorTurbo) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 99,  # BlzOpenDoor BLUE
+         134, # BlzOpenDoor RED
+         136  # BlzOpenDoor YELLOW
+      if CDoom.ev_do_locked_door(line, CDoom::Vldoorenum::BlazeOpen, thing) != 0
+        CDoom.p_change_switch_texture(line, 1)
+      end
+    when 138
+      # Light Turn On
+      CDoom.ev_light_turn_on(line, 255)
+      CDoom.p_change_switch_texture(line, 1)
+    when 139
+      # Light Turn Off
+      CDoom.ev_light_turn_on(line, 35)
+      CDoom.p_change_switch_texture(line, 1)
+    end
+    return 1
+  end
+
+  def self.ev_teleport(line : CDoom::Line*, side : LibC::Int, thing : CDoom::Mobj*) : LibC::Int
+    # don't teleport missiles
+    return 0 if thing.value.flags & CDoom::Mobjflag::MF_MISSILE.value != 0
+
+    # Don't teleport if hit back of line,
+    #  so you can get out of teleporter.
+    return 0 if side == 1
+
+    tag = line.value.tag
+    CDoom.numsectors.times do |i|
+      if CDoom.sectors[i].tag == tag
+        thinker = CDoom.thinkercap.next
+        while thinker != pointerof(CDoom.thinkercap)
+          # not a mobj
+          if thinker.value.function.acp1.pointer != (->CDoom.p_mobj_thinker).pointer
+            thinker = thinker.value.next
+            next
+          end
+
+          m = thinker.as(CDoom::Mobj*)
+
+          # not a teleportman
+          if m.value.type != CDoom::Mobjtype::MT_TELEPORTMAN
+            thinker = thinker.value.next
+            next
+          end
+
+          sector = m.value.subsector.value.sector
+          # wrong sector
+          if sector - CDoom.sectors != i
+            thinker = thinker.value.next
+            next
+          end
+
+          oldx = thing.value.x
+          oldy = thing.value.y
+          oldz = thing.value.z
+
+          return 0 if CDoom.p_teleport_move(thing, m.value.x, m.value.y) == 0
+
+          thing.value.z = thing.value.floorz # fixme: not needed?
+          thing.value.player.value.viewz = thing.value.z + thing.value.player.value.viewheight if !thing.value.player.null?
+
+          # spawn a teleport fog at source and destination
+          fog = CDoom.p_spawn_mobj(oldx, oldy, oldz, CDoom::Mobjtype::MT_TFOG)
+          CDoom.s_start_sound(fog, CDoom::Sfxenum::SFX_telept.value)
+          an = m.value.angle >> CDoom::ANGLETOFINESHIFT
+          fog = CDoom.p_spawn_mobj(m.value.x + 20 * CDoom.finecosine[an], m.value.y + 20 * CDoom.finesine[an],
+            thing.value.z, CDoom::Mobjtype::MT_TFOG)
+
+          # emit sound, where?
+          CDoom.s_start_sound(fog, CDoom::Sfxenum::SFX_telept.value)
+
+          # don't move for a bit
+          thing.value.reactiontime = 18 if !thing.value.player.null?
+
+          thing.value.angle = m.value.angle
+          thing.value.momx = 0
+          thing.value.momy = 0
+          thing.value.momz = 0
+          return 1
+
+          thinker = thinker.value.next
+        end
+      end
+    end
+
+    return 0
+  end
+
+  #
+  # THINKERS
+  # All thinkers should be allocated by Z_Malloc
+  # so they can be operated on uniformly.
+  # The actual structures will vary in size,
+  # but the first element must be thinker_t.
+  #
+
+  def self.p_init_thinkers
+    CDoom.thinkercap.prev = pointerof(CDoom.thinkercap)
+    CDoom.thinkercap.next = pointerof(CDoom.thinkercap)
+  end
+
+  #
+  # Adds a new thinker at the end of the list.
+  #
+  def self.p_add_thinker(thinker : CDoom::Thinker*)
+    CDoom.thinkercap.prev.value.next = thinker
+    thinker.value.next = pointerof(CDoom.thinkercap)
+    thinker.value.prev = CDoom.thinkercap.prev
+    CDoom.thinkercap.prev = thinker
+  end
+
+  #
+  # Deallocation is lazy -- it will not actually be freed
+  # until its thinking turn comes up.
+  #
+  def self.p_remove_thinker(thinker : CDoom::Thinker*)
+    # FIXME: NOP>
+    (thinker.as(UInt8*) + offsetof(CDoom::Thinker, @function)).as(CDoom::ActionfV*).value = CDoom::ActionfV.new(Pointer(Void).new(UInt64::MAX), Pointer(Void).null)
+  end
+
+  def self.p_run_thinkers
+    currentthinker = CDoom.thinkercap.next
+    while currentthinker != pointerof(CDoom.thinkercap)
+      if currentthinker.value.function.acv.pointer == Pointer(Void).new(UInt64::MAX)
+        # time to remove it
+        currentthinker.value.next.value.prev = currentthinker.value.prev
+        currentthinker.value.prev.value.next = currentthinker.value.next
+        CDoom.z_free(currentthinker)
+      else
+        currentthinker.value.function.acp1.call(currentthinker.as(Void*)) if !currentthinker.value.function.acp1.pointer.null?
+      end
+      currentthinker = currentthinker.value.next
+    end
+  end
+
+  def self.p_ticker
+    # run the tic
+    return if CDoom.paused != 0
+
+    # pause if in menu and at least one tic has been run
+    if CDoom.netgame == 0 &&
+       CDoom.menuactive != 0 &&
+       CDoom.demoplayback == 0 &&
+       CDoom.players[CDoom.consoleplayer].viewz != 1
+      return
+    end
+    CDoom::MAXPLAYERS.times { |i| CDoom.p_player_think(CDoom.players.to_unsafe + i) if CDoom.playeringame[i] != 0 }
+
+    CDoom.p_run_thinkers
+    CDoom.p_update_specials
+    CDoom.p_respawn_specials
+
+    # for par times
+    CDoom.leveltime += 1
+  end
+
+  #
+  # Movement.
+  #
+
+  #
+  # Moves the given origin along a given angle.
+  #
+  def self.p_thrust(player : CDoom::Player*, angle : CDoom::Angle, move : CDoom::Fixed)
+    angle >>= CDoom::ANGLETOFINESHIFT
+
+    player.value.mo.value.momx = player.value.mo.value.momx + CDoom.fixed_mul(move, CDoom.finecosine[angle])
+    player.value.mo.value.momy = player.value.mo.value.momy + CDoom.fixed_mul(move, CDoom.finesine[angle])
+  end
+
+  #
+  # Calculate the walking / running height adjustment
+  #
+  def self.p_calc_height(player : CDoom::Player*)
+    # Regular movement bobbing
+    # (needs to be calculated for gun swing
+    # even if not on ground)
+    # OPTIMIZE: tablify angle
+    # Note: a LUT allows for effects
+    #  like a ramp with low health.
+    player.value.bob =
+      CDoom.fixed_mul(player.value.mo.value.momx, player.value.mo.value.momx) +
+        CDoom.fixed_mul(player.value.mo.value.momy, player.value.mo.value.momy)
+
+    player.value.bob = player.value.bob >> 2
+
+    player.value.bob = CDoom::MAXBOB if player.value.bob > CDoom::MAXBOB
+
+    if player.value.cheats & CDoom::Cheat::CF_NOMOMENTUM.value != 0 || CDoom.onground == 0
+      player.value.viewz = player.value.mo.value.z + CDoom::VIEWHEIGHT
+
+      if player.value.viewz > player.value.mo.value.ceilingz - 4 * CDoom::FRACUNIT
+        player.value.viewz = player.value.mo.value.ceilingz - 4 * CDoom::FRACUNIT
+      end
+
+      player.value.viewz = player.value.mo.value.z + player.value.viewheight
+      return
+    end
+
+    angle = (CDoom::FINEANGLES // 20 * CDoom.leveltime) & CDoom::FINEMASK
+    bob = CDoom.fixed_mul(player.value.bob // 2, CDoom.finesine[angle])
+
+    # move viewheight
+    if player.value.playerstate == CDoom::Playerstate::PST_LIVE
+      player.value.viewheight = player.value.viewheight + player.value.deltaviewheight
+
+      if player.value.viewheight > CDoom::VIEWHEIGHT
+        player.value.viewheight = CDoom::VIEWHEIGHT
+        player.value.deltaviewheight = 0
+      end
+
+      if player.value.viewheight < CDoom::VIEWHEIGHT // 2
+        player.value.viewheight = CDoom::VIEWHEIGHT // 2
+        player.value.deltaviewheight = 1 if player.value.deltaviewheight <= 0
+      end
+
+      if player.value.deltaviewheight != 0
+        player.value.deltaviewheight = player.value.deltaviewheight + CDoom::FRACUNIT // 4
+        player.value.deltaviewheight = 1 if player.value.deltaviewheight == 0
+      end
+    end
+
+    player.value.viewz = player.value.mo.value.z + player.value.viewheight + bob
+
+    if player.value.viewz > player.value.mo.value.ceilingz - 4 * CDoom::FRACUNIT
+      player.value.viewz = player.value.mo.value.ceilingz - 4 * CDoom::FRACUNIT
+    end
+  end
+
+  def self.p_move_player(player : CDoom::Player*)
+    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+
+    player.value.mo.value.angle = player.value.mo.value.angle &+ (cmd.value.angleturn.to_i32 << 16)
+
+    # Do not let the player control movement
+    #  if not onground.
+    CDoom.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
+
+    CDoom.p_thrust(player, player.value.mo.value.angle, cmd.value.forwardmove.to_i32 * 2048) if cmd.value.forwardmove != 0 && CDoom.onground != 0
+
+    CDoom.p_thrust(player, player.value.mo.value.angle &- CDoom::ANG90, cmd.value.sidemove.to_i32 * 2048) if cmd.value.sidemove != 0 && CDoom.onground != 0
+
+    if (cmd.value.forwardmove != 0 || cmd.value.sidemove != 0) &&
+       player.value.mo.value.state == CDoom.states + CDoom::Statenum::S_PLAY.value
+      CDoom.p_set_mobj_state(player.value.mo, CDoom::Statenum::S_PLAY_RUN1)
+    end
+  end
+
+  #
+  # Fall on your face when dying.
+  # Decrease POV height to floor height.
+  #
+
+  def self.p_death_think(player : CDoom::Player*)
+    CDoom.p_move_psprites(player)
+
+    # fall to the ground
+    player.value.viewheight = player.value.viewheight - CDoom::FRACUNIT if player.value.viewheight > 6 * CDoom::FRACUNIT
+
+    player.value.viewheight = 6 * CDoom::FRACUNIT if player.value.viewheight < 6 * CDoom::FRACUNIT
+
+    player.value.deltaviewheight = 0
+    CDoom.onground = (player.value.mo.value.z <= player.value.mo.value.floorz).to_unsafe
+    CDoom.p_calc_height(player)
+
+    if !player.value.attacker.null? && player.value.attacker != player.value.mo
+      angle = CDoom.r_point_to_angle2(player.value.mo.value.x,
+        player.value.mo.value.y,
+        player.value.attacker.value.x,
+        player.value.attacker.value.y)
+
+      delta = angle &- player.value.mo.value.angle
+
+      if delta < CDoom::ANG5 || delta > (-CDoom::ANG5).to_u32!
+        # Looking at killer,
+        #  so fade damage flash down.
+        player.value.mo.value.angle = angle
+
+        player.value.damagecount = player.value.damagecount - 1 if player.value.damagecount != 0
+      elsif delta < CDoom::ANG180
+        player.value.mo.value.angle = player.value.mo.value.angle &+ CDoom::ANG5
+      else
+        player.value.mo.value.angle = player.value.mo.value.angle &- CDoom::ANG5
+      end
+    elsif player.value.damagecount != 0
+      player.value.damagecount = player.value.damagecount - 1
+    end
+
+    player.value.playerstate = CDoom::Playerstate::PST_REBORN if player.value.cmd.buttons & CDoom::Buttoncode::BT_USE.value != 0
+  end
+
+  def self.p_player_think(player : CDoom::Player*)
+    if player.value.cheats & CDoom::Cheat::CF_NOCLIP.value != 0
+      player.value.mo.value.flags = player.value.mo.value.flags | CDoom::Mobjflag::MF_NOCLIP.value
+    else
+      player.value.mo.value.flags = player.value.mo.value.flags & ~CDoom::Mobjflag::MF_NOCLIP.value
+    end
+
+    # chain saw run forward
+    cmd = (player.as(UInt8*) + offsetof(CDoom::Player, @cmd)).as(CDoom::Ticcmd*)
+    if player.value.mo.value.flags & CDoom::Mobjflag::MF_JUSTATTACKED.value != 0
+      cmd.value.angleturn = 0
+      cmd.value.forwardmove = 0xc800 // 512
+      cmd.value.sidemove = 0
+      player.value.mo.value.flags = player.value.mo.value.flags & ~CDoom::Mobjflag::MF_JUSTATTACKED.value
+    end
+
+    if player.value.playerstate == CDoom::Playerstate::PST_DEAD
+      CDoom.p_death_think(player)
+      return
+    end
+
+    # Move around.
+    # Reactiontime is used to prevent movement
+    #  for a bit after a teleport.
+    if player.value.mo.value.reactiontime != 0
+      player.value.mo.value.reactiontime = player.value.mo.value.reactiontime - 1
+    else
+      CDoom.p_move_player(player)
+    end
+
+    CDoom.p_calc_height(player)
+
+    CDoom.p_player_in_special_sector(player) if player.value.mo.value.subsector.value.sector.value.special != 0
+
+    # Check for weapon change.
+
+    # A special event has no other buttons.
+    cmd.value.buttons = 0 if cmd.value.buttons & CDoom::Buttoncode::BT_SPECIAL.value != 0
+
+    if cmd.value.buttons & CDoom::Buttoncode::BT_CHANGE.value != 0
+      # The actual changing of the weapon is done
+      #  when the weapon psprite can do it
+      #  (read: not in the middle of an attack).
+      newweapon = CDoom::Weapontype.new((cmd.value.buttons & CDoom::Buttoncode::BT_WEAPONMASK.value) >> CDoom::Buttoncode::BT_WEAPONSHIFT.value)
+
+      if newweapon == CDoom::Weapontype::Fist &&
+         player.value.weaponowned[CDoom::Weapontype::Chainsaw.value] != 0 &&
+         !(player.value.readyweapon == CDoom::Weapontype::Chainsaw &&
+         player.value.powers[CDoom::Powertype::Strength.value] != 0)
+        newweapon = CDoom::Weapontype::Chainsaw
+      end
+
+      if CDoom.gamemode == CDoom::GameMode::Commercial &&
+         newweapon == CDoom::Weapontype::Shotgun &&
+         player.value.weaponowned[CDoom::Weapontype::Supershotgun.value] != 0 &&
+         player.value.readyweapon != CDoom::Weapontype::Supershotgun
+        newweapon = CDoom::Weapontype::Supershotgun
+      end
+
+      if player.value.weaponowned[newweapon.value] != 0 &&
+         newweapon != player.value.readyweapon
+        # Do not go to plasma or BFG in shareware,
+        #  even if cheated.
+        if (newweapon != CDoom::Weapontype::Plasma &&
+           newweapon != CDoom::Weapontype::Bfg) ||
+           CDoom.gamemode != CDoom::GameMode::Shareware
+          player.value.pendingweapon = newweapon
+        end
+      end
+    end
+
+    # check for use
+    if cmd.value.buttons & CDoom::Buttoncode::BT_USE.value != 0
+      if player.value.usedown == 0
+        CDoom.p_use_lines(player)
+        player.value.usedown = 1
+      end
+    else
+      player.value.usedown = 0
+    end
+
+    # cycle psprites
+    CDoom.p_move_psprites(player)
+
+    # Counters, time dependend power ups.
+
+    # Strength counts up to diminish fade
+    if player.value.powers[CDoom::Powertype::Strength.value] != 0
+      player.value.powers[CDoom::Powertype::Strength.value] =
+        player.value.powers[CDoom::Powertype::Strength.value] + 1
+    end
+
+    if player.value.powers[CDoom::Powertype::Invulnerability.value] != 0
+      player.value.powers[CDoom::Powertype::Invulnerability.value] =
+        player.value.powers[CDoom::Powertype::Invulnerability.value] - 1
+    end
+
+    if player.value.powers[CDoom::Powertype::Invisibility.value] != 0
+      player.value.powers[CDoom::Powertype::Invisibility.value] =
+        player.value.powers[CDoom::Powertype::Invisibility.value] - 1
+      if player.value.powers[CDoom::Powertype::Invisibility.value] == 0
+        player.value.mo.value.flags = player.value.mo.value.flags & ~CDoom::Mobjflag::MF_SHADOW.value
+      end
+    end
+
+    if player.value.powers[CDoom::Powertype::Infrared.value] != 0
+      player.value.powers[CDoom::Powertype::Infrared.value] =
+        player.value.powers[CDoom::Powertype::Infrared.value] - 1
+    end
+
+    if player.value.powers[CDoom::Powertype::Ironfeet.value] != 0
+      player.value.powers[CDoom::Powertype::Ironfeet.value] =
+        player.value.powers[CDoom::Powertype::Ironfeet.value] - 1
+    end
+
+    player.value.damagecount = player.value.damagecount - 1 if player.value.damagecount != 0
+
+    player.value.bonuscount = player.value.bonuscount - 1 if player.value.bonuscount != 0
+
+    # Handling colormaps.
+    if player.value.powers[CDoom::Powertype::Invulnerability.value] != 0
+      if player.value.powers[CDoom::Powertype::Invulnerability.value] > 4 * 32 ||
+         player.value.powers[CDoom::Powertype::Invulnerability.value] & 8 != 0
+        player.value.fixedcolormap = CDoom::INVERSECOLORMAP
+      else
+        player.value.fixedcolormap = 0
+      end
+    elsif player.value.powers[CDoom::Powertype::Infrared.value] != 0
+      if player.value.powers[CDoom::Powertype::Infrared.value] > 4 * 32 ||
+         player.value.powers[CDoom::Powertype::Infrared.value] & 8 != 0
+        # almost full bright
+        player.value.fixedcolormap = 1
+      else
+        player.value.fixedcolormap = 0
+      end
+    else
+      player.value.fixedcolormap = 0
+    end
+  end
+
+  def self.r_clear_draw_segs
+    CDoom.ds_p = CDoom.drawsegs.to_unsafe
+  end
+
+  #
+  # Does handle solid walls,
+  #  e.g. single sided LineDefs (middle texture)
+  #  that entirely block the view.
+  #
+  def self.r_clip_solid_wall_segment(first : LibC::Int, last : LibC::Int)
+    # Find the first range that touches the range
+    #  (adjacent pixels are touching).
+    start = CDoom.solidsegs.to_unsafe
+    while start.value.last < first - 1
+      start += 1
+    end
+
+    if first < start.value.first
+      if last < start.value.first - 1
+        # Post is entirely visible (above start),
+        #  so insert a new clippost.
+        CDoom.r_store_wall_range(first, last)
+        nextc = CDoom.newend
+        CDoom.newend += 1
+
+        while nextc != start
+          nextc.value = (nextc - 1).value
+          nextc -= 1
+        end
+        nextc.value.first = first
+        nextc.value.last = last
+        return
+      end
+
+      # There is a fragment above start.value.
+      CDoom.r_store_wall_range(first, start.value.first - 1)
+      # Now adjust the clip size.
+      start.value.first = first
+    end
+
+    # Bottom contained in start?
+    return if last <= start.value.last
+
+    nextc = start
+    crunch = false
+    while last >= (nextc + 1).value.first - 1
+      # There is a fragment between two posts.
+      CDoom.r_store_wall_range(nextc.value.last + 1, (nextc + 1).value.first - 1)
+      nextc += 1
+
+      if last <= nextc.value.last
+        # Bottom is contained in next.
+        # Adjust the clip size.
+        start.value.last = nextc.value.last
+        crunch = true
+        break
+      end
+    end
+
+    unless crunch
+      # There is a fragment after nextc.value.
+      CDoom.r_store_wall_range(nextc.value.last + 1, last)
+      # Adjust the clip size.
+      start.value.last = last
+    end
+
+    # Remove start+1 to next from the clip list,
+    # because start now covers their area.
+    if nextc == start
+      # Post just extended past the bottom of one post.
+      return
+    end
+
+    while nextc != CDoom.newend
+      nextc += 1
+      # Remove a post
+      start += 1
+      start.value = nextc.value
+    end
+
+    CDoom.newend = start + 1
+  end
+
+  #
+  # Clips the given range of columns,
+  #  but does not includes it in the clip list.
+  # Does handle windows,
+  #  e.g. LineDefs with upper and lower texture.
+  #
+  def self.r_clip_pass_wall_segment(first : LibC::Int, last : LibC::Int)
+    # Find the first range that touches the range
+    #  (adjacent pixels are touching).
+    start = CDoom.solidsegs.to_unsafe
+    while start.value.last < first - 1
+      start += 1
+    end
+
+    if first < start.value.first
+      if last < start.value.first - 1
+        # Post is entirely visible (above start).
+        CDoom.r_store_wall_range(first, last)
+        return
+      end
+
+      # There is a fragment above start.value.
+      CDoom.r_store_wall_range(first, start.value.first - 1)
+    end
+
+    # Bottom contained in start?
+    return if last <= start.value.last
+
+    while last >= (start + 1).value.first - 1
+      # There is a fragment between two posts.
+      CDoom.r_store_wall_range(start.value.last + 1, (start + 1).value.first - 1)
+      start += 1
+
+      return if last <= start.value.last
+    end
+
+    # There is a fragment after next.value.
+    CDoom.r_store_wall_range(start.value.last + 1, last)
+  end
+
+  def self.r_clear_clip_segs
+    (CDoom.solidsegs.to_unsafe).value.first = -0x7fffffff
+    (CDoom.solidsegs.to_unsafe).value.last = -1
+    (CDoom.solidsegs.to_unsafe + 1).value.first = CDoom.viewwidth
+    (CDoom.solidsegs.to_unsafe + 1).value.last = 0x7fffffff
+    CDoom.newend = CDoom.solidsegs.to_unsafe + 2
+  end
+
+  #
+  # Clips the given segment
+  # and adds any visible pieces to the line list.
+  #
+  def self.r_addline(line : CDoom::Seg*)
+    CDoom.curline = line
+
+    # OPTIMIZE: quickly reject orthogonal back sides.
+    angle1 = CDoom.r_point_to_angle(line.value.v1.value.x, line.value.v1.value.y)
+    angle2 = CDoom.r_point_to_angle(line.value.v2.value.x, line.value.v2.value.y)
+
+    # Clip to view edges.
+    # OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
+    span = angle1 &- angle2
+
+    # Back side? I.e. backface culling?
+    return if span >= CDoom::ANG180
+
+    # Global angle needed by segcalc.
+    CDoom.rw_angle1 = angle1
+    angle1 &-= CDoom.viewangle
+    angle2 &-= CDoom.viewangle
+
+    tspan = angle1 &+ CDoom.clipangle
+    if tspan > 2 * CDoom.clipangle
+      tspan &-= 2 * CDoom.clipangle
+
+      # Totally off the left edge?
+      return if tspan >= span
+
+      angle1 = CDoom.clipangle
+    end
+    tspan = CDoom.clipangle &- angle2
+    if tspan > 2 * CDoom.clipangle
+      tspan &-= 2 * CDoom.clipangle
+
+      # Totally off the left edge?
+      return if tspan >= span
+
+      angle2 = -(CDoom.clipangle.to_i32!)
+    end
+
+    # The seg is in the view range,
+    # but not necessarily visible.
+    angle1 = (angle1 &+ CDoom::ANG90) >> CDoom::ANGLETOFINESHIFT
+    angle2 = (angle2 &+ CDoom::ANG90) >> CDoom::ANGLETOFINESHIFT
+    x1 = CDoom.viewangletox[angle1]
+    x2 = CDoom.viewangletox[angle2]
+
+    # Does not cross a pixel?
+    return if (x1 == x2)
+
+    CDoom.backsector = line.value.backsector
+
+    # Single sided line?
+    if CDoom.backsector.null?
+      CDoom.r_clip_solid_wall_segment(x1, x2 - 1)
+      return
+    end
+
+    # Closed door.
+    if CDoom.backsector.value.ceilingheight <= CDoom.frontsector.value.floorheight ||
+      CDoom.backsector.value.floorheight >= CDoom.frontsector.value.ceilingheight
+      CDoom.r_clip_solid_wall_segment(x1, x2 - 1)
+      return
+    end
+
+    # Window.
+    if CDoom.backsector.value.ceilingheight != CDoom.frontsector.value.ceilingheight ||
+      CDoom.backsector.value.floorheight != CDoom.frontsector.value.floorheight
+      CDoom.r_clip_pass_wall_segment(x1, x2 - 1)
+      return
+    end
+
+    # Reject empty lines used for triggers
+    #  and special events.
+    # Identical floor and ceiling on both sides,
+    # identical light levels on both sides,
+    # and no middle texture.
+    if CDoom.backsector.value.ceilingpic == CDoom.frontsector.value.ceilingpic &&
+      CDoom.backsector.value.floorpic == CDoom.frontsector.value.floorpic &&
+      CDoom.backsector.value.lightlevel == CDoom.frontsector.value.lightlevel &&
+      CDoom.curline.value.sidedef.value.midtexture == 0
+      return
+    end
+
+    CDoom.r_clip_pass_wall_segment(x1, x2 - 1)
+    return
+  end
+
+
+  #
+  # Checks BSP node/subtree bounding box.
+# Returns true
+#  if some part of the bbox might be visible.
+#
+    def self.r_check_bbox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
+      # Find the corners of the box
+      # that define the edges from current viewpoint.
+      if CDoom.viewx <= bspcoord[CDoom::BOXLEFT]
+        boxx = 0
+      elsif CDoom.viewx < bspcoord[CDoom::BOXRIGHT]
+        boxx = 1
+      else
+        boxx = 2
+      end
+
+      if CDoom.viewy >= bspcoord[CDoom::BOXTOP]
+        boxy = 0
+      elsif CDoom.viewy > bspcoord[CDoom::BOXBOTTOM]
+        boxy = 1
+      else
+        boxy = 2
+      end
+
+      boxpos = (boxy << 2) + boxx
+      return 1 if boxpos == 5
+
+      x1 = bspcoord[CDoom.checkcoord[boxpos][0]]
+      y1 = bspcoord[CDoom.checkcoord[boxpos][1]]
+      x2 = bspcoord[CDoom.checkcoord[boxpos][2]]
+      y2 = bspcoord[CDoom.checkcoord[boxpos][3]]
+
+      # check clip list for an open space
+      angle1 = CDoom.r_point_to_angle(x1, y1) &- CDoom.viewangle
+      angle2 = CDoom.r_point_to_angle(x2, y2) &- CDoom.viewangle
+
+      span = angle1 &- angle2
+
+      # Sitting on a line?
+      return 1 if span >= CDoom::ANG180
+
+      tspan = angle1 &+ CDoom.clipangle
+
+      if tspan > 2 * CDoom.clipangle
+        tspan &-= 2 * CDoom.clipangle
+
+        # Totally off the left edge?
+        return 0 if tspan >= span
+
+        angle1 = CDoom.clipangle
+      end
+      tspan = CDoom.clipangle &- angle2
+      if tspan > 2 * CDoom.clipangle
+        tspan &-= 2 * CDoom.clipangle
+
+        # Totally off the left edge?
+        return 0 if tspan >= span
+
+        angle2 = -(CDoom.clipangle.to_i32!)
+      end
+
+      # Find the first clippost
+    #  that touches the source post
+    #  (adjacent pixels are touching).
+    angle1 = (angle1 &+ CDoom::ANG90) >> CDoom::ANGLETOFINESHIFT
+    angle2 = (angle2 &+ CDoom::ANG90) >> CDoom::ANGLETOFINESHIFT
+    sx1 = CDoom.viewangletox[angle1]
+    sx2 = CDoom.viewangletox[angle2]
+
+    # Does not cross a pixel.
+    return 0 if sx1 == sx2
+    sx2 -= 1
+
+    start = CDoom.solidsegs.to_unsafe
+    while start.value.last < sx2
+      start += 1
+    end
+
+    if sx1 >= start.value.first &&
+      sx2 <= start.value.last
+      # The clippost contains the new span.
+      return 0
+    end
+
+    return 1
+     end
+
+
+     #
+     # Determine floor/ceiling planes.
+# Add sprites of things in sector.
+# Draw one or more line segments.
+#
+      def self.r_subsector(num : LibC::Int)
+        {% if @top_level.has_constant?("RANGECHECK") %}
+          if num >= CDoom.numsubsectors
+            CDoom.doom_strcpy(CDoom.error_buf, "Error: r_subsector: ss ")
+            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(num, 10))
+            CDoom.doom_strcpy(CDoom.error_buf, " with numss = ")
+            CDoom.doom_concat(CDoom.error_buf, CDoom.doom_itoa(CDoom.numsubsectors, 10))
+            CDoom.i_error(CDoom.error_buf)
+          end
+        {% end %}
+
+        CDoom.sscount += 1
+        sub = CDoom.subsectors + num
+        CDoom.frontsector = sub.value.sector
+        count = sub.value.numlines
+        line = CDoom.segs + sub.value.firstline
+
+        if CDoom.frontsector.value.floorheight < CDoom.viewz
+          CDoom.floorplane = CDoom.r_find_plane(CDoom.frontsector.value.floorheight,
+          CDoom.frontsector.value.floorpic,
+          CDoom.frontsector.value.lightlevel)
+        else
+          CDoom.floorplane = Pointer(CDoom::Visplane).null
+        end
+
+        if CDoom.frontsector.value.ceilingheight > CDoom.viewz ||
+          CDoom.frontsector.value.ceilingpic == CDoom.skyflatnum
+          CDoom.ceilingplane = CDoom.r_find_plane(CDoom.frontsector.value.ceilingheight,
+          CDoom.frontsector.value.ceilingpic,
+          CDoom.frontsector.value.lightlevel)
+        else
+          CDoom.ceilingplane = Pointer(CDoom::Visplane).null
+        end
+
+        CDoom.r_add_sprites(CDoom.frontsector)
+
+        while count != 0
+          count -= 1
+          CDoom.r_addline(line)
+          line += 1
+        end
+      end
+
+
+      #
+      # Renders all subsectors below a given node,
+#  traversing subtree recursively.
+# Just call with BSP root.
+#
+  def self.r_render_bsp_node(bspnum : LibC::Int)
+    # Found a subsector?
+    if bspnum & CDoom::NF_SUBSECTOR != 0
+      if bspnum == -1
+        CDoom.r_subsector(0)
+      else
+        CDoom.r_subsector(bspnum & (~CDoom::NF_SUBSECTOR))
+      end
+      return
+    end
+
+    bsp = CDoom.nodes + bspnum
+
+    # Decide which side the view point is on.
+    side = CDoom.r_point_on_side(CDoom.viewx, CDoom.viewy, bsp)
+
+    # Recursively divide front space.
+    CDoom.r_render_bsp_node(bsp.value.children[side])
+
+    # Possibly divide back space.
+    CDoom.r_render_bsp_node(bsp.value.children[side ^ 1]) if CDoom.r_check_bbox(bsp.value.bbox[side ^ 1]) != 0
+  end
+
+
+
 end

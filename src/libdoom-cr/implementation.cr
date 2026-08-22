@@ -2132,3 +2132,179 @@ end
 fun p_intercept_vector2 = P_InterceptVector2(v2 : CDoom::Divline*, v1 : CDoom::Divline*) : CDoom::Fixed
   LibDoom.p_intercept_vector2(v2, v1)
 end
+
+fun p_cross_subsector = P_CrossSubsector(num : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_cross_subsector(num)
+end
+
+fun p_cross_bsp_node = P_CrossBSPNode(bspnum : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_cross_bsp_node(bspnum)
+end
+
+fun p_check_sight = P_CheckSight(t1 : CDoom::Mobj*, t2 : CDoom::Mobj*) : CDoom::DoomBool
+  LibDoom.p_check_sight(t1, t2)
+end
+
+fun p_init_pic_anims = P_InitPicAnims
+  LibDoom.p_init_pic_anims
+end
+
+fun get_side = getSide(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Side*
+  LibDoom.get_side(current_sector, line, side)
+end
+
+fun get_sector = getSector(current_sector : LibC::Int, line : LibC::Int, side : LibC::Int) : CDoom::Sector*
+  LibDoom.get_sector(current_sector, line, side)
+end
+
+fun two_sided = twoSided(sector : LibC::Int, line : LibC::Int) : LibC::Int
+  LibDoom.two_sided(sector, line)
+end
+
+fun get_next_sector = getNextSector(line : CDoom::Line*, sec : CDoom::Sector*) : CDoom::Sector*
+  LibDoom.get_next_sector(line, sec)
+end
+
+fun p_find_lowest_floor_surrounding = P_FindLowestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+  LibDoom.p_find_lowest_floor_surrounding(sec)
+end
+
+fun p_find_highest_floor_surrounding = P_FindHighestFloorSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+  LibDoom.p_find_highest_floor_surrounding(sec)
+end
+
+fun p_find_next_highest_floor = P_FindNextHighestFloor(sec : CDoom::Sector*, currentheight : LibC::Int) : CDoom::Fixed
+  LibDoom.p_find_next_highest_floor(sec, currentheight)
+end
+
+fun p_find_lowest_ceiling_surrounding = P_FindLowestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+  LibDoom.p_find_lowest_ceiling_surrounding(sec)
+end
+
+fun p_find_highest_ceiling_surrounding = P_FindHighestCeilingSurrounding(sec : CDoom::Sector*) : CDoom::Fixed
+  LibDoom.p_find_highest_ceiling_surrounding(sec)
+end
+
+fun p_find_sector_from_line_tag = P_FindSectorFromLineTag(line : CDoom::Line*, start : LibC::Int) : LibC::Int
+  LibDoom.p_find_sector_from_line_tag(line, start)
+end
+
+fun p_find_min_surrounding_light = P_FindMinSurroundingLight(sector : CDoom::Sector*, max : LibC::Int) : LibC::Int
+  LibDoom.p_find_min_surrounding_light(sector, max)
+end
+
+fun p_cross_special_line = P_CrossSpecialLine(linenum : LibC::Int, side : LibC::Int, thing : CDoom::Mobj*)
+  LibDoom.p_cross_special_line(linenum, side, thing)
+end
+
+fun p_shoot_special_line = P_ShootSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*)
+  LibDoom.p_shoot_special_line(thing, line)
+end
+
+fun p_player_in_special_sector = P_PlayerInSpecialSector(player : CDoom::Player*)
+  LibDoom.p_player_in_special_sector(player)
+end
+
+fun p_update_specials = P_UpdateSpecials
+  LibDoom.p_update_specials
+end
+
+fun ev_do_donut = EV_DoDonut(line : CDoom::Line*) : LibC::Int
+  LibDoom.ev_do_donut(line)
+end
+
+fun p_spawn_specials = P_SpawnSpecials
+  LibDoom.p_spawn_specials
+end
+
+fun p_init_switch_list = P_InitSwitchList
+  LibDoom.p_init_switch_list
+end
+
+fun p_start_button = P_StartButton(line : CDoom::Line*, w : CDoom::Bwhere, texture : LibC::Int, time : LibC::Int)
+  LibDoom.p_start_button(line, w, texture, time)
+end
+
+fun p_change_switch_texture = P_ChangeSwitchTexture(line : CDoom::Line*, use_again : LibC::Int)
+  LibDoom.p_change_switch_texture(line, use_again)
+end
+
+fun p_use_special_line = P_UseSpecialLine(thing : CDoom::Mobj*, line : CDoom::Line*, side : LibC::Int) : CDoom::DoomBool
+  LibDoom.p_use_special_line(thing, line, side)
+end
+
+fun ev_teleport = EV_Teleport(line : CDoom::Line*, side : LibC::Int, thing : CDoom::Mobj*) : LibC::Int
+  LibDoom.ev_teleport(line, side, thing)
+end
+
+fun p_init_thinkers = P_InitThinkers
+  LibDoom.p_init_thinkers
+end
+
+fun p_add_thinker = P_AddThinker(thinker : CDoom::Thinker*)
+  LibDoom.p_add_thinker(thinker)
+end
+
+fun p_remove_thinker = P_RemoveThinker(thinker : CDoom::Thinker*)
+  LibDoom.p_remove_thinker(thinker)
+end
+
+fun p_run_thinkers = P_RunThinkers
+  LibDoom.p_run_thinkers
+end
+
+fun p_ticker = P_Ticker
+  LibDoom.p_ticker
+end
+
+fun p_thrust = P_Thrust(player : CDoom::Player*, angle : CDoom::Angle, move : CDoom::Fixed)
+  LibDoom.p_thrust(player, angle, move)
+end
+
+fun p_calc_height = P_CalcHeight(player : CDoom::Player*)
+  LibDoom.p_calc_height(player)
+end
+
+fun p_move_player = P_MovePlayer(player : CDoom::Player*)
+  LibDoom.p_move_player(player)
+end
+
+fun p_death_think = P_DeathThink(player : CDoom::Player*)
+  LibDoom.p_death_think(player)
+end
+
+fun p_player_think = P_PlayerThink(player : CDoom::Player*)
+  LibDoom.p_player_think(player)
+end
+
+fun r_clear_draw_segs = R_ClearDrawSegs
+  LibDoom.r_clear_draw_segs
+end
+
+fun r_clip_solid_wall_segment = R_ClipSolidWallSegment(first : LibC::Int, last : LibC::Int)
+  LibDoom.r_clip_solid_wall_segment(first, last)
+end
+
+fun r_clip_pass_wall_segment = R_ClipPassWallSegment(first : LibC::Int, last : LibC::Int)
+  LibDoom.r_clip_pass_wall_segment(first, last)
+end
+
+fun r_clear_clip_segs = R_ClearClipSegs
+  LibDoom.r_clear_clip_segs
+end
+
+fun r_addline = R_AddLine(line : CDoom::Seg*)
+  LibDoom.r_addline(line)
+end
+
+    fun r_check_bbox = R_CheckBBox(bspcoord : CDoom::Fixed*) : CDoom::DoomBool
+LibDoom.r_check_bbox(bspcoord)
+    end
+
+      fun r_subsector = R_Subsector(num : LibC::Int)
+LibDoom.r_subsector(num)
+      end
+
+  fun r_render_bsp_node = R_RenderBSPNode(bspnum : LibC::Int)
+LibDoom.r_render_bsp_node(bspnum)
+  end
